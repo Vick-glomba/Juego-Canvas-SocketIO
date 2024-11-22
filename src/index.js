@@ -168,7 +168,9 @@ async function main() {
 
   app.use(express.static("public"));
 
-  httpServer.listen(PORT);
+  httpServer.listen(PORT, () => {
+    console.log("Escuchando desde puerto:",PORT)
+  });
 
   let lastUpdate = Date.now();
   setInterval(() => {
