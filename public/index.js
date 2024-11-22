@@ -10,8 +10,8 @@ speakerImage.src = "/speaker.png";
 const walkSnow = new Audio("walk-snow.mp3");
 
 const canvasEl = document.getElementById("canvas");
-canvasEl.width = window.innerWidth;
-canvasEl.height = window.innerHeight;
+canvasEl.width = window.innerWidth * 0.5;
+canvasEl.height = window.innerHeight * 0.6;
 const canvas = canvasEl.getContext("2d");
 
 const socket = io();
@@ -147,7 +147,7 @@ window.addEventListener("keyup", (e) => {
   socket.emit("inputs", inputs);
 });
 
-window.addEventListener("click", (e) => {
+canvasEl.addEventListener("click", (e) => {
   const angle = Math.atan2(
     e.clientY - canvasEl.height / 2,
     e.clientX - canvasEl.width / 2
@@ -211,13 +211,16 @@ function loop() {
 
   for (const player of players) {
     canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
+    canvas.fillStyle= 'black'
+    canvas.fillText("Nombre", player.x - cameraX, player.y - cameraY + 45)
+
     if (!player.isMuted) {
-      canvas.drawImage(
-        speakerImage,
-        player.x - cameraX + 5,
-        player.y - cameraY - 28
-      );
-    }
+    //   canvas.drawImage(
+    //     speakerImage,
+    //     player.x - cameraX + 5,
+    //     player.y - cameraY - 28
+    //   );
+     }
 
     if (player !== myPlayer) {
       if (

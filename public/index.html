@@ -12,16 +12,29 @@
       }
 
       #mute {
-        position: absolute;
-        top: 5px;
-        left: 5px;
+
+      }
+      .HUD{
+        display: flex;
+
+        background-color: black;
+      }
+      #canvas{
+         width: 70%;
+        height: 60%;
+        margin: 0%; 
       }
     </style>
   </head>
   <body>
-    <canvas id="canvas"></canvas>
+    <div class="HUD">
+      <canvas id="canvas"></canvas>
+      <div>
 
-    <button id="mute">mute</button>
+        <button id="mute">mute</button>
+      </div>
+    </div>
+
 
     <!-- <script src="AgoraRTC_N-4.15.0.js"></script> -->
     <script src="/socket.io/socket.io.js"></script>

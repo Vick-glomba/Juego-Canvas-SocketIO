@@ -41,15 +41,15 @@ function isCollidingWithMap(player) {
         isColliding(
           {
             x: player.x,
-            y: player.y,
-            w: 32,
-            h: 32,
+            y: player.y +30,
+            w: 30,
+            h: 5,
           },
           {
             x: col * TILE_SIZE,
-            y: row * TILE_SIZE,
-            w: TILE_SIZE,
-            h: TILE_SIZE,
+            y: row * TILE_SIZE ,
+            w: TILE_SIZE ,
+            h: TILE_SIZE ,
           }
         )
       ) {
