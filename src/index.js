@@ -70,8 +70,10 @@ function tick(delta) {
 
     if (inputs.up) {
       player.y -= SPEED;
+      player.mirando = "up"
     } else if (inputs.down) {
       player.y += SPEED;
+      player.mirando= "down"
     }
 
     if (isCollidingWithMap(player)) {
@@ -80,10 +82,12 @@ function tick(delta) {
 
     if (inputs.left) {
       player.x -= SPEED;
+      player.mirando = "left"
     } else if (inputs.right) {
       player.x += SPEED;
+      player.mirando = "right"
     }
-
+    
     if (isCollidingWithMap(player)) {
       player.x = previousX;
     }
@@ -132,6 +136,7 @@ async function main() {
       id: socket.id,
       x: 800,
       y: 800,
+      mirando: "down"
     });
 
     socket.emit("map", {

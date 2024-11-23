@@ -128,6 +128,7 @@ const inputs = {
   right: false,
 };
   let primera
+  let mirando
 window.addEventListener("keydown", (e) => {
 
   switch (e.key) {
@@ -136,24 +137,28 @@ window.addEventListener("keydown", (e) => {
       inputs["down"] = false;
       inputs["right"] = false;
       inputs["left"] = false;
+     
       break;
     case "s":
       inputs["up"] = false;
       inputs["down"] = true;
       inputs["right"] = false;
       inputs["left"] = false;
+     
       break;
     case "d":
       inputs["up"] = false;
       inputs["down"] = false;
       inputs["right"] = true;
       inputs["left"] = false;
+     
       break;
     case "a":
       inputs["up"] = false;
       inputs["down"] = false;
       inputs["right"] = false;
       inputs["left"] = true;
+      
       break;
 
   }
@@ -244,9 +249,28 @@ function loop() {
   }
   //Personaje
   for (const player of players) {
+    let row = 0
+    let col = 0
 
-    const row = 0
-    const col = 1
+    switch (player.mirando) {
+      case "up":
+        row = 0
+        col = 1
+        break;
+      case "down":
+        row = 0
+        col = 0
+        break;
+      case "left":
+        row = 0
+        col = 2
+        break;
+      case "right":
+        row = 0
+        col = 3
+        break;
+
+    }
     
     let { id } = pj.pj[row][col] ?? { id: undefined };
     const imageRow = parseInt(id / TILES_IN_ROW_PJ);
