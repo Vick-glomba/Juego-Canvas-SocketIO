@@ -42,9 +42,9 @@ function isCollidingWithMap(player) {
         tile &&
         isColliding(
           {
-            x: player.x,
-            y: player.y +30,
-            w: 30,
+            x: player.x +20,
+            y: player.y +45,
+            w: 10,
             h: 5,
           },
           {
