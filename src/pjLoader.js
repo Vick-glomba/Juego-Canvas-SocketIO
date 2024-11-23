@@ -1,34 +1,53 @@
 const tmx = require("tmx-parser");
 
 async function loadPj(archivo) {
-  const path = "./src/images/"+archivo+".tmx"
+  const path = "./src/images/" + archivo + ".tmx"
   const tsx = await new Promise((resolve, reject) => {
     tmx.parseFile(path, function (err, loadedMap) {
       if (err) return reject(err);
-      console.log(loadedMap)
       resolve(loadedMap);
     });
   });
 
+
   const pjTiles = tsx.layers[0].tiles;
   const pj2D = [];
+  
   for (let row = 0; row < tsx.height; row++) {
     const pjRow = [];
     for (let col = 0; col < tsx.width; col++) {
-      const pjTile = pjTiles[row * tsx.height + col];
+      const pjTile = pjTiles[row * tsx.width + col];
       if (pjTile) {
         pjRow.push({
           id: pjTile.id,
-          gid: pjTile.gid,
+          // gid: pjTile.gid,
         });
       } else {
         pjRow.push(undefined);
       }
+      
     }
+    col = 0
     pj2D.push(pjRow);
   }
+  console.log(pj2D)
+  const tile= tsx.tileSets["0"]
+ // console.log(tsx.layers["0"].map.width, tsx.layers["0"].map.height)
+  const info = {
+    rows: tsx.width,
+    cols: tsx.height,
+    name: tile.name,
+    source: tile.source,
+    name: tile.name,
+    tileWidth: tile.tileWidth,
+    tileHeight: tile.tileHeight,
+    image: tile.image
+  }
 
-  return pj2D
+  return {
+    pj2D,
+    info
+  }
 }
 
 module.exports = loadPj;

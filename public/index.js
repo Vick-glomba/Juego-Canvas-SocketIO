@@ -39,7 +39,7 @@ muteButton.addEventListener("click", () => {
     muteButton.innerText = "unmute";
     socket.emit("mute", true);
   } else {
-   // localTracks.audioTrack.setEnabled(true);
+    // localTracks.audioTrack.setEnabled(true);
     muteButton.innerText = "mute";
     socket.emit("mute", false);
   }
@@ -88,13 +88,15 @@ function handleUserUnpublished(user) {
 let groundMap = [[]];
 let decalMap = [[]];
 let pj
+let dataTile
 let players = [];
 let snowballs = [];
+let ultimoFrame = 0
 
-const TILES_IN_ROW_PJ = 10
-const TILES_IN_COL_PJ = 5
-const PJ_SIZE_W = 120
-const PJ_SIZE_H = 130
+let TILES_IN_ROW_PJ
+let TILES_IN_COL_PJ
+let PJ_SIZE_W
+let PJ_SIZE_H
 
 const TILE_SIZE = 32;
 
@@ -108,9 +110,8 @@ socket.on("map", (loadedMap) => {
   groundMap = loadedMap.ground;
   decalMap = loadedMap.decal;
 });
-socket.on("pj", (loadedPj) => {
-  pj = loadedPj
- 
+socket.on("pj", (data) => {
+  pj = data.pj
 });
 
 socket.on("players", (serverPlayers) => {
@@ -127,43 +128,42 @@ const inputs = {
   left: false,
   right: false,
 };
-  let primera
-  let mirando
-window.addEventListener("keydown", (e) => {
 
+window.addEventListener("keydown", (e) => {
   switch (e.key) {
     case "w":
       inputs["up"] = true;
       inputs["down"] = false;
       inputs["right"] = false;
       inputs["left"] = false;
-     
       break;
     case "s":
       inputs["up"] = false;
       inputs["down"] = true;
       inputs["right"] = false;
       inputs["left"] = false;
-     
+
       break;
     case "d":
       inputs["up"] = false;
       inputs["down"] = false;
       inputs["right"] = true;
       inputs["left"] = false;
-     
+
       break;
     case "a":
       inputs["up"] = false;
       inputs["down"] = false;
       inputs["right"] = false;
       inputs["left"] = true;
-      
+
       break;
 
   }
 
   if (["a", "s", "w", "d"].includes(e.key) && walkSnow.paused) {
+    inputs["quieto"] = false
+    inputs["ultimoFrame"] = ultimoFrame
     // walkSnow.play();
   }
   socket.emit("inputs", inputs);
@@ -180,6 +180,7 @@ window.addEventListener("keyup", (e) => {
     inputs["left"] = false;
   }
   if (["a", "s", "w", "d"].includes(e.key)) {
+    inputs["quieto"] = true
     walkSnow.pause();
     walkSnow.currentTime = 0;
   }
@@ -188,8 +189,8 @@ window.addEventListener("keyup", (e) => {
 
 canvasEl.addEventListener("click", (e) => {
   const angle = Math.atan2(
-    e.clientY - (canvasEl.height +PJ_SIZE_H ) / 2 ,
-    e.clientX - (canvasEl.width +PJ_SIZE_W +108) / 2
+    e.clientY - (canvasEl.height + PJ_SIZE_H) / 2,
+    e.clientX - (canvasEl.width + PJ_SIZE_W + 108) / 2
   );
   socket.emit("snowball", angle);
 });
@@ -201,8 +202,8 @@ function loop() {
   let cameraX = 0;
   let cameraY = 0;
   if (myPlayer) {
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) +(40 /2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) +(50 /2);
+    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) + (40 / 2);
+    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) + (50 / 2);
   }
 
   const TILES_IN_ROW = 8;
@@ -251,30 +252,74 @@ function loop() {
   for (const player of players) {
     let row = 0
     let col = 0
-
-    switch (player.mirando) {
-      case "up":
-        row = 0
-        col = 1
-        break;
-      case "down":
-        row = 0
-        col = 0
-        break;
-      case "left":
-        row = 0
-        col = 2
-        break;
-      case "right":
-        row = 0
-        col = 3
-        break;
-
-    }
     
-    let { id } = pj.pj[row][col] ?? { id: undefined };
+    if (player.quieto) {
+      
+       switch (player.mirando) {
+         case "up":
+           row = 2
+           col = 0
+           break;
+         case "down":
+           row = 0
+           col = 0
+           break;
+         case "left":
+           row = 1
+           col = 0
+           break;
+         case "right":
+           row = 3
+           col = 0
+           break;
+       }
+      
+     } else {
+
+        switch (player.mirando) {
+          case "up":
+            //animacion arriba
+            const walkUp = [1,2,3,4,5,6,7,8,9]
+            row =6 
+            col = walkUp[ultimoFrame] || 0
+            ultimoFrame = ultimoFrame<walkUp.length?ultimoFrame + 1:0
+            break;
+
+         case "down":
+           //animacion abajo  
+           const walkDown = [1,2,3,4,5,6,7,8,9]
+           row = 4
+           col = walkDown[ultimoFrame]|| 0
+           ultimoFrame = ultimoFrame<walkDown.length?ultimoFrame + 1:0
+           break;
+
+          case "left":
+            //animacion izquierda
+            const walkLeft = [1,2,3,4,5,6,7,8,9]
+            row = 5
+            col = walkLeft[ultimoFrame]|| 0
+            ultimoFrame =ultimoFrame<walkLeft.length?ultimoFrame + 1:0
+            break;
+
+          case "right":
+            //animacion derecha
+            const walkRight = [9,8,7,6,5,4,3,2,1]
+            row = 7
+            col = walkRight[ultimoFrame] || 0
+            ultimoFrame = ultimoFrame<walkRight.length?ultimoFrame + 1:0
+            break;
+        }
+     }
+    // console.log( pj.info)
+    TILES_IN_ROW_PJ = pj.info.rows
+    TILES_IN_COL_PJ = pj.info.cols
+    PJ_SIZE_W = pj.info.tileWidth
+    PJ_SIZE_H = pj.info.tileHeight
+    let { id } = pj.pj2D[row][col] ?? { id: undefined };
+   
     const imageRow = parseInt(id / TILES_IN_ROW_PJ);
-    const imageCol = id % TILES_IN_COL_PJ;
+    const imageCol = id % TILES_IN_ROW_PJ;
+
     // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
     canvas.drawImage(
       pjImage,
@@ -288,16 +333,16 @@ function loop() {
       50
     );
     //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
-    canvas.fillStyle= 'black'
-    canvas.fillText("Nombre", player.x - cameraX , player.y - cameraY +60)
+    canvas.fillStyle = 'black'
+    canvas.fillText("Nombre", player.x - cameraX, player.y - cameraY + 60)
 
     if (!player.isMuted) {
-    //   canvas.drawImage(
-    //     speakerImage,
-    //     player.x - cameraX + 5,
-    //     player.y - cameraY - 28
-    //   );
-     }
+      //   canvas.drawImage(
+      //     speakerImage,
+      //     player.x - cameraX + 5,
+      //     player.y - cameraY - 28
+      //   );
+    }
 
     if (player !== myPlayer) {
       if (
@@ -319,8 +364,8 @@ function loop() {
     canvas.fillStyle = "#FFFFFF";
     canvas.beginPath();
     canvas.arc(
-      snowball.x - cameraX +20,
-      snowball.y - cameraY +25,
+      snowball.x - cameraX + 20,
+      snowball.y - cameraY + 25,
       SNOWBALL_RADIUS,
       0,
       2 * Math.PI
@@ -328,7 +373,8 @@ function loop() {
     canvas.fill();
   }
 
-  window.requestAnimationFrame(loop);
-}
 
-window.requestAnimationFrame(loop);
+}
+setInterval(() => {
+ loop();
+}, 80 );

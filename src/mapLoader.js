@@ -8,8 +8,8 @@ async function loadMap() {
     });
   });
 
-  const layer = map.layers[0];
-  const groundTiles = layer.tiles;
+
+  const groundTiles = map.layers[0].tiles;
   const decalTiles = map.layers[1].tiles;
   const ground2D = [];
   const decal2D = [];
