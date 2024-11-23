@@ -10,6 +10,7 @@ const io = new Server(httpServer);
 const PORT = process.env.PORT || 5000;
 
 const loadMap = require("./mapLoader");
+const loadPj = require("./pjLoader");
 
 const SPEED = 5;
 const TICK_RATE = 30;
@@ -21,6 +22,7 @@ let players = [];
 let snowballs = [];
 const inputsMap = {};
 let ground2D, decal2D;
+let pj2D
 
 function isColliding(rect1, rect2) {
   return (
@@ -114,6 +116,7 @@ function tick(delta) {
 
 async function main() {
   ({ ground2D, decal2D } = await loadMap());
+  (   pj2D  = await loadPj("link"))
 
   io.on("connect", (socket) => {
     console.log("user connected", socket.id);
@@ -135,6 +138,10 @@ async function main() {
       ground: ground2D,
       decal: decal2D,
     });
+    socket.emit("pj", {
+      pj: pj2D
+    });
+    
 
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;

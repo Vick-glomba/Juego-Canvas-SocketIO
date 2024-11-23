@@ -1,6 +1,9 @@
 const mapImage = new Image();
 mapImage.src = "/snowy-sheet.png";
 
+const pjImage = new Image();
+pjImage.src = "/sprite.png";
+
 const santaImage = new Image();
 santaImage.src = "/santa.png";
 
@@ -84,10 +87,17 @@ function handleUserUnpublished(user) {
 
 let groundMap = [[]];
 let decalMap = [[]];
+let pj
 let players = [];
 let snowballs = [];
 
+const TILES_IN_ROW_PJ = 10
+const TILES_IN_COL_PJ = 5
+const PJ_SIZE_W = 120
+const PJ_SIZE_H = 130
+
 const TILE_SIZE = 32;
+
 const SNOWBALL_RADIUS = 5;
 
 socket.on("connect", () => {
@@ -97,6 +107,10 @@ socket.on("connect", () => {
 socket.on("map", (loadedMap) => {
   groundMap = loadedMap.ground;
   decalMap = loadedMap.decal;
+});
+socket.on("pj", (loadedPj) => {
+  pj = loadedPj
+ 
 });
 
 socket.on("players", (serverPlayers) => {
@@ -113,17 +127,37 @@ const inputs = {
   left: false,
   right: false,
 };
-
+  let primera
 window.addEventListener("keydown", (e) => {
-  if (e.key === "w") {
-    inputs["up"] = true;
-  } else if (e.key === "s") {
-    inputs["down"] = true;
-  } else if (e.key === "d") {
-    inputs["right"] = true;
-  } else if (e.key === "a") {
-    inputs["left"] = true;
+
+  switch (e.key) {
+    case "w":
+      inputs["up"] = true;
+      inputs["down"] = false;
+      inputs["right"] = false;
+      inputs["left"] = false;
+      break;
+    case "s":
+      inputs["up"] = false;
+      inputs["down"] = true;
+      inputs["right"] = false;
+      inputs["left"] = false;
+      break;
+    case "d":
+      inputs["up"] = false;
+      inputs["down"] = false;
+      inputs["right"] = true;
+      inputs["left"] = false;
+      break;
+    case "a":
+      inputs["up"] = false;
+      inputs["down"] = false;
+      inputs["right"] = false;
+      inputs["left"] = true;
+      break;
+
   }
+
   if (["a", "s", "w", "d"].includes(e.key) && walkSnow.paused) {
     // walkSnow.play();
   }
@@ -149,8 +183,8 @@ window.addEventListener("keyup", (e) => {
 
 canvasEl.addEventListener("click", (e) => {
   const angle = Math.atan2(
-    e.clientY - canvasEl.height / 2,
-    e.clientX - canvasEl.width / 2
+    e.clientY - (canvasEl.height +PJ_SIZE_H ) / 2 ,
+    e.clientX - (canvasEl.width +PJ_SIZE_W +108) / 2
   );
   socket.emit("snowball", angle);
 });
@@ -162,8 +196,8 @@ function loop() {
   let cameraX = 0;
   let cameraY = 0;
   if (myPlayer) {
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2);
+    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) +(40 /2);
+    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) +(50 /2);
   }
 
   const TILES_IN_ROW = 8;
@@ -208,11 +242,30 @@ function loop() {
       );
     }
   }
-
+  //Personaje
   for (const player of players) {
-    canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
+
+    const row = 0
+    const col = 1
+    
+    let { id } = pj.pj[row][col] ?? { id: undefined };
+    const imageRow = parseInt(id / TILES_IN_ROW_PJ);
+    const imageCol = id % TILES_IN_COL_PJ;
+    // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    canvas.drawImage(
+      pjImage,
+      imageCol * PJ_SIZE_W,
+      imageRow * PJ_SIZE_H,
+      PJ_SIZE_W,
+      PJ_SIZE_H,
+      player.x - cameraX,
+      player.y - cameraY,
+      40,
+      50
+    );
+    //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
     canvas.fillStyle= 'black'
-    canvas.fillText("Nombre", player.x - cameraX, player.y - cameraY + 45)
+    canvas.fillText("Nombre", player.x - cameraX , player.y - cameraY +60)
 
     if (!player.isMuted) {
     //   canvas.drawImage(
@@ -242,8 +295,8 @@ function loop() {
     canvas.fillStyle = "#FFFFFF";
     canvas.beginPath();
     canvas.arc(
-      snowball.x - cameraX,
-      snowball.y - cameraY,
+      snowball.x - cameraX +20,
+      snowball.y - cameraY +25,
       SNOWBALL_RADIUS,
       0,
       2 * Math.PI
