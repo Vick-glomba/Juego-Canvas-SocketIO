@@ -1,8 +1,7 @@
 const mapImage = new Image();
 mapImage.src = "/snowy-sheet.png";
 
-let pjImage 
-
+let pjImage
 const santaImage = new Image();
 santaImage.src = "/santa.png";
 
@@ -15,6 +14,63 @@ const canvasEl = document.getElementById("canvas");
 canvasEl.width = window.innerWidth * 0.5;
 canvasEl.height = window.innerHeight * 0.6;
 const canvas = canvasEl.getContext("2d");
+
+
+
+
+let adjust = {
+  link: {
+    w: 40,
+    h: 50,
+    stand:{
+      rowUp:6,
+      up: [0],
+      rowDown:0,
+      down: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+      rowLeft:1,
+      left: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+      rowRight:3,
+      right: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+    },
+    walk:{
+      rowUp:6,
+      up: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rowDown:4,
+      down: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rowLeft:5,
+      left: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rowRight:7,
+      right: [9, 8, 7, 6, 5, 4, 3, 2, 1],
+    },
+  },
+  barca: {
+     w: 100,
+     h: 100,
+     stand:{
+      rowUp:3,
+      up: [1, 2, 3],
+      rowDown:2,
+      down: [1, 2, 3],
+      rowLeft:0,
+      left: [1, 2, 3],
+      rowRight:1,
+      right: [1, 2, 3],
+    },
+     walk:{
+       rowUp:3,
+       up: [1, 2, 3],
+       rowDown:2,
+       down: [1, 2, 3],
+       rowLeft:0,
+       left: [1, 2, 3],
+       rowRight:1,
+       right: [1,2,3],
+     }
+     },
+
+}
+
+
 
 const socket = io();
 
@@ -35,11 +91,15 @@ const uid = Math.floor(Math.random() * 1000000);
 muteButton.addEventListener("click", () => {
   if (isPlaying) {
     //localTracks.audioTrack.setEnabled(false);
-    muteButton.innerText = "unmute";
+    pj = personajes.find(pj => pj.skin === "link")
+    pjImage.src = "/" + pj.info.name + ".png";
+    muteButton.innerText = "Barca";
     socket.emit("mute", true);
   } else {
     // localTracks.audioTrack.setEnabled(true);
-    muteButton.innerText = "mute";
+    pj = personajes.find(pj => pj.skin === "barca")
+    pjImage.src = "/" + pj.info.name + ".png";
+    muteButton.innerText = "Link";
     socket.emit("mute", false);
   }
   isPlaying = !isPlaying;
@@ -91,6 +151,7 @@ let dataTile
 let players = [];
 let snowballs = [];
 let ultimoFrame = 0
+let personajes
 
 let TILES_IN_ROW_PJ
 let TILES_IN_COL_PJ
@@ -109,11 +170,11 @@ socket.on("map", (loadedMap) => {
   groundMap = loadedMap.ground;
   decalMap = loadedMap.decal;
 });
-socket.on("pj", (personajes) => {
-  pj = personajes.find(pj => pj.skin === "link")
-  console.log(pj.info.name)
- pjImage = new Image();
-pjImage.src = "/"+pj.info.name+".png";
+socket.on("pj", (pjs) => {
+  personajes = pjs
+  pj = personajes.find(pj => pj.skin === "barca")
+  pjImage = new Image();
+  pjImage.src = "/" + pj.info.name + ".png";
 });
 
 socket.on("players", (serverPlayers) => {
@@ -166,6 +227,8 @@ window.addEventListener("keydown", (e) => {
   if (["a", "s", "w", "d"].includes(e.key) && walkSnow.paused) {
     inputs["quieto"] = false
     inputs["ultimoFrame"] = ultimoFrame
+    inputs["w"] = adjust[pj.skin].w
+    inputs["h"] = adjust[pj.skin].h
     // walkSnow.play();
   }
   socket.emit("inputs", inputs);
@@ -183,6 +246,8 @@ window.addEventListener("keyup", (e) => {
   }
   if (["a", "s", "w", "d"].includes(e.key)) {
     inputs["quieto"] = true
+    inputs["w"] = adjust[pj.skin].w
+    inputs["h"] = adjust[pj.skin].h
     walkSnow.pause();
     walkSnow.currentTime = 0;
   }
@@ -204,8 +269,8 @@ function loop() {
   let cameraX = 0;
   let cameraY = 0;
   if (myPlayer) {
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) + (40 / 2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) + (50 / 2);
+    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) //+ (resize[pj.skin].w / 2);
+    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) //+ (resize[pj.skin].h / 2);
   }
 
   const TILES_IN_ROW = 8;
@@ -254,83 +319,85 @@ function loop() {
   for (const player of players) {
     let row = 0
     let col = 0
-    
+
     if (player.quieto) {
-      
-       switch (player.mirando) {
-         case "up":
-           row = 2
-           col = 0
-          //  row = 3
-          //  col = 0
-           break;
-         case "down":
-           row = 0
-           col = 0
-          //  row = 2
-          //  col = 0
-           break;
-         case "left":
-           row = 1
-           col = 0
-          //  row = 0
-          //  col = 0
-           break;
-         case "right":
-           row = 3
-           col = 0
-          //  row = 1
-          //  col = 0
-           break;
-       }
-      
-     } else {
 
-        switch (player.mirando) {
-          case "up":
-            //animacion arriba
-  //          const walkUp = [0,1,2]
-            const walkUp = [1,2,3,4,5,6,7,8,9]
-            row =6 
-            col = walkUp[ultimoFrame] || 0
-            ultimoFrame = ultimoFrame<walkUp.length?ultimoFrame + 1:0
-            break;
+      switch (player.mirando) {
+        case "up":
+          const walkUp =adjust[pj.skin].stand.up
+          row = adjust[pj.skin].stand.rowUp
+          col = walkUp[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkUp.length ? ultimoFrame + 1 : 0
+          break;
 
-         case "down":
-           //animacion abajo  
-          // const walkDown = [0,1,2]
-           const walkDown = [1,2,3,4,5,6,7,8,9]
-           row = 4
-           col = walkDown[ultimoFrame]|| 0
-           ultimoFrame = ultimoFrame<walkDown.length?ultimoFrame + 1:0
-           break;
+        case "down":
+          //animacion abajo  
+          const walkDown = adjust[pj.skin].stand.down
+          row = adjust[pj.skin].stand.rowDown
+          col = walkDown[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkDown.length ? ultimoFrame + 1 : 0
+          break;
 
-          case "left":
-            //animacion izquierda
-           // const walkLeft = [0,1,2]
-            const walkLeft = [1,2,3,4,5,6,7,8,9]
-            row = 5
-            col = walkLeft[ultimoFrame]|| 0
-            ultimoFrame =ultimoFrame<walkLeft.length?ultimoFrame + 1:0
-            break;
+        case "left":
+          //animacion izquierda
+          const walkLeft = adjust[pj.skin].stand.left
+          row = adjust[pj.skin].stand.rowLeft
+          col = walkLeft[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkLeft.length ? ultimoFrame + 1 : 0
+          break;
 
-          case "right":
-            //animacion derecha
-         //   const walkRight = [0,1,2]
-            const walkRight = [9,8,7,6,5,4,3,2,1]
-            row = 7 
-            col = walkRight[ultimoFrame] || 0
-            ultimoFrame = ultimoFrame<walkRight.length?ultimoFrame + 1:0
-            break;
-        }
-     }
+        case "right":
+          //animacion derecha
+          const walkRight = adjust[pj.skin].stand.right
+          row =  adjust[pj.skin].stand.rowRight
+          col = walkRight[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkRight.length ? ultimoFrame + 1 : 0
+          break;
+      }
+
+    } else {
+
+      switch (player.mirando) {
+        case "up":
+          const walkUp =adjust[pj.skin].walk.up
+          row = adjust[pj.skin].walk.rowUp
+          col = walkUp[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkUp.length ? ultimoFrame + 1 : 0
+          break;
+
+        case "down":
+          //animacion abajo  
+          const walkDown = adjust[pj.skin].walk.down
+          row = adjust[pj.skin].walk.rowDown
+          col = walkDown[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkDown.length ? ultimoFrame + 1 : 0
+          break;
+
+        case "left":
+          //animacion izquierda
+          const walkLeft = adjust[pj.skin].walk.left
+          row = adjust[pj.skin].walk.rowLeft
+          col = walkLeft[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkLeft.length ? ultimoFrame + 1 : 0
+          break;
+
+        case "right":
+          //animacion derecha
+          const walkRight = adjust[pj.skin].walk.right
+          row =  adjust[pj.skin].walk.rowRight
+          col = walkRight[ultimoFrame] || 0
+          ultimoFrame = ultimoFrame < walkRight.length ? ultimoFrame + 1 : 0
+          break;
+      }
+    }
     // console.log( pj.info)
     TILES_IN_ROW_PJ = pj.info.rows
     TILES_IN_COL_PJ = pj.info.cols
     PJ_SIZE_W = pj.info.tileWidth
     PJ_SIZE_H = pj.info.tileHeight
+
     let { id } = pj.pj2D[row][col] ?? { id: undefined };
-   
+
     const imageRow = parseInt(id / TILES_IN_ROW_PJ);
     const imageCol = id % TILES_IN_ROW_PJ;
 
@@ -341,17 +408,18 @@ function loop() {
       imageRow * PJ_SIZE_H,
       PJ_SIZE_W,
       PJ_SIZE_H,
-      player.x - cameraX ,
-      player.y - cameraY ,
-      40,
-      50
+      player.x - cameraX - adjust[pj.skin].w / 2,
+      player.y - cameraY - adjust[pj.skin].h / 2,
+      adjust[pj.skin].w,
+      adjust[pj.skin].h
     );
     //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
     canvas.fillStyle = 'black'
     canvas.fillStyle = "#FF0000";
     canvas.font = "bold 12px arial";
-    console.log(player.nombre)
-    canvas.fillText(player.nombre, player.x - cameraX +5 , player.y - cameraY +PJ_SIZE_H/1.5)
+    canvas.textAlign = "center"
+  
+    canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - adjust[pj.skin].h / 2) + adjust[pj.skin].h + 15)
 
     if (!player.isMuted) {
       //   canvas.drawImage(
@@ -393,5 +461,5 @@ function loop() {
 
 }
 setInterval(() => {
- loop();
-}, 80 );
+  loop();
+}, 80);

@@ -24,8 +24,7 @@ const inputsMap = {};
 let ground2D, decal2D;
 
 let pj2D
-let dataTiles
-let pjDB = ["link", "barca", "link", "link"]
+let pjDB = ["link", "barca"]
 
 
 function isColliding(rect1, rect2) {
@@ -41,21 +40,21 @@ function isCollidingWithMap(player) {
   for (let row = 0; row < decal2D.length; row++) {
     for (let col = 0; col < decal2D[0].length; col++) {
       const tile = decal2D[row][col];
-
+     
       if (
         tile &&
         isColliding(
           {
-            x: player.x +20,
-            y: player.y +45,
-            w: 5,
-            h: 10,
+            x: player.x,
+            y: player.y,
+            w: 0,
+            h: 0,
           },
           {
-            x: col * TILE_SIZE,
-            y: row * TILE_SIZE,
-            w: TILE_SIZE,
-            h: TILE_SIZE,
+            x: col * TILE_SIZE -TILE_SIZE/2,
+            y: row * TILE_SIZE -TILE_SIZE,
+            w: TILE_SIZE*2,
+            h: TILE_SIZE*2,
           }
         )
       ) {
@@ -92,6 +91,9 @@ function tick(delta) {
       player.mirando = "right"
     }
 
+    player.w = inputs.w ||0
+    player.h = inputs.h ||0
+    
     if (inputs.up || inputs.down || inputs.left || inputs.right) {
       player.quieto = false
       player.ultimoFrame = inputs.ultimoFrame
@@ -164,6 +166,8 @@ async function main() {
       quieto: true,
       ultimoFrame: 0,
       skin: "link",
+      w:0,
+      h:0,
       nombre: "El Vittor"
     });
 
