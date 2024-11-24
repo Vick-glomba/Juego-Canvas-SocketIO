@@ -16,14 +16,17 @@ const SPEED = 4;
 const TICK_RATE = 50;
 const SNOWBALL_SPEED = 5;
 const PLAYER_SIZE = 120;
-const TILE_SIZE = 130;
+const TILE_SIZE = 32;
 
 let players = [];
 let snowballs = [];
 const inputsMap = {};
 let ground2D, decal2D;
+
 let pj2D
 let dataTiles
+let pjDB = ["link", "barca", "link", "link"]
+
 
 function isColliding(rect1, rect2) {
   return (
@@ -43,10 +46,10 @@ function isCollidingWithMap(player) {
         tile &&
         isColliding(
           {
-            x: player.x + 20,
-            y: player.y + 45,
-            w: 10,
-            h: 5,
+            x: player.x +20,
+            y: player.y +45,
+            w: 5,
+            h: 10,
           },
           {
             x: col * TILE_SIZE,
@@ -128,7 +131,20 @@ function tick(delta) {
 
 async function main() {
   ({ ground2D, decal2D } = await loadMap());
-  (pj2D = await loadPj("link"))
+  let personajes= []
+  //aca tengo que cargar todos los pjs que existen hacer un loop y mandar un array.
+  for (let i = 0; i < pjDB.length; i++) {
+  
+    pj2D = await loadPj(pjDB[i])
+    pj2D.skin = pjDB[i]
+    personajes.push(pjDB[i]=pj2D)  
+  }
+
+
+
+  
+ 
+
 
   io.on("connect", (socket) => {
     console.log("user connected", socket.id);
@@ -147,17 +163,18 @@ async function main() {
       mirando: "down",
       quieto: true,
       ultimoFrame: 0,
-      skin: "link"
+      skin: "link",
+      nombre: "El Vittor"
     });
 
     socket.emit("map", {
       ground: ground2D,
       decal: decal2D,
     });
-    socket.emit("pj", {
-      pj: pj2D,
-      dataTiles: dataTiles
-    });
+    
+    socket.emit("pj", personajes );
+      // pj: pj2D,
+      // dataTiles: dataTiles
 
 
     socket.on("inputs", (inputs) => {

@@ -1,8 +1,7 @@
 const mapImage = new Image();
 mapImage.src = "/snowy-sheet.png";
 
-const pjImage = new Image();
-pjImage.src = "/sprite.png";
+let pjImage 
 
 const santaImage = new Image();
 santaImage.src = "/santa.png";
@@ -110,8 +109,11 @@ socket.on("map", (loadedMap) => {
   groundMap = loadedMap.ground;
   decalMap = loadedMap.decal;
 });
-socket.on("pj", (data) => {
-  pj = data.pj
+socket.on("pj", (personajes) => {
+  pj = personajes.find(pj => pj.skin === "link")
+  console.log(pj.info.name)
+ pjImage = new Image();
+pjImage.src = "/"+pj.info.name+".png";
 });
 
 socket.on("players", (serverPlayers) => {
@@ -259,18 +261,26 @@ function loop() {
          case "up":
            row = 2
            col = 0
+          //  row = 3
+          //  col = 0
            break;
          case "down":
            row = 0
            col = 0
+          //  row = 2
+          //  col = 0
            break;
          case "left":
            row = 1
            col = 0
+          //  row = 0
+          //  col = 0
            break;
          case "right":
            row = 3
            col = 0
+          //  row = 1
+          //  col = 0
            break;
        }
       
@@ -279,6 +289,7 @@ function loop() {
         switch (player.mirando) {
           case "up":
             //animacion arriba
+  //          const walkUp = [0,1,2]
             const walkUp = [1,2,3,4,5,6,7,8,9]
             row =6 
             col = walkUp[ultimoFrame] || 0
@@ -287,6 +298,7 @@ function loop() {
 
          case "down":
            //animacion abajo  
+          // const walkDown = [0,1,2]
            const walkDown = [1,2,3,4,5,6,7,8,9]
            row = 4
            col = walkDown[ultimoFrame]|| 0
@@ -295,6 +307,7 @@ function loop() {
 
           case "left":
             //animacion izquierda
+           // const walkLeft = [0,1,2]
             const walkLeft = [1,2,3,4,5,6,7,8,9]
             row = 5
             col = walkLeft[ultimoFrame]|| 0
@@ -303,8 +316,9 @@ function loop() {
 
           case "right":
             //animacion derecha
+         //   const walkRight = [0,1,2]
             const walkRight = [9,8,7,6,5,4,3,2,1]
-            row = 7
+            row = 7 
             col = walkRight[ultimoFrame] || 0
             ultimoFrame = ultimoFrame<walkRight.length?ultimoFrame + 1:0
             break;
@@ -327,14 +341,17 @@ function loop() {
       imageRow * PJ_SIZE_H,
       PJ_SIZE_W,
       PJ_SIZE_H,
-      player.x - cameraX,
-      player.y - cameraY,
+      player.x - cameraX ,
+      player.y - cameraY ,
       40,
       50
     );
     //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
     canvas.fillStyle = 'black'
-    canvas.fillText("Nombre", player.x - cameraX, player.y - cameraY + 60)
+    canvas.fillStyle = "#FF0000";
+    canvas.font = "bold 12px arial";
+    console.log(player.nombre)
+    canvas.fillText(player.nombre, player.x - cameraX +5 , player.y - cameraY +PJ_SIZE_H/1.5)
 
     if (!player.isMuted) {
       //   canvas.drawImage(
