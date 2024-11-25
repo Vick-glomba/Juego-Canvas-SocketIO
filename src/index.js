@@ -13,7 +13,7 @@ const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 
 const SPEED = 8;
-const TICK_RATE = 20;
+const TICK_RATE = 16;
 const SNOWBALL_SPEED = 11;
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;

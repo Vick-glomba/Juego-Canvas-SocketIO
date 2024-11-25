@@ -1,7 +1,7 @@
 const tmx = require("tmx-parser");
 
 async function loadPj(archivo) {
-  const path = "./src/images/" + archivo + ".tmx"
+  const path = "./src/render/" + archivo + ".tmx"
   const tsx = await new Promise((resolve, reject) => {
     tmx.parseFile(path, function (err, loadedMap) {
       if (err) return reject(err);

@@ -1,23 +1,41 @@
 
 const nombre = prompt("elije tu nombre")
 const mapImage = new Image();
-mapImage.src = "/snowy-sheet.png";
+mapImage.src = "./images/snowy-sheet.png";
 
 const imagenes = {}
 
 imagenes.link = new Image();
-imagenes.link.src= "/sprite.png"
+imagenes.link.src = "./images/sprite.png"
 
 imagenes.barca = new Image();
-imagenes.barca.src ="/barcanueva.png"
+imagenes.barca.src = "./images/barcanueva.png"
 
-const santaImage = new Image();
-santaImage.src = "/santa.png";
+
 
 const speakerImage = new Image();
-speakerImage.src = "/speaker.png";
+speakerImage.src = "./images/speaker.png";
 
-const walkSnow = new Audio("walk-snow.mp3");
+
+//AUDIOS
+
+const walkSnow = new Audio("./audio/walk-snow.mp3");
+
+//mis sonidos
+const misPasos = new Audio("./audio/caminar.WAV");
+misPasos.preload = "auto"
+misPasos.playbackRate = 1
+misPasos.volume = 0.1
+const miAgua = new Audio("./audio/agua.wav");
+miAgua.volume = 0.1
+// onidos de otros personajes
+const otrosPasos = new Audio("./audio/caminar.WAV");
+otrosPasos.preload = "auto"
+otrosPasos.playbackRate = 1
+otrosPasos.volume = 0.1
+const otrosAgua = new Audio("./audio/agua.wav");
+otrosAgua.volume = 0.1
+//agua.playbackRate = 0.5;
 
 const canvasEl = document.getElementById("canvas");
 canvasEl.width = window.innerWidth * 0.5;
@@ -135,15 +153,15 @@ socket.on("map", (loadedMap) => {
 
 socket.on("pjs", (pjs) => {
   personajes = pjs
- 
- // pj = personajes.find(pj => pj.skin === "barca")
+
+  // pj = personajes.find(pj => pj.skin === "barca")
 });
 
 socket.on("players", (serverPlayers) => {
   players = serverPlayers;
-  const myPlayer = players.find((player) => player.id === socket.id);
-  players =players.filter((player) => player.id !== socket.id)
-  players.push(myPlayer)
+  const mio = players.find((player) => player.id === socket.id);
+  players = players.filter((player) => player.id !== socket.id)
+  players.push(mio)
   //console.log(players[0].skin, players[0].skin, players[0].skin)
 });
 
@@ -159,7 +177,7 @@ const inputs = {
 };
 
 window.addEventListener("keydown", (e) => {
-  
+
   switch (e.key) {
     case "w":
       inputs["up"] = true;
@@ -191,36 +209,40 @@ window.addEventListener("keydown", (e) => {
 
   }
 
-  if (["a", "s", "w", "d"].includes(e.key) && walkSnow.paused) {
+  if (["a", "s", "w", "d"].includes(e.key)) {
     //inputs["quieto"] = false
-   // inputs["ultimoFrame"] = ultimoFrame
-    
+    // inputs["ultimoFrame"] = ultimoFrame
+
     // inputs["w"] = adjust[pj.skin].w
     // inputs["h"] = adjust[pj.skin].h
-    // walkSnow.play();
+    //walkSnow.play();
+    // pasos.play();
+
   }
 
   socket.emit("inputs", inputs);
 });
 
 window.addEventListener("keyup", (e) => {
-  if (e.key === "w" ) {
+  if (e.key === "w") {
     inputs["up"] = false;
-  } else if (e.key === "s" ) {
+  } else if (e.key === "s") {
     inputs["down"] = false;
-  } else if (e.key === "d" ) {
+  } else if (e.key === "d") {
     inputs["right"] = false;
-  } else if (e.key === "a" ) {
+  } else if (e.key === "a") {
     inputs["left"] = false;
   }
   if (["a", "s", "w", "d"].includes(e.key)) {
-   // inputs["quieto"] = true
+    // inputs["quieto"] = true
     // inputs["w"] = adjust[pj.skin].w
     // inputs["h"] = adjust[pj.skin].h
-    // walkSnow.pause();
-    // walkSnow.currentTime = 0;
+    //  walkSnow.pause();
+    //  walkSnow.currentTime = 0;
+    // pasos.pause();
+    //pasos.currentTime = 0;
   }
-  
+
   socket.emit("inputs", inputs);
 });
 
@@ -235,12 +257,17 @@ canvasEl.addEventListener("click", (e) => {
 function loop() {
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
+
+
+
+
+
   const myPlayer = players.find((player) => player.id === socket.id);
   let cameraX = 0;
   let cameraY = 0;
   if (myPlayer) {
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) ;
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) 
+    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+    cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
   }
 
   const TILES_IN_ROW = 8;
@@ -287,26 +314,40 @@ function loop() {
   }
   //Personaje
   for (const player of players) {
-    // console.log(player.skin)
-    
-   const pjrender = personajes.find(pj => pj.skin === player.skin)
-   //linkImage.src = "/" + pjrender.info.name + ".png"
 
-   
-  
-    
+    const pjrender = personajes.find(pj => pj.skin === player.skin)
+
+
+    const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
+    const ratio = 1.0 - Math.min(distance / 700, 1);
+
+    const proximidad = Math.floor(ratio * 100)
+    // console.log(proximidad)
+    if (proximidad > 60) {
+      if (player === myPlayer) {
+        if (!player.quieto) player.skin === "barca" ? miAgua.play() : misPasos.play() 
+      } else {
+        if (!player.quieto) player.skin === "barca" ? otrosAgua.play() : otrosPasos.play()
+      }
+
+
+      // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
+
+    }
+
+
     TILES_IN_ROW_PJ = pjrender.info.rows
     TILES_IN_COL_PJ = pjrender.info.cols
     PJ_SIZE_W = pjrender.info.tileWidth
     PJ_SIZE_H = pjrender.info.tileHeight
-    console.log("aca" , pjrender.pj2D[player.row][player.col])
-    let { id } = pjrender.pj2D[player.row][player.col] ?? { id:0 };
-   
-    
+    //console.log("aca" , pjrender.pj2D[player.row][player.col])
+    let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
+
+
     const imageRow = parseInt(id / TILES_IN_ROW_PJ);
     const imageCol = id % TILES_IN_ROW_PJ;
-    
-   
+
+
 
     // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 
@@ -337,18 +378,12 @@ function loop() {
       //   );
     }
 
+
     if (player !== myPlayer) {
-      if (
-        remoteUsers[player.voiceId] &&
-        remoteUsers[player.voiceId].audioTrack
-      ) {
-        const distance = Math.sqrt(
-          (player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2
-        );
+      if (remoteUsers[player.voiceId] && remoteUsers[player.voiceId].audioTrack) {
+        const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
         const ratio = 1.0 - Math.min(distance / 700, 1);
-        remoteUsers[player.voiceId].audioTrack.setVolume(
-          Math.floor(ratio * 100)
-        );
+        remoteUsers[player.voiceId].audioTrack.setVolume(Math.floor(ratio * 100));
       }
     }
   }
@@ -370,4 +405,4 @@ function loop() {
 }
 setInterval(() => {
   loop();
-}, 10);
+}, 16);
