@@ -1,10 +1,13 @@
 const mapImage = new Image();
 mapImage.src = "/snowy-sheet.png";
 
-let linkImage = new Image();
-linkImage.src= "/sprite.png"
-let barcaImage = new Image();
-barcaImage.src ="/barcanueva.png"
+const imagenes = {}
+
+imagenes.link = new Image();
+imagenes.link.src= "/sprite.png"
+
+imagenes.barca = new Image();
+imagenes.barca.src ="/barcanueva.png"
 
 const santaImage = new Image();
 santaImage.src = "/santa.png";
@@ -134,6 +137,9 @@ socket.on("pjs", (pjs) => {
 
 socket.on("players", (serverPlayers) => {
   players = serverPlayers;
+  const myPlayer = players.find((player) => player.id === socket.id);
+  players =players.filter((player) => player.id !== socket.id)
+  players.push(myPlayer)
   //console.log(players[0].skin, players[0].skin, players[0].skin)
 });
 
@@ -280,7 +286,7 @@ function loop() {
     // console.log(player.skin)
     
    const pjrender = personajes.find(pj => pj.skin === player.skin)
-   linkImage.src = "/" + pjrender.info.name + ".png"
+   //linkImage.src = "/" + pjrender.info.name + ".png"
 
    
   
@@ -301,7 +307,7 @@ function loop() {
     // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 
     canvas.drawImage(
-      pjrender.info.name === "sprite"?linkImage:barcaImage,
+      imagenes[player.skin],
       imageCol * PJ_SIZE_W,
       imageRow * PJ_SIZE_H,
       PJ_SIZE_W,
