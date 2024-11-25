@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 5000;
 const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 
-const SPEED = 4;
-const TICK_RATE = 50;
-const SNOWBALL_SPEED = 5;
+const SPEED = 8;
+const TICK_RATE = 20;
+const SNOWBALL_SPEED = 11;
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
 
@@ -26,6 +26,75 @@ let ground2D, decal2D;
 let pj2D
 let pjDB = ["link", "barca"]
 
+
+let adjust = {
+  link: {
+    w: 40,
+    h: 50,
+    stand: {
+      rowUp: 6,
+      up: [0],
+      rowDown: 0,
+      down: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0],
+      rowLeft: 1,
+      left: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0],
+      rowRight: 3,
+      right: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0],
+    },
+    walk: {
+      rowUp: 6,
+      up: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rowDown: 4,
+      down: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rowLeft: 5,
+      left: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      rowRight: 7,
+      right: [9,8,7,6,5,4,3,2,1],
+    },
+  },
+  barca: {
+    w: 100,
+    h: 100,
+    stand: {
+      rowUp: 3,
+      up: [0, 1, 2, 3],
+      rowDown: 2,
+      down: [0, 1, 2, 3],
+      rowLeft: 0,
+      left: [0, 1, 2, 3],
+      rowRight: 1,
+      right: [0, 1, 2, 3],
+    },
+    walk: {
+      rowUp: 3,
+      up: [0, 1, 2, 3],
+      rowDown: 2,
+      down: [0, 1, 2, 3],
+      rowLeft: 0,
+      left: [0, 1, 2, 3],
+      rowRight: 1,
+      right: [0, 1, 2, 3],
+    }
+  },
+
+}
+
+
+
+
+
+
+let personajes = []
+//aca tengo que cargar todos los pjs que existen hacer un loop y mandar un array.
+const loadPersonajes = async () => {
+
+  for (let i = 0; i < pjDB.length; i++) {
+
+    pj2D = await loadPj(pjDB[i])
+    pj2D.skin = pjDB[i]
+    personajes.push(pjDB[i] = pj2D)
+  }
+}
 
 function isColliding(rect1, rect2) {
   return (
@@ -40,7 +109,7 @@ function isCollidingWithMap(player) {
   for (let row = 0; row < decal2D.length; row++) {
     for (let col = 0; col < decal2D[0].length; col++) {
       const tile = decal2D[row][col];
-     
+
       if (
         tile &&
         isColliding(
@@ -51,10 +120,10 @@ function isCollidingWithMap(player) {
             h: 0,
           },
           {
-            x: col * TILE_SIZE -TILE_SIZE/2,
-            y: row * TILE_SIZE -TILE_SIZE,
-            w: TILE_SIZE*2,
-            h: TILE_SIZE*2,
+            x: col * TILE_SIZE - TILE_SIZE / 2,
+            y: row * TILE_SIZE - TILE_SIZE,
+            w: TILE_SIZE * 2,
+            h: TILE_SIZE * 2,
           }
         )
       ) {
@@ -70,6 +139,23 @@ function tick(delta) {
     const inputs = inputsMap[player.id];
     const previousY = player.y;
     const previousX = player.x;
+    let row = 0
+    let col = 0
+    // console.log(adjust[player.skin].w)
+    player.w = adjust[player.skin].w
+    player.h = adjust[player.skin].h
+    const standUp = adjust[player.skin].stand.up
+    const standDown = adjust[player.skin].stand.down
+   
+    const standLeft = adjust[player.skin].stand.left
+    const standRight = adjust[player.skin].stand.right
+    const walkUp = adjust[player.skin].walk.up
+    const walkDown = adjust[player.skin].walk.down
+    const walkLeft = adjust[player.skin].walk.left
+    const walkRight = adjust[player.skin].walk.right
+    // console.log(player)
+
+
 
     if (inputs.up) {
       player.y -= SPEED;
@@ -91,15 +177,95 @@ function tick(delta) {
       player.mirando = "right"
     }
 
-    player.w = inputs.w ||0
-    player.h = inputs.h ||0
-    
+
+
     if (inputs.up || inputs.down || inputs.left || inputs.right) {
       player.quieto = false
-      player.ultimoFrame = inputs.ultimoFrame
+      //player.ultimoFrame = inputs.ultimoFrame
+      //console.log(inputs.ultimoFrame)
+      //player.ultimoFrame
+
     } else {
       player.quieto = true
     }
+    // player.quieto = true
+    // player.mirando = "down"
+    //console.log(player.mirando)
+    if (player.quieto) {
+
+      switch (player.mirando) {
+        case "up":
+
+          row = adjust[player.skin].stand.rowUp
+          col = standUp[player.ultimoFrame] || standUp[0]
+          player.ultimoFrame = player.ultimoFrame < standUp.length - 1 ? player.ultimoFrame + 1 : standUp[0]
+          break;
+
+        case "down":
+
+          //animacion abajo  
+          row = adjust[player.skin].stand.rowDown
+          col = standDown[player.ultimoFrame] || standDown[0]
+          player.ultimoFrame = player.ultimoFrame < standDown.length - 1 ? player.ultimoFrame + 1 : standDown[0]
+          break;
+
+        case "left":
+          //animacion izquierda
+
+          row = adjust[player.skin].stand.rowLeft
+          col = standLeft[player.ultimoFrame] ||  standLeft[0]
+          player.ultimoFrame = player.ultimoFrame < standLeft.length - 1 ? player.ultimoFrame + 1 : standLeft[0]
+          break;
+
+        case "right":
+          //animacion derecha
+
+          row = adjust[player.skin].stand.rowRight
+          col = standRight[player.ultimoFrame] || standRight[0]
+          player.ultimoFrame = player.ultimoFrame < standRight.length - 1 ? player.ultimoFrame + 1 : standRight[0]
+          break;
+      }
+
+    } else {
+
+      switch (player.mirando) {
+        case "up":
+
+          row = adjust[player.skin].walk.rowUp
+          col = walkUp[player.ultimoFrame] || walkUp[0]
+          player.ultimoFrame = player.ultimoFrame < walkUp.length - 1 ? player.ultimoFrame + 1 : walkUp[0]
+          break;
+
+        case "down":
+          //animacion abajo  
+
+          row = adjust[player.skin].walk.rowDown
+          col = walkDown[player.ultimoFrame] || walkDown[0]
+          player.ultimoFrame = player.ultimoFrame < walkDown.length - 1 ? player.ultimoFrame + 1 : walkDown[0]
+          break;
+
+        case "left":
+          //animacion izquierda
+
+          row = adjust[player.skin].walk.rowLeft
+          col = walkLeft[player.ultimoFrame] || walkLeft[0]
+          player.ultimoFrame = player.ultimoFrame < walkLeft.length - 1 ? player.ultimoFrame + 1 : walkLeft[0]
+          break;
+
+        case "right":
+          //animacion derecha
+
+          row = adjust[player.skin].walk.rowRight
+          col = walkRight[player.ultimoFrame] || 0
+          player.ultimoFrame = player.ultimoFrame < walkRight.length - 1 ? player.ultimoFrame + 1 : 0
+          break;
+      }
+
+    }
+    player.row = row
+    player.col = col
+
+
 
     if (isCollidingWithMap(player)) {
       player.x = previousX;
@@ -133,19 +299,7 @@ function tick(delta) {
 
 async function main() {
   ({ ground2D, decal2D } = await loadMap());
-  let personajes= []
-  //aca tengo que cargar todos los pjs que existen hacer un loop y mandar un array.
-  for (let i = 0; i < pjDB.length; i++) {
-  
-    pj2D = await loadPj(pjDB[i])
-    pj2D.skin = pjDB[i]
-    personajes.push(pjDB[i]=pj2D)  
-  }
-
-
-
-  
- 
+  await loadPersonajes()
 
 
   io.on("connect", (socket) => {
@@ -164,32 +318,41 @@ async function main() {
       y: 800,
       mirando: "down",
       quieto: true,
-      ultimoFrame: 0,
       skin: "link",
-      w:0,
-      h:0,
-      nombre: "El Vittor"
+      w: 0,
+      h: 0,
+      nombre: "El Vittor",
+      quieto: true,
+      mirando: "down",
+      row: 0,
+      col: 0,
+      // ultimoFrame: 0,
     });
 
     socket.emit("map", {
       ground: ground2D,
       decal: decal2D,
     });
-    
-    socket.emit("pj", personajes );
-      // pj: pj2D,
-      // dataTiles: dataTiles
+
+    socket.emit("pjs", personajes);
+    // pj: pj2D,
+    // dataTiles: dataTiles
 
 
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;
     });
 
+
+
     socket.on("mute", (isMuted) => {
       const player = players.find((player) => player.id === socket.id);
       player.isMuted = isMuted;
     });
-
+    socket.on("cambiarSkin", (nuevoSkin) => {
+      const player = players.find((player) => player.id === socket.id);
+      player.skin = nuevoSkin
+    });
     socket.on("voiceId", (voiceId) => {
       const player = players.find((player) => player.id === socket.id);
       player.voiceId = voiceId;

@@ -1,7 +1,11 @@
 const mapImage = new Image();
 mapImage.src = "/snowy-sheet.png";
 
-let pjImage
+let linkImage = new Image();
+linkImage.src= "/sprite.png"
+let barcaImage = new Image();
+barcaImage.src ="/barcanueva.png"
+
 const santaImage = new Image();
 santaImage.src = "/santa.png";
 
@@ -14,61 +18,6 @@ const canvasEl = document.getElementById("canvas");
 canvasEl.width = window.innerWidth * 0.5;
 canvasEl.height = window.innerHeight * 0.6;
 const canvas = canvasEl.getContext("2d");
-
-
-
-
-let adjust = {
-  link: {
-    w: 40,
-    h: 50,
-    stand:{
-      rowUp:6,
-      up: [0],
-      rowDown:0,
-      down: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
-      rowLeft:1,
-      left: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
-      rowRight:3,
-      right: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
-    },
-    walk:{
-      rowUp:6,
-      up: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      rowDown:4,
-      down: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      rowLeft:5,
-      left: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      rowRight:7,
-      right: [9, 8, 7, 6, 5, 4, 3, 2, 1],
-    },
-  },
-  barca: {
-     w: 100,
-     h: 100,
-     stand:{
-      rowUp:3,
-      up: [1, 2, 3],
-      rowDown:2,
-      down: [1, 2, 3],
-      rowLeft:0,
-      left: [1, 2, 3],
-      rowRight:1,
-      right: [1, 2, 3],
-    },
-     walk:{
-       rowUp:3,
-       up: [1, 2, 3],
-       rowDown:2,
-       down: [1, 2, 3],
-       rowLeft:0,
-       left: [1, 2, 3],
-       rowRight:1,
-       right: [1,2,3],
-     }
-     },
-
-}
 
 
 
@@ -91,17 +40,21 @@ const uid = Math.floor(Math.random() * 1000000);
 muteButton.addEventListener("click", () => {
   if (isPlaying) {
     //localTracks.audioTrack.setEnabled(false);
-    pj = personajes.find(pj => pj.skin === "link")
-    pjImage.src = "/" + pj.info.name + ".png";
-    muteButton.innerText = "Barca";
     socket.emit("mute", true);
+    muteButton.innerText = "Link";
+    const skin = "barca"
+    socket.emit("cambiarSkin", skin);
+
+
   } else {
     // localTracks.audioTrack.setEnabled(true);
-    pj = personajes.find(pj => pj.skin === "barca")
-    pjImage.src = "/" + pj.info.name + ".png";
-    muteButton.innerText = "Link";
     socket.emit("mute", false);
+    muteButton.innerText = "Barca";
+    const skin = "link"
+    socket.emit("cambiarSkin", skin);
+
   }
+
   isPlaying = !isPlaying;
 });
 
@@ -170,15 +123,18 @@ socket.on("map", (loadedMap) => {
   groundMap = loadedMap.ground;
   decalMap = loadedMap.decal;
 });
-socket.on("pj", (pjs) => {
+
+
+
+socket.on("pjs", (pjs) => {
   personajes = pjs
-  pj = personajes.find(pj => pj.skin === "barca")
-  pjImage = new Image();
-  pjImage.src = "/" + pj.info.name + ".png";
+ 
+ // pj = personajes.find(pj => pj.skin === "barca")
 });
 
 socket.on("players", (serverPlayers) => {
   players = serverPlayers;
+  //console.log(players[0].skin, players[0].skin, players[0].skin)
 });
 
 socket.on("snowballs", (serverSnowballs) => {
@@ -193,6 +149,7 @@ const inputs = {
 };
 
 window.addEventListener("keydown", (e) => {
+  
   switch (e.key) {
     case "w":
       inputs["up"] = true;
@@ -225,32 +182,35 @@ window.addEventListener("keydown", (e) => {
   }
 
   if (["a", "s", "w", "d"].includes(e.key) && walkSnow.paused) {
-    inputs["quieto"] = false
-    inputs["ultimoFrame"] = ultimoFrame
-    inputs["w"] = adjust[pj.skin].w
-    inputs["h"] = adjust[pj.skin].h
+    //inputs["quieto"] = false
+   // inputs["ultimoFrame"] = ultimoFrame
+    
+    // inputs["w"] = adjust[pj.skin].w
+    // inputs["h"] = adjust[pj.skin].h
     // walkSnow.play();
   }
+
   socket.emit("inputs", inputs);
 });
 
 window.addEventListener("keyup", (e) => {
-  if (e.key === "w") {
+  if (e.key === "w" ) {
     inputs["up"] = false;
-  } else if (e.key === "s") {
+  } else if (e.key === "s" ) {
     inputs["down"] = false;
-  } else if (e.key === "d") {
+  } else if (e.key === "d" ) {
     inputs["right"] = false;
-  } else if (e.key === "a") {
+  } else if (e.key === "a" ) {
     inputs["left"] = false;
   }
   if (["a", "s", "w", "d"].includes(e.key)) {
-    inputs["quieto"] = true
-    inputs["w"] = adjust[pj.skin].w
-    inputs["h"] = adjust[pj.skin].h
-    walkSnow.pause();
-    walkSnow.currentTime = 0;
+   // inputs["quieto"] = true
+    // inputs["w"] = adjust[pj.skin].w
+    // inputs["h"] = adjust[pj.skin].h
+    // walkSnow.pause();
+    // walkSnow.currentTime = 0;
   }
+  
   socket.emit("inputs", inputs);
 });
 
@@ -269,8 +229,8 @@ function loop() {
   let cameraX = 0;
   let cameraY = 0;
   if (myPlayer) {
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) //+ (resize[pj.skin].w / 2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) //+ (resize[pj.skin].h / 2);
+    cameraX = parseInt(myPlayer.x - canvasEl.width / 2) ;
+    cameraY = parseInt(myPlayer.y - canvasEl.height / 2) 
   }
 
   const TILES_IN_ROW = 8;
@@ -317,109 +277,47 @@ function loop() {
   }
   //Personaje
   for (const player of players) {
-    let row = 0
-    let col = 0
+    // console.log(player.skin)
+    
+   const pjrender = personajes.find(pj => pj.skin === player.skin)
+   linkImage.src = "/" + pjrender.info.name + ".png"
 
-    if (player.quieto) {
-
-      switch (player.mirando) {
-        case "up":
-          const walkUp =adjust[pj.skin].stand.up
-          row = adjust[pj.skin].stand.rowUp
-          col = walkUp[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkUp.length ? ultimoFrame + 1 : 0
-          break;
-
-        case "down":
-          //animacion abajo  
-          const walkDown = adjust[pj.skin].stand.down
-          row = adjust[pj.skin].stand.rowDown
-          col = walkDown[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkDown.length ? ultimoFrame + 1 : 0
-          break;
-
-        case "left":
-          //animacion izquierda
-          const walkLeft = adjust[pj.skin].stand.left
-          row = adjust[pj.skin].stand.rowLeft
-          col = walkLeft[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkLeft.length ? ultimoFrame + 1 : 0
-          break;
-
-        case "right":
-          //animacion derecha
-          const walkRight = adjust[pj.skin].stand.right
-          row =  adjust[pj.skin].stand.rowRight
-          col = walkRight[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkRight.length ? ultimoFrame + 1 : 0
-          break;
-      }
-
-    } else {
-
-      switch (player.mirando) {
-        case "up":
-          const walkUp =adjust[pj.skin].walk.up
-          row = adjust[pj.skin].walk.rowUp
-          col = walkUp[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkUp.length ? ultimoFrame + 1 : 0
-          break;
-
-        case "down":
-          //animacion abajo  
-          const walkDown = adjust[pj.skin].walk.down
-          row = adjust[pj.skin].walk.rowDown
-          col = walkDown[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkDown.length ? ultimoFrame + 1 : 0
-          break;
-
-        case "left":
-          //animacion izquierda
-          const walkLeft = adjust[pj.skin].walk.left
-          row = adjust[pj.skin].walk.rowLeft
-          col = walkLeft[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkLeft.length ? ultimoFrame + 1 : 0
-          break;
-
-        case "right":
-          //animacion derecha
-          const walkRight = adjust[pj.skin].walk.right
-          row =  adjust[pj.skin].walk.rowRight
-          col = walkRight[ultimoFrame] || 0
-          ultimoFrame = ultimoFrame < walkRight.length ? ultimoFrame + 1 : 0
-          break;
-      }
-    }
-    // console.log( pj.info)
-    TILES_IN_ROW_PJ = pj.info.rows
-    TILES_IN_COL_PJ = pj.info.cols
-    PJ_SIZE_W = pj.info.tileWidth
-    PJ_SIZE_H = pj.info.tileHeight
-
-    let { id } = pj.pj2D[row][col] ?? { id: undefined };
-
+   
+  
+    
+    TILES_IN_ROW_PJ = pjrender.info.rows
+    TILES_IN_COL_PJ = pjrender.info.cols
+    PJ_SIZE_W = pjrender.info.tileWidth
+    PJ_SIZE_H = pjrender.info.tileHeight
+    console.log("aca" , pjrender.pj2D[player.row][player.col])
+    let { id } = pjrender.pj2D[player.row][player.col] ?? { id:0 };
+   
+    
     const imageRow = parseInt(id / TILES_IN_ROW_PJ);
     const imageCol = id % TILES_IN_ROW_PJ;
+    
+   
 
     // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+
     canvas.drawImage(
-      pjImage,
+      pjrender.info.name === "sprite"?linkImage:barcaImage,
       imageCol * PJ_SIZE_W,
       imageRow * PJ_SIZE_H,
       PJ_SIZE_W,
       PJ_SIZE_H,
-      player.x - cameraX - adjust[pj.skin].w / 2,
-      player.y - cameraY - adjust[pj.skin].h / 2,
-      adjust[pj.skin].w,
-      adjust[pj.skin].h
+      player.x - cameraX - player.w / 2,
+      player.y - cameraY - player.h / 2,
+      player.w,
+      player.h
     );
     //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
     canvas.fillStyle = 'black'
     canvas.fillStyle = "#FF0000";
     canvas.font = "bold 12px arial";
     canvas.textAlign = "center"
-  
-    canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - adjust[pj.skin].h / 2) + adjust[pj.skin].h + 15)
+
+    canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
 
     if (!player.isMuted) {
       //   canvas.drawImage(
@@ -462,4 +360,4 @@ function loop() {
 }
 setInterval(() => {
   loop();
-}, 80);
+}, 10);
