@@ -1,3 +1,5 @@
+
+const nombre = prompt("elije tu nombre")
 const mapImage = new Image();
 mapImage.src = "/snowy-sheet.png";
 
@@ -121,6 +123,8 @@ const SNOWBALL_RADIUS = 5;
 socket.on("connect", () => {
   console.log("connected");
 });
+
+socket.emit("nombre", nombre)
 
 socket.on("map", (loadedMap) => {
   groundMap = loadedMap.ground;

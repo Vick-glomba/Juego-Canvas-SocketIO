@@ -305,6 +305,11 @@ async function main() {
   io.on("connect", (socket) => {
     console.log("user connected", socket.id);
 
+    socket.on("nombre", (nombre) =>{
+      const player = players.find((player) => player.id === socket.id);
+      player.nombre = nombre
+    })
+
     inputsMap[socket.id] = {
       up: false,
       down: false,
