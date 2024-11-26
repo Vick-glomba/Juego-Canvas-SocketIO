@@ -21,6 +21,8 @@ speakerImage.src = "./images/speaker.png";
 
 const walkSnow = new Audio("./audio/walk-snow.mp3");
 
+const clcik1 = new Audio("./audio/click1.WAV");
+const clcik2 = new Audio("./audio/click2.WAV");
 //mis sonidos
 const misPasos = new Audio("./audio/caminar.WAV");
 misPasos.preload = "auto"
@@ -38,8 +40,22 @@ otrosAgua.volume = 0.1
 //agua.playbackRate = 0.5;
 
 const canvasEl = document.getElementById("canvas");
-canvasEl.width = 600// window.innerWidth ;
-canvasEl.height = 400//window.innerHeight  ;
+const principal = document.getElementById("principal");
+
+//BOTONES
+const btnOpciones = document.getElementById("btnOpciones")
+const btnEstadisticas = document.getElementById("btnEstadisticas")
+const btnClanes = document.getElementById("btnClanes")
+
+
+
+
+
+
+//  principal.width =  window.innerWidth  ;
+//  principal.height = window.innerHeight  ;
+canvasEl.width = 800
+canvasEl.height = 400
 const canvas = canvasEl.getContext("2d");
 
 
@@ -59,22 +75,33 @@ window.remoteUsers = remoteUsers;
 const hechizos = document.getElementById("hechizos")
 const inventario = document.getElementById("inventario")
 const btnInventario = document.getElementById("btnInventario")
-const btnHechizos =  document.getElementById("btnHechizos")
+const btnHechizos = document.getElementById("btnHechizos")
 const muteButton = document.getElementById("mute");
 const uid = Math.floor(Math.random() * 1000000);
 
 btnInventario.addEventListener("click", () => {
-  
-  inventario.style.display = "flex"
-   hechizos.style.display = "none"
+  inventario.style.visibility = "visible"
+  hechizos.style.visibility = "hidden"
+  hechizos.style.display = "none"
+  inventario.style.display = "block"
 })
 btnHechizos.addEventListener("click", () => {
-  hechizos.style.display = "flex"
   inventario.style.display = "none"
+  hechizos.style.display = "block"
+  hechizos.style.visibility = "visible"
+  inventario.style.visibility = "hidden"
 
 })
 
-
+btnOpciones.addEventListener("click", () => {
+  console.log("opciones")
+})
+btnEstadisticas.addEventListener("click", () => {
+  console.log("estadisticas")
+})
+btnClanes.addEventListener("click", () => {
+  console.log("clanes")
+})
 
 muteButton.addEventListener("click", () => {
   if (isPlaying) {
@@ -178,7 +205,7 @@ socket.on("players", (serverPlayers) => {
   const mio = players.find((player) => player.id === socket.id);
   players = players.filter((player) => player.id !== socket.id)
   players.push(mio)
-  //console.log(players[0].skin, players[0].skin, players[0].skin)
+
 });
 
 socket.on("snowballs", (serverSnowballs) => {
@@ -271,8 +298,9 @@ canvasEl.addEventListener("click", (e) => {
 });
 
 function loop() {
+  // canvasEl.width =  window.innerWidth * 0.6 ;
+  // canvasEl.height = window.innerHeight *0.85;
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
-
 
 
 
@@ -291,7 +319,7 @@ function loop() {
   // ground
   for (let row = 0; row < groundMap.length; row++) {
     for (let col = 0; col < groundMap[0].length; col++) {
-      let { id } = groundMap[row][col]?? { id: undefined };
+      let { id } = groundMap[row][col] ?? { id: undefined };
       const imageRow = parseInt(id / TILES_IN_ROW);
       const imageCol = id % TILES_IN_ROW;
       canvas.drawImage(
@@ -338,29 +366,28 @@ function loop() {
     const ratio = 1.0 - Math.min(distance / 700, 1);
 
     const proximidad = Math.floor(ratio * 100)
-    // console.log(proximidad)
+
     if (proximidad > 50) {
       if (player === myPlayer) {
-        if (!player.quieto) player.skin === "barca" ? miAgua.play() : misPasos.play() 
+        if (!player.quieto) player.skin === "barca" ? miAgua.play() : !otrosPasos.isPlaying ? misPasos.play() : misPasos.currentTime = 0
       } else {
-        if (!player.quieto) player.skin === "barca" ? otrosAgua.play() : otrosPasos.play()
+        if (!player.quieto) player.skin === "barca" ? otrosAgua.play() : !misPasos.isPlaying ? otrosPasos.play() : otrosPasos.currentTime = 0
       }
 
 
       // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
 
-      
-      
+
+
       TILES_IN_ROW_PJ = pjrender.info.rows
       TILES_IN_COL_PJ = pjrender.info.cols
       PJ_SIZE_W = pjrender.info.tileWidth
       PJ_SIZE_H = pjrender.info.tileHeight
-      //console.log("aca" , pjrender.pj2D[player.row][player.col])
       let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
       const imageRow = parseInt(id / TILES_IN_ROW_PJ);
       const imageCol = id % TILES_IN_ROW_PJ;
       // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-      
+
       canvas.drawImage(
         imagenes[player.skin],
         imageCol * PJ_SIZE_W,
@@ -377,7 +404,7 @@ function loop() {
       canvas.fillStyle = "#FF0000";
       canvas.font = "bold 12px arial";
       canvas.textAlign = "center"
-      
+
       canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
     }
 

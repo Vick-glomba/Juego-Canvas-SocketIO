@@ -7,7 +7,7 @@ async function loadMap() {
       resolve(loadedMap);
     });
   });
-    console.log(map)
+
   const layer = map.layers[0];
   const groundTiles = layer.tiles;
   const decalTiles = map.layers[1].tiles;
@@ -39,7 +39,6 @@ async function loadMap() {
     decal2D.push(decalRow);
   }
   
-  console.log(map)
   
   return {
     ground2D,

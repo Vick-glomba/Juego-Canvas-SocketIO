@@ -141,7 +141,7 @@ function tick(delta) {
     const previousX = player.x;
     let row = 0
     let col = 0
-    // console.log(adjust[player.skin].w)
+ 
     player.w = adjust[player.skin].w
     player.h = adjust[player.skin].h
     const standUp = adjust[player.skin].stand.up
@@ -153,7 +153,7 @@ function tick(delta) {
     const walkDown = adjust[player.skin].walk.down
     const walkLeft = adjust[player.skin].walk.left
     const walkRight = adjust[player.skin].walk.right
-    // console.log(player)
+
 
 
 
@@ -181,16 +181,11 @@ function tick(delta) {
 
     if (inputs.up || inputs.down || inputs.left || inputs.right) {
       player.quieto = false
-      //player.ultimoFrame = inputs.ultimoFrame
-      //console.log(inputs.ultimoFrame)
-      //player.ultimoFrame
 
     } else {
       player.quieto = true
     }
-    // player.quieto = true
-    // player.mirando = "down"
-    //console.log(player.mirando)
+
     if (player.quieto) {
 
       switch (player.mirando) {

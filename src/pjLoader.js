@@ -31,7 +31,7 @@ async function loadPj(archivo) {
     pj2D.push(pjRow);
   }
   const tile= tsx.tileSets["0"]
-  // console.log(tsx.layers["0"].map.width, tsx.layers["0"].map.height)
+ 
   const info = {
     rows: tsx.width,
     cols: tsx.height,
