@@ -2,12 +2,12 @@ const tmx = require("tmx-parser");
 
 async function loadMap() {
   const map = await new Promise((resolve, reject) => {
-    tmx.parseFile("./src/map.tmx", function (err, loadedMap) {
+    tmx.parseFile("./src/render/dungeon-newbie.tmx", function (err, loadedMap) {
       if (err) return reject(err);
       resolve(loadedMap);
     });
   });
-
+    console.log(map)
   const layer = map.layers[0];
   const groundTiles = layer.tiles;
   const decalTiles = map.layers[1].tiles;
@@ -18,7 +18,13 @@ async function loadMap() {
     const decalRow = [];
     for (let col = 0; col < map.width; col++) {
       const groundTile = groundTiles[row * map.height + col];
-      groundRow.push({ id: groundTile.id, gid: groundTile.gid });
+      if(groundTile){
+
+         groundRow.push({ id: groundTile.id, gid: groundTile.gid });
+      }else{
+        groundRow.push(undefined)
+      }
+
       const decalTile = decalTiles[row * map.height + col];
       if (decalTile) {
         decalRow.push({
@@ -32,7 +38,9 @@ async function loadMap() {
     ground2D.push(groundRow);
     decal2D.push(decalRow);
   }
-
+  
+  console.log(map)
+  
   return {
     ground2D,
     decal2D,

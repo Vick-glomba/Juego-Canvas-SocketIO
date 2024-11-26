@@ -1,7 +1,7 @@
 
 const nombre = prompt("elije tu nombre")
 const mapImage = new Image();
-mapImage.src = "./images/snowy-sheet.png";
+mapImage.src = "./images/mapas/dungeon-newbie.png";
 
 const imagenes = {}
 
@@ -38,8 +38,8 @@ otrosAgua.volume = 0.1
 //agua.playbackRate = 0.5;
 
 const canvasEl = document.getElementById("canvas");
-canvasEl.width = window.innerWidth * 0.5;
-canvasEl.height = window.innerHeight * 0.6;
+canvasEl.width = 600// window.innerWidth ;
+canvasEl.height = 400//window.innerHeight  ;
 const canvas = canvasEl.getContext("2d");
 
 
@@ -56,9 +56,25 @@ let isPlaying = true;
 
 const remoteUsers = {};
 window.remoteUsers = remoteUsers;
-
+const hechizos = document.getElementById("hechizos")
+const inventario = document.getElementById("inventario")
+const btnInventario = document.getElementById("btnInventario")
+const btnHechizos =  document.getElementById("btnHechizos")
 const muteButton = document.getElementById("mute");
 const uid = Math.floor(Math.random() * 1000000);
+
+btnInventario.addEventListener("click", () => {
+  
+  inventario.style.display = "flex"
+   hechizos.style.display = "none"
+})
+btnHechizos.addEventListener("click", () => {
+  hechizos.style.display = "flex"
+  inventario.style.display = "none"
+
+})
+
+
 
 muteButton.addEventListener("click", () => {
   if (isPlaying) {
@@ -270,12 +286,12 @@ function loop() {
     cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
   }
 
-  const TILES_IN_ROW = 8;
+  const TILES_IN_ROW = 20;
 
   // ground
   for (let row = 0; row < groundMap.length; row++) {
     for (let col = 0; col < groundMap[0].length; col++) {
-      let { id } = groundMap[row][col];
+      let { id } = groundMap[row][col]?? { id: undefined };
       const imageRow = parseInt(id / TILES_IN_ROW);
       const imageCol = id % TILES_IN_ROW;
       canvas.drawImage(
@@ -323,7 +339,7 @@ function loop() {
 
     const proximidad = Math.floor(ratio * 100)
     // console.log(proximidad)
-    if (proximidad > 60) {
+    if (proximidad > 50) {
       if (player === myPlayer) {
         if (!player.quieto) player.skin === "barca" ? miAgua.play() : misPasos.play() 
       } else {
@@ -333,42 +349,37 @@ function loop() {
 
       // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
 
+      
+      
+      TILES_IN_ROW_PJ = pjrender.info.rows
+      TILES_IN_COL_PJ = pjrender.info.cols
+      PJ_SIZE_W = pjrender.info.tileWidth
+      PJ_SIZE_H = pjrender.info.tileHeight
+      //console.log("aca" , pjrender.pj2D[player.row][player.col])
+      let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
+      const imageRow = parseInt(id / TILES_IN_ROW_PJ);
+      const imageCol = id % TILES_IN_ROW_PJ;
+      // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+      
+      canvas.drawImage(
+        imagenes[player.skin],
+        imageCol * PJ_SIZE_W,
+        imageRow * PJ_SIZE_H,
+        PJ_SIZE_W,
+        PJ_SIZE_H,
+        player.x - cameraX - player.w / 2,
+        player.y - cameraY - player.h / 2,
+        player.w,
+        player.h
+      );
+      //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
+      canvas.fillStyle = 'black'
+      canvas.fillStyle = "#FF0000";
+      canvas.font = "bold 12px arial";
+      canvas.textAlign = "center"
+      
+      canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
     }
-
-
-    TILES_IN_ROW_PJ = pjrender.info.rows
-    TILES_IN_COL_PJ = pjrender.info.cols
-    PJ_SIZE_W = pjrender.info.tileWidth
-    PJ_SIZE_H = pjrender.info.tileHeight
-    //console.log("aca" , pjrender.pj2D[player.row][player.col])
-    let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
-
-
-    const imageRow = parseInt(id / TILES_IN_ROW_PJ);
-    const imageCol = id % TILES_IN_ROW_PJ;
-
-
-
-    // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-
-    canvas.drawImage(
-      imagenes[player.skin],
-      imageCol * PJ_SIZE_W,
-      imageRow * PJ_SIZE_H,
-      PJ_SIZE_W,
-      PJ_SIZE_H,
-      player.x - cameraX - player.w / 2,
-      player.y - cameraY - player.h / 2,
-      player.w,
-      player.h
-    );
-    //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
-    canvas.fillStyle = 'black'
-    canvas.fillStyle = "#FF0000";
-    canvas.font = "bold 12px arial";
-    canvas.textAlign = "center"
-
-    canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
 
     if (!player.isMuted) {
       //   canvas.drawImage(
