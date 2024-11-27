@@ -8,7 +8,6 @@
   <title>Argentum-Web</title>
 
   <style>
-
     body {
       margin: 0;
     }
@@ -17,30 +16,52 @@
       width: 150px;
       height: 150px;
     }
-    
+
     #HUD {
       display: flex;
       width: 1200px;
-      height: 550px;
+      height: 675px;
       overflow: hidden;
       background-color: black;
     }
-    #consola{
-      width: 900px;
-      height: 120px;
+
+    #consola {
+      border: 2px;
+      border-style: double;
+      border-color: rgb(163, 168, 26);
+      padding: 10px;
+      
+      width: 875px;
+      height: 25%;
       background-color: rgb(11, 22, 22);
     }
 
     #canvas {
       width: 900px;
-      height: 430px;
+      height: 75%;
       margin: 0%;
     }
-    
-    #principal{
-      width:300px;
+
+    #principal {
+      width: 300px;
+      
     }
 
+    #mensaje {
+      
+      width: 870px;
+
+      background-color: rgb(255, 255, 255);
+    }
+
+    #cajaMensajes {
+      overflow-y: scroll;
+      color: aliceblue;
+      width: 875px;
+
+      margin-bottom: 10px;
+      height: 82%;
+    }
   </style>
 </head>
 
@@ -50,24 +71,30 @@
   <div id="HUD">
     <div>
 
-      <div id="consola"></div>
+      <div id="consola">
+        <div id="cajaMensajes"></div>
+        <input type="text" id="mensaje">
+      </div>
       <canvas id="canvas"></canvas>
     </div>
 
 
-    <div id="principal" >
+    <div id="principal">
       <!-- PANEL DERECHO HUD -->
-      <div style="width: 100%; height: 100%; background-image: url('./Images/interfaz/PRINCIPALNUEVO_SIN_ENERGIA.JPG');background-repeat: no-repeat; background-size:100% 100%;">
+      <div
+        style="width: 100%; height: 100%; background-image: url('./Images/interfaz/PRINCIPALNUEVO_SIN_ENERGIA.JPG');background-repeat: no-repeat; background-size:100% 100%;">
         <!-- DIV EXP -->
-        <div style="margin-left:2%;height: 14%;width: 95%; background-color: rgba(48, 162, 162, 0); background-color: rgba(43, 226, 165, 0.567);"></div>
+        <div
+          style="margin-left:2%;height: 14%;width: 95%; background-color: rgba(48, 162, 162, 0); background-color: rgba(43, 226, 165, 0.567);">
+        </div>
         <!-- DIV INV/HECHIS -->
-        <div style="margin-left:2%; background-color: rgba(206, 18, 18, 0.688); width:95%; height:56%">
+        <div style="margin-left:2%; width:95%; height:56%">
           <!-- PANEL INVENTARIO -->
           <div id="inventario"
             style="width:100%; height: 100%; background-image: url('./Images/interfaz/Centronuevoinventario.jpg');background-repeat: no-repeat; background-size:100% 100%;">
-            <div style="width: 100%; height:100%; background-color: rgba(255, 140, 0, 0.487); ">
+            <div style="width: 100%; height:100%; ">
               <button id="btnHechizos"
-                style="position: relative;top: 0%;left: 50%;  width:50%; height: 12%;background-color: rgba(30, 81, 169, 0.711);">
+                style="position: relative;top: 0%;left: 50%;  width:50%; height: 12%;background-color: rgba(30, 81, 169, 0); border: 0;">
               </button>
               <div style="background-color: rgba(0, 0, 0, 0.602); width: 90%; height: 80%; margin: 5%;"></div>
 
@@ -77,75 +104,91 @@
           <!-- PANEL HECHIZOS  -->
           <div id="hechizos"
             style="width: 100%; height: 100%; background-image: url('./Images/interfaz/Centronuevohechizos.jpg');background-repeat: no-repeat; background-size:100% 100%; visibility: hidden; display: none;">
-            <div style="width: 100%; height:100%; background-color: rgba(10, 145, 207, 0.496);">
+            <div style="width: 100%; height:100%; ">
               <button id="btnInventario"
-                style="  width:50%; height: 13%;background-color: rgba(201, 209, 45, 0.812);">
+                style="  width:50%; height: 13%;border: 0; background-color: rgba(201, 209, 45, 0.002);border: 0;">
               </button>
-              <div style="display: flex; width: 100%; height: 68%; background-color: rgba(137, 43, 226, 0.704);">
-                
-                <div style="background-color: rgba(0, 0, 0, 0.529); width: 75%;height: 80%; margin-left: 10%; margin-top: 4%; margin-bottom: 5%;"></div>
-                <div style="background-color: rgba(181, 15, 51, 0.505); width: 10%; height: 30%; margin-left: 2%; margin-top: 4%;">
-                  <button style="width: 80%; height: 40%;margin: 10%; background-color: rgba(239, 214, 54, 0.497);"></button>
-                  <button style="width: 80%; height: 40%; margin: 10%;margin-top: 0%;background-color: rgba(239, 214, 54, 0.497);"></button>
+              <div style="display: flex; width: 100%; height: 68%; border: 0; ">
+
+                <div
+                  style="background-color: rgba(0, 0, 0, 0.529); width: 75%;height: 80%; margin-left: 10%; margin-top: 4%; margin-bottom: 5%;">
+                </div>
+                <div style=" width: 10%; height: 30%; margin-left: 2%; margin-top: 4%;">
+                  <button id="flechaArriba"
+                    style="width: 80%; height: 40%;margin: 10%; background-color: rgba(239, 214, 54, 0); border: 0;"></button>
+                  <button id="flechaAbajo"
+                    style="width: 80%; height: 40%; margin: 10%;margin-top: 0%;background-color: rgba(239, 214, 54, 0); border: 0;"></button>
                 </div>
               </div>
-              <div style="height: 20%; width: 100%; background-color: rgba(226, 43, 156, 0.626);">
+              <div style="height: 20%; width: 100%;">
                 <button id="lanzar"
-                  style=" width:55%; height: 60%;background-color: rgba(30, 169, 70, 0.711); margin-left: 7%;">
+                  style=" width:55%; height: 50%;background-color: rgba(30, 169, 69, 0); margin-left: 7%; border: 0;">
                 </button>
-                <button id="info"
-                  style=" width:30%; height: 60%;background-color: rgba(30, 169, 70, 0.711); ">
+                <button id="info" style=" width:30%; height: 50%;background-color: rgba(30, 169, 69, 0); border: 0; ">
                 </button>
-                
+
               </div>
             </div>
-            
+
           </div>
-          
+
           <button id="mute" hidden>Barca</button>
         </div>
-        
+
         <!-- DIV BARRAS/BOTONES -->
-        <div style="display: flex; height: 30%; width: 100%; background-image: url('./Images/interfaz/PRINCIPALNUEVO_INFERIOR.jpg'); background-size: 100% 100%;">
-           <!-- DIV BARRAS -->
-            <div style=" width: 55%; height: 100%; background-color: rgba(0, 0, 255, 0);">
-              <div style="margin-left: 10%; width: 80%; height: 100%; background-color: rgba(0, 184, 230, 0.657);"></div>
-            </div>
-            <!-- DIV BOTONES -->  
-            <div style=" width: 45%; height: 100%; ">
-              <div style="margin-left: 10%; width: 80%; height: 100%;">
-                <!-- MONEDAS -->
-                 <!-- ORO -->
-                <div style="display: flex; margin-top: 14%;  width: 100%; height: 12%;">
-                  <button style="margin-left: 1%; width: 20%; height: 90%;border: 0; background-color: rgba(41, 201, 222, 0.503);"></button>
-                  <div style="margin-left: 5%; width: 75%; font-size: 80%; margin-top: 1%; text-align: center; color: rgb(228, 8, 8); font-weight: 900;">0</div>
-                </div>
-                <!-- PLATA -->
-                <div style=" display: flex; width: 100%; height: 12%;">
-                  <button style="margin-left: 1%; width: 20%; height: 90%;border: 0; background-color: rgba(247, 255, 6, 0.606);"></button>
-                  <div style="margin-left: 5%; width: 75%; font-size: 80%; margin-top: 1%; text-align: center; color: rgb(228, 8, 8); font-weight: 900;">0</div>
-                </div>
-                <!-- BRONCE -->
-                <div style=" display: flex; width: 100%; height: 12%; ">
-                  <button style="margin-left: 1%; width: 20%; height: 90%;border: 0; background-color: rgba(234, 84, 29, 0.491);"></button>
-                  <div style="margin-left: 5%; width: 75%; font-size: 80%; margin-top: 2%; text-align: center; color: rgb(228, 8, 8); font-weight: 900;">0</div>
-                </div>
-                <!-- BOTONES -->
-                <div style=" margin-top: 4%; width: 100%; height: 12%; ">
-                  <button id="btnOpciones" style="width: 100%; height: 100%; background-color: rgba(210, 86, 14, 0.532); border: 0; "></button>
-                </div>
-                <div style=" margin-top: 4%; width: 100%; height: 12%; ">
-                  <button id="btnEstadisticas" style="width: 100%; height: 100%; background-color: rgba(14, 148, 210, 0.532);border: 0; "></button>
-                </div>
-                <div style=" margin-top: 4%; width: 100%; height: 12%;">
-                  <button id="btnClanes" style="width: 100%; height: 100%; background-color: rgba(210, 14, 14, 0.532);border: 0; "></button>
-                </div>
-
-
+        <div
+          style="display: flex; height: 30%; width: 100%; background-image: url('./Images/interfaz/PRINCIPALNUEVO_INFERIOR.jpg'); background-size: 100% 100%;">
+          <!-- DIV BARRAS -->
+          <div style=" width: 55%; height: 100%; background-color: rgba(0, 0, 255, 0);">
+            <div style="margin-left: 10%; width: 80%; height: 100%; background-color: rgba(0, 184, 230, 0.657);"></div>
+          </div>
+          <!-- DIV BOTONES -->
+          <div style=" width: 45%; height: 100%; ">
+            <div style="margin-left: 10%; width: 80%; height: 100%;">
+              <!-- MONEDAS -->
+              <!-- ORO -->
+              <div style="display: flex; margin-top: 20%;  width: 100%; height: 12%;">
+                <button id="oro"
+                  style="margin-left: 1%; width: 20%; height: 90%;border: 0; background-color: rgba(41, 201, 222, 0);"></button>
+                <div
+                  style=" width: 75%; font-size: 80%; margin-top: 3%; text-align: center; color: rgba(228, 8, 8, 0.869); font-weight: 900;">
+                  0</div>
               </div>
+              <!-- PLATA -->
+              <div style=" display: flex; width: 100%; height: 12%;">
+                <button id="plata"
+                  style="margin-left: 1%; width: 20%; height: 90%;border: 0; background-color: rgba(247, 255, 6, 0);"></button>
+                <div
+                  style=" width: 75%; font-size: 80%; margin-top: 2%; text-align: center; color: rgba(228, 8, 8, 0.869); font-weight: 900; border: 0;">
+                  0</div>
+              </div>
+              <!-- BRONCE -->
+              <div style=" display: flex; width: 100%; height: 12%; ">
+                <button id="bronce"
+                  style="margin-left: 1%; width: 20%; height: 90%;border: 0; background-color: rgba(234, 84, 29, 0);"></button>
+                <div
+                  style=" width: 75%; font-size: 80%; margin-top: 3%; text-align: center; color: rgba(228, 8, 8, 0.869); font-weight: 900; border: 0;">
+                  0</div>
+              </div>
+              <!-- BOTONES -->
+              <div style=" margin-top: 4%; width: 100%; height: 12%; ">
+                <button id="btnOpciones"
+                  style="width: 100%; height: 100%; background-color: rgba(210, 86, 14, 0); border: 0; "></button>
+              </div>
+              <div style=" margin-top: 4%; width: 100%; height: 12%; ">
+                <button id="btnEstadisticas"
+                  style="width: 100%; height: 100%; background-color: rgba(14, 148, 210, 0);border: 0; "></button>
+              </div>
+              <div style=" margin-top: 4%; width: 100%; height: 12%;">
+                <button id="btnClanes"
+                  style="width: 100%; height: 100%; background-color: rgba(210, 14, 14, 0);border: 0; "></button>
+              </div>
+
+
             </div>
+          </div>
         </div>
-        
+
 
       </div>
     </div>

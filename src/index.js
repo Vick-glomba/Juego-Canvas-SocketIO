@@ -154,9 +154,8 @@ function tick(delta) {
     const walkLeft = adjust[player.skin].walk.left
     const walkRight = adjust[player.skin].walk.right
 
-
-
-
+    
+    
     if (inputs.up) {
       player.y -= SPEED;
       player.mirando = "up"
@@ -164,11 +163,11 @@ function tick(delta) {
       player.y += SPEED;
       player.mirando = "down"
     }
-
+    
     if (isCollidingWithMap(player)) {
       player.y = previousY;
     }
-
+    
     if (inputs.left) {
       player.x -= SPEED;
       player.mirando = "left"
@@ -176,21 +175,22 @@ function tick(delta) {
       player.x += SPEED;
       player.mirando = "right"
     }
-
-
-
+    
+    
+    
     if (inputs.up || inputs.down || inputs.left || inputs.right) {
       player.quieto = false
-
+      
     } else {
       player.quieto = true
     }
-
+    
+     
     if (player.quieto) {
-
+      
       switch (player.mirando) {
         case "up":
-
+          
           row = adjust[player.skin].stand.rowUp
           col = standUp[player.ultimoFrame] || standUp[0]
           player.ultimoFrame = player.ultimoFrame < standUp.length - 1 ? player.ultimoFrame + 1 : standUp[0]
@@ -326,6 +326,7 @@ async function main() {
       mirando: "down",
       row: 0,
       col: 0,
+      ultimoMensaje: ""
       // ultimoFrame: 0,
     });
 
@@ -338,6 +339,20 @@ async function main() {
     // pj: pj2D,
     // dataTiles: dataTiles
 
+
+    socket.on("enviarMensaje", (mensaje)=>{
+      const player = players.find((player) => player.id === socket.id);
+     let msg = mensaje
+     msg = msg.trim()
+      if (msg !== ""){
+        player.ultimoMensaje = mensaje
+        const player1 = players.find((player) => player.id === socket.id);
+         msg = player.nombre +": "+ mensaje
+        io.emit("recibirMensaje", msg)
+      }else{
+        player.ultimoMensaje = msg
+      }
+    })
 
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;

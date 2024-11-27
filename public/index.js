@@ -42,15 +42,28 @@ otrosAgua.volume = 0.1
 const canvasEl = document.getElementById("canvas");
 const principal = document.getElementById("principal");
 
+
+
+let escribiendo = false
+
 //BOTONES
 const btnOpciones = document.getElementById("btnOpciones")
 const btnEstadisticas = document.getElementById("btnEstadisticas")
 const btnClanes = document.getElementById("btnClanes")
 
+const oro = document.getElementById("oro")
+const plata = document.getElementById("plata")
+const bronce = document.getElementById("bronce")
 
+const btnHechizos = document.getElementById("btnHechizos")
+const btnInventario = document.getElementById("btnInventario")
+const flechaArriba = document.getElementById("flechaArriba")
+const flechaAbajo = document.getElementById("flechaAbajo")
+const lanzar = document.getElementById("lanzar")
+const info = document.getElementById("info")
 
-
-
+const cajaMensajes = document.getElementById("cajaMensajes")
+const mensaje = document.getElementById("mensaje")
 
 //  principal.width =  window.innerWidth  ;
 //  principal.height = window.innerHeight  ;
@@ -74,8 +87,6 @@ const remoteUsers = {};
 window.remoteUsers = remoteUsers;
 const hechizos = document.getElementById("hechizos")
 const inventario = document.getElementById("inventario")
-const btnInventario = document.getElementById("btnInventario")
-const btnHechizos = document.getElementById("btnHechizos")
 const muteButton = document.getElementById("mute");
 const uid = Math.floor(Math.random() * 1000000);
 
@@ -93,6 +104,13 @@ btnHechizos.addEventListener("click", () => {
 
 })
 
+
+
+mensaje.addEventListener("click", () => {
+  escribiendo = true
+  console.log("toco el input", escribiendo)
+})
+
 btnOpciones.addEventListener("click", () => {
   console.log("opciones")
 })
@@ -101,6 +119,33 @@ btnEstadisticas.addEventListener("click", () => {
 })
 btnClanes.addEventListener("click", () => {
   console.log("clanes")
+})
+oro.addEventListener("click", () => {
+  console.log("oro")
+})
+plata.addEventListener("click", () => {
+  console.log("plata")
+})
+bronce.addEventListener("click", () => {
+  console.log("bronce")
+})
+btnHechizos.addEventListener("click", () => {
+  console.log("btnHechizos")
+})
+btnInventario.addEventListener("click", () => {
+  console.log("btnInventario")
+})
+flechaArriba.addEventListener("click", () => {
+  console.log("flechaArriba")
+})
+flechaAbajo.addEventListener("click", () => {
+  console.log("flechaAbajo")
+})
+lanzar.addEventListener("click", () => {
+  console.log("lanzar")
+})
+info.addEventListener("click", () => {
+  console.log("info")
 })
 
 muteButton.addEventListener("click", () => {
@@ -162,7 +207,8 @@ function handleUserUnpublished(user) {
 // }
 
 // join();
-
+let myPlayer
+let mensajesConsola = []
 let groundMap = [[]];
 let decalMap = [[]];
 let pj
@@ -202,15 +248,22 @@ socket.on("pjs", (pjs) => {
 
 socket.on("players", (serverPlayers) => {
   players = serverPlayers;
-  const mio = players.find((player) => player.id === socket.id);
+  myPlayer = players.find((player) => player.id === socket.id);
   players = players.filter((player) => player.id !== socket.id)
-  players.push(mio)
+  players.push(myPlayer)
 
 });
 
 socket.on("snowballs", (serverSnowballs) => {
   snowballs = serverSnowballs;
 });
+
+
+socket.on("recibirMensaje", (mensaje) =>{
+mensajesConsola.push(mensaje)
+actualizarMensajes()
+})
+
 
 const inputs = {
   up: false,
@@ -219,37 +272,83 @@ const inputs = {
   right: false,
 };
 
+const actualizarMensajes = () => {
+  cajaMensajes.innerHTML = ""
+  let html = ""
+  if (mensajesConsola.length > 15) mensajesConsola.shift()
+  for (let i = 0; i < mensajesConsola.length; i++) {
+    if (mensajesConsola[i]) {
+      const mensaje = mensajesConsola[i]
+      html += `
+     <p style="color: aliceblue;margin:0px; padding:0px; margin-left: 15px; font-size:200">${mensaje}</p>
+     `
+    } else break;
+
+  }
+ 
+  cajaMensajes.innerHTML = html
+
+  cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
+
+}
+
+
 window.addEventListener("keydown", (e) => {
 
-  switch (e.key) {
-    case "w":
-      inputs["up"] = true;
-      inputs["down"] = false;
-      inputs["right"] = false;
-      inputs["left"] = false;
-      break;
-    case "s":
-      inputs["up"] = false;
-      inputs["down"] = true;
-      inputs["right"] = false;
-      inputs["left"] = false;
+  if (e.key === "Enter") {
 
-      break;
-    case "d":
-      inputs["up"] = false;
-      inputs["down"] = false;
-      inputs["right"] = true;
-      inputs["left"] = false;
+    if (escribiendo) {
+      const msg = mensaje.value
+      socket.emit("enviarMensaje", msg)
+      //mensajesConsola.push(mensaje.value)
+      mensaje.value = ""
+      mensaje.blur()
+      escribiendo = false
+      actualizarMensajes()
+      setTimeout(() => {
+        if(myPlayer.ultimoMensaje === msg) socket.emit("enviarMensaje", "")
+      }, 10000);
 
-      break;
-    case "a":
-      inputs["up"] = false;
-      inputs["down"] = false;
-      inputs["right"] = false;
-      inputs["left"] = true;
+    } else {
+      mensaje.focus()
+      escribiendo = true
+    }
+  }
 
-      break;
+  if(!escribiendo){
 
+
+    switch (e.key) {
+
+      case "w":
+        inputs["up"] = true;
+        inputs["down"] = false;
+        inputs["right"] = false;
+        inputs["left"] = false;
+        break;
+      case "s":
+        inputs["up"] = false;
+        inputs["down"] = true;
+        inputs["right"] = false;
+        inputs["left"] = false;
+
+        break;
+      case "d":
+        inputs["up"] = false;
+        inputs["down"] = false;
+        inputs["right"] = true;
+        inputs["left"] = false;
+
+        break;
+      case "a":
+        inputs["up"] = false;
+        inputs["down"] = false;
+        inputs["right"] = false;
+        inputs["left"] = true;
+
+        break;
+
+    }
   }
 
   if (["a", "s", "w", "d"].includes(e.key)) {
@@ -306,7 +405,7 @@ function loop() {
 
 
 
-  const myPlayer = players.find((player) => player.id === socket.id);
+  
   let cameraX = 0;
   let cameraY = 0;
   if (myPlayer) {
@@ -377,7 +476,7 @@ function loop() {
 
       // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
 
-
+      
 
       TILES_IN_ROW_PJ = pjrender.info.rows
       TILES_IN_COL_PJ = pjrender.info.cols
@@ -399,12 +498,22 @@ function loop() {
         player.w,
         player.h
       );
+
+
+      //ULTIMO MENSAJE PERSONAJE
+      canvas.fillStyle = 'black'
+      canvas.fillStyle = "#f0f3f4";
+      canvas.font = "bold 12px arial";
+      canvas.textAlign = "center"
+      canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h -PJ_SIZE_H /2.5)
+
+
+      //NOMBRE PERSONAJE
       //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
       canvas.fillStyle = 'black'
       canvas.fillStyle = "#FF0000";
       canvas.font = "bold 12px arial";
       canvas.textAlign = "center"
-
       canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
     }
 
