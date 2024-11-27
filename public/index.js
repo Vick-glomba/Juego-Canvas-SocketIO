@@ -45,6 +45,7 @@ const HUD = document.getElementById("HUD");
 const canvasEl = document.getElementById("canvas");
 const principal = document.getElementById("principal");
 
+let hechizoSelect
 
 
 let escribiendo = false
@@ -86,8 +87,8 @@ const socket = io();
 const localTracks = {
   audioTrack: null,
 };
-
 let isPlaying = true;
+
 
 // COLORES MENSAJES CONSOLA
 const colorChat = "#c2bd58"
@@ -96,9 +97,9 @@ const colorCrimi = "#ea0c05"
 const colorNeutral = "#bfc1c1"
 
 
-
 const remoteUsers = {};
 window.remoteUsers = remoteUsers;
+const boxHechizos = document.getElementById("boxHechizos")
 const hechizos = document.getElementById("hechizos")
 const inventario = document.getElementById("inventario")
 const muteButton = document.getElementById("mute");
@@ -115,6 +116,7 @@ btnHechizos.addEventListener("click", () => {
   hechizos.style.display = "block"
   hechizos.style.visibility = "visible"
   inventario.style.visibility = "hidden"
+  actualizarHechizos(null, hechizoSelect)
 
 })
 
@@ -156,6 +158,19 @@ flechaAbajo.addEventListener("click", () => {
   console.log("flechaAbajo")
 })
 
+boxHechizos.addEventListener("click", (e) => {
+  if (e.target.id !== "boxHechizos") {
+
+    hechizoSelect = e.target.id
+    actualizarHechizos(null,hechizoSelect)
+  }
+
+
+})
+
+
+
+
 HUD.addEventListener("click", (e) => {
   if (cast && e.target !== lanzar) {
 
@@ -166,7 +181,7 @@ HUD.addEventListener("click", (e) => {
 })
 
 lanzar.addEventListener("click", () => {
-  console.log("lanzar")
+  console.log("lanzar ", hechizoSelect)
   HUD.style.cursor = "crosshair"
   cast = true
 })
@@ -318,6 +333,27 @@ const inputs = {
   left: false,
   right: false,
 };
+
+
+const actualizarHechizos = (hechizo, hechizoSelect) => {
+  if (hechizo) {
+    console.log("carga un hechizo nuevo")
+  } else {
+    boxHechizos.innerHTML = ""
+    let html = ""
+    for (let i = 0; i < 20; i++) {
+      const texto = myPlayer.hechizos[i] ? myPlayer.hechizos[i] : "--------------  Vacio  -------------"
+      const id = i
+      const color = Number(hechizoSelect) === i ? "#f9e79f50" : "rgba(0, 0, 0, 0.67)"
+      html += `
+       <div id="${id}" style="border:0; color: #ffffff; width: 100%;text-align: center; height: 20px; background-color:${color};">${texto}</div>
+       `
+
+    }
+    boxHechizos.innerHTML = html
+  }
+}
+
 //CONSOLA MENSAJES
 const actualizarMensajes = () => {
 
