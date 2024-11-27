@@ -273,9 +273,16 @@ socket.on("snowballs", (serverSnowballs) => {
 });
 
 
-socket.on("recibirMensaje", (mensaje) => {
-  mensajesConsola.push(mensaje)
-  actualizarMensajes()
+socket.on("recibirMensaje", ( obj )=> {
+  if(obj.tipo ==="click" && obj.player.id === myPlayer.id){
+    console.log(obj)
+    mensajesConsola.push(obj)
+    actualizarMensajes()
+  }
+  if(obj.tipo ==="chat"){
+    mensajesConsola.push(obj)
+    actualizarMensajes()
+  }
 })
 
 
@@ -287,15 +294,38 @@ const inputs = {
 };
 
 const actualizarMensajes = () => {
+  
   cajaMensajes.innerHTML = ""
   let html = ""
   if (mensajesConsola.length > 15) mensajesConsola.shift()
   for (let i = 0; i < mensajesConsola.length; i++) {
-    if (mensajesConsola[i]) {
-      const mensaje = mensajesConsola[i]
-      html += `
-     <p style="color: aliceblue;margin:0px; padding:0px; margin-left: 15px; font-size:200">${mensaje}</p>
-     `
+    let msg
+    const colorChat= "yellow"
+    const colorCiuda= "#07b0d1"
+    const colorCrimi= "red"
+    if (mensajesConsola[i] && mensajesConsola[i].msg) {
+      switch (mensajesConsola[i].tipo) {
+        case "chat":
+          msg = mensajesConsola[i].player.nombre +": "+ mensajesConsola[i].msg
+          html += `
+         <p style="color:${colorChat};margin:0px; padding:0px; margin-left: 15px; font-size:200">${msg}</p>
+         `
+          break;
+        case "click":
+          msg = mensajesConsola[i].msg
+          const color = mensajesConsola[i].player.estado === "criminal"? colorCrimi: colorCiuda
+          html += `
+         <p style="color:${color};margin:0px; padding:0px; margin-left: 15px; font-size:200">${msg}</p>
+         `
+          break;
+        case "info":
+          
+          break;
+        case "daño":
+          
+          break;
+      }
+
     } else break;
 
   }
@@ -312,7 +342,10 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
 
     if (escribiendo) {
-      const msg = mensaje.value
+      const msg = {
+        tipo:"chat",
+        msg: mensaje.value
+      }
       socket.emit("enviarMensaje", msg)
       //mensajesConsola.push(mensaje.value)
       mensaje.value = ""
@@ -405,7 +438,7 @@ window.addEventListener("keyup", (e) => {
 //EVENTO DE CLICK EN CANVAS
 canvasEl.addEventListener("click", (e) => {
 
-  const point = { x:myPlayer.x +e.clientX -canvasEl.width/2, y:myPlayer.y + e.clientY - canvasEl.height/2 - myPlayer.h};
+  const point = { x:myPlayer.x +e.clientX -canvasEl.width/2 +window.scrollX, y:myPlayer.y + e.clientY- canvasEl.height +window.scrollY +myPlayer.h};
   socket.emit("point", point);
 
 });
@@ -558,7 +591,7 @@ function loop() {
     canvas.beginPath();
     canvas.arc(
       snowball.x - cameraX,
-      snowball.y - cameraY,
+      snowball.y - cameraY +10,
       SNOWBALL_RADIUS,
       0,
       2 * Math.PI

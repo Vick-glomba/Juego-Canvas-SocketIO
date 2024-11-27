@@ -14,7 +14,7 @@ const loadPj = require("./pjLoader");
 
 const SPEED = 8;
 const TICK_RATE = 16;
-const SNOWBALL_SPEED = 11;
+
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
 
@@ -273,15 +273,22 @@ function tick(delta) {
     snowball.timeLeft -= delta;
 
     for (const player of players) {
-      //if (player.id === snowball.playerId) continue;
+
+     //esto es de la bola original //if (player.id === snowball.playerId) continue;
       const distance = Math.sqrt(
-        (player.x - snowball.x) ** 2 +
-        (player.y - snowball.y) ** 2
+        (player.x  - snowball.x) ** 2 +
+        (player.y  - snowball.y ) ** 2
       );
-      if (distance <= PLAYER_SIZE / 6) {
-        player.x = player.x + 10;
-        player.y = player.y;
-        snowball.timeLeft = -1;
+      if (distance <= player.w/2 ) {
+        player.y= player.y-1
+        const pj = players.find((player) => player.id === snowball.playerId);
+        const obj={
+          player: pj,
+          tipo: "click",
+          msg:player.nombre
+        }
+      io.emit("recibirMensaje",obj )
+         snowball.timeLeft = -1;
         break;
       }
     }
@@ -314,6 +321,7 @@ async function main() {
 
     players.push({
       id: socket.id,
+      estado:"criminal",
       x: 800,
       y: 800,
       mirando: "down",
@@ -340,15 +348,16 @@ async function main() {
     // dataTiles: dataTiles
 
 
-    socket.on("enviarMensaje", (mensaje)=>{
+    socket.on("enviarMensaje", (obj)=>{
       const player = players.find((player) => player.id === socket.id);
-     let msg = mensaje
+     let msg = obj.msg
      msg = msg.trim()
       if (msg !== ""){
-        player.ultimoMensaje = mensaje
-        const player1 = players.find((player) => player.id === socket.id);
-         msg = player.nombre +": "+ mensaje
-        io.emit("recibirMensaje", msg)
+        player.ultimoMensaje = obj.msg
+         msg = player.nombre +": "+ obj.msg
+         obj.player= player
+         console.log(obj)
+        io.emit("recibirMensaje", obj)
       }else{
         player.ultimoMensaje = msg
       }
@@ -382,7 +391,7 @@ async function main() {
         timeLeft: 10000,
         playerId: socket.id,
       });
-      console.log(snowballs, player.x, player.y)
+   
     });
 
     socket.on("disconnect", () => {
