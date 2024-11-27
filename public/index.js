@@ -26,6 +26,7 @@ const clcik2 = new Audio("./audio/click2.WAV");
 //mis sonidos
 const misPasos = new Audio("./audio/caminar.WAV");
 misPasos.preload = "auto"
+
 misPasos.playbackRate = 1
 misPasos.volume = 0.1
 const miAgua = new Audio("./audio/agua.wav");
@@ -33,6 +34,7 @@ miAgua.volume = 0.1
 // onidos de otros personajes
 const otrosPasos = new Audio("./audio/caminar.WAV");
 otrosPasos.preload = "auto"
+otrosPasos.muted = "muted"
 otrosPasos.playbackRate = 1
 otrosPasos.volume = 0.1
 const otrosAgua = new Audio("./audio/agua.wav");
@@ -65,10 +67,13 @@ const info = document.getElementById("info")
 const cajaMensajes = document.getElementById("cajaMensajes")
 const mensaje = document.getElementById("mensaje")
 
-//  principal.width =  window.innerWidth  ;
-//  principal.height = window.innerHeight  ;
-canvasEl.width = 800
-canvasEl.height = 400
+//AJUSTE DE TAMAÑO PARA TENER COORDENADAS CORRECTAS
+ canvasEl.width =  1200 * 0.75  // el primer valor son los pixeles del HUD cambiar si cambia la resolucion
+ canvasEl.height =  675*0.75   
+
+canvasEl.focus()
+
+
 const canvas = canvasEl.getContext("2d");
 
 
@@ -208,6 +213,12 @@ function handleUserUnpublished(user) {
 
 // join();
 let myPlayer
+let cameraX = 0;
+let cameraY = 0;
+
+
+let clickPoint = []
+
 let mensajesConsola = []
 let groundMap = [[]];
 let decalMap = [[]];
@@ -225,7 +236,7 @@ let PJ_SIZE_H
 
 const TILE_SIZE = 32;
 
-const SNOWBALL_RADIUS = 5;
+const SNOWBALL_RADIUS = 4;
 
 socket.on("connect", () => {
   console.log("connected");
@@ -251,7 +262,10 @@ socket.on("players", (serverPlayers) => {
   myPlayer = players.find((player) => player.id === socket.id);
   players = players.filter((player) => player.id !== socket.id)
   players.push(myPlayer)
-
+  if (myPlayer) {
+    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+    cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+  }
 });
 
 socket.on("snowballs", (serverSnowballs) => {
@@ -259,9 +273,9 @@ socket.on("snowballs", (serverSnowballs) => {
 });
 
 
-socket.on("recibirMensaje", (mensaje) =>{
-mensajesConsola.push(mensaje)
-actualizarMensajes()
+socket.on("recibirMensaje", (mensaje) => {
+  mensajesConsola.push(mensaje)
+  actualizarMensajes()
 })
 
 
@@ -285,7 +299,7 @@ const actualizarMensajes = () => {
     } else break;
 
   }
- 
+
   cajaMensajes.innerHTML = html
 
   cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
@@ -306,7 +320,7 @@ window.addEventListener("keydown", (e) => {
       escribiendo = false
       actualizarMensajes()
       setTimeout(() => {
-        if(myPlayer.ultimoMensaje === msg) socket.emit("enviarMensaje", "")
+        if (myPlayer.ultimoMensaje === msg) socket.emit("enviarMensaje", "")
       }, 10000);
 
     } else {
@@ -315,7 +329,7 @@ window.addEventListener("keydown", (e) => {
     }
   }
 
-  if(!escribiendo){
+  if (!escribiendo) {
 
 
     switch (e.key) {
@@ -388,30 +402,24 @@ window.addEventListener("keyup", (e) => {
   socket.emit("inputs", inputs);
 });
 
+//EVENTO DE CLICK EN CANVAS
 canvasEl.addEventListener("click", (e) => {
-  const angle = Math.atan2(
-    e.clientY - (canvasEl.height + PJ_SIZE_H) / 2,
-    e.clientX - (canvasEl.width + PJ_SIZE_W + 108) / 2
-  );
-  socket.emit("snowball", angle);
+
+  const point = { x:myPlayer.x +e.clientX -canvasEl.width/2, y:myPlayer.y + e.clientY - canvasEl.height/2 - myPlayer.h};
+  socket.emit("point", point);
+
 });
 
 function loop() {
-  // canvasEl.width =  window.innerWidth * 0.6 ;
-  // canvasEl.height = window.innerHeight *0.85;
+
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
 
 
 
 
-  
-  let cameraX = 0;
-  let cameraY = 0;
-  if (myPlayer) {
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-  }
+
+
 
   const TILES_IN_ROW = 20;
 
@@ -476,7 +484,7 @@ function loop() {
 
       // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
 
-      
+
 
       TILES_IN_ROW_PJ = pjrender.info.rows
       TILES_IN_COL_PJ = pjrender.info.cols
@@ -505,7 +513,7 @@ function loop() {
       canvas.fillStyle = "#f0f3f4";
       canvas.font = "bold 12px arial";
       canvas.textAlign = "center"
-      canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h -PJ_SIZE_H /2.5)
+      canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
 
 
       //NOMBRE PERSONAJE
@@ -515,6 +523,16 @@ function loop() {
       canvas.font = "bold 12px arial";
       canvas.textAlign = "center"
       canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
+
+
+      //dibujar Click
+      //console.log(clickPoint)
+      // canvas.strokeStyle = "rgb(0,255,0)";
+      // canvas.beginPath();
+      // canvas.arc(clickPoint[0], clickPoint[1], 2, 0, 100, false);
+      // canvas.stroke();
+
+
     }
 
     if (!player.isMuted) {
@@ -536,11 +554,11 @@ function loop() {
   }
 
   for (const snowball of snowballs) {
-    canvas.fillStyle = "#FFFFFF";
+    canvas.fillStyle = "#d1d107";
     canvas.beginPath();
     canvas.arc(
-      snowball.x - cameraX + 20,
-      snowball.y - cameraY + 25,
+      snowball.x - cameraX,
+      snowball.y - cameraY,
       SNOWBALL_RADIUS,
       0,
       2 * Math.PI

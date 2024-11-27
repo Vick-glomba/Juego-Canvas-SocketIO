@@ -268,12 +268,12 @@ function tick(delta) {
   }
 
   for (const snowball of snowballs) {
-    snowball.x += Math.cos(snowball.angle) * SNOWBALL_SPEED;
-    snowball.y += Math.sin(snowball.angle) * SNOWBALL_SPEED;
+    // snowball.x
+    // snowball.y 
     snowball.timeLeft -= delta;
 
     for (const player of players) {
-      if (player.id === snowball.playerId) continue;
+      //if (player.id === snowball.playerId) continue;
       const distance = Math.sqrt(
         (player.x - snowball.x) ** 2 +
         (player.y - snowball.y) ** 2
@@ -373,15 +373,16 @@ async function main() {
       player.voiceId = voiceId;
     });
 
-    socket.on("snowball", (angle) => {
+    socket.on("point", (obj) => {
       const player = players.find((player) => player.id === socket.id);
+     
       snowballs.push({
-        angle,
-        x: player.x,
-        y: player.y,
-        timeLeft: 1000,
+        x: obj.x,
+        y: obj.y,
+        timeLeft: 10000,
         playerId: socket.id,
       });
+      console.log(snowballs, player.x, player.y)
     });
 
     socket.on("disconnect", () => {
