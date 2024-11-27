@@ -35,11 +35,11 @@ let adjust = {
       rowUp: 6,
       up: [0],
       rowDown: 0,
-      down: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0],
+      down: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0],
       rowLeft: 1,
-      left: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0],
+      left: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0],
       rowRight: 3,
-      right: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0],
+      right: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0],
     },
     walk: {
       rowUp: 6,
@@ -49,7 +49,7 @@ let adjust = {
       rowLeft: 5,
       left: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       rowRight: 7,
-      right: [9,8,7,6,5,4,3,2,1],
+      right: [9, 8, 7, 6, 5, 4, 3, 2, 1],
     },
   },
   barca: {
@@ -141,12 +141,12 @@ function tick(delta) {
     const previousX = player.x;
     let row = 0
     let col = 0
- 
+
     player.w = adjust[player.skin].w
     player.h = adjust[player.skin].h
     const standUp = adjust[player.skin].stand.up
     const standDown = adjust[player.skin].stand.down
-   
+
     const standLeft = adjust[player.skin].stand.left
     const standRight = adjust[player.skin].stand.right
     const walkUp = adjust[player.skin].walk.up
@@ -154,8 +154,8 @@ function tick(delta) {
     const walkLeft = adjust[player.skin].walk.left
     const walkRight = adjust[player.skin].walk.right
 
-    
-    
+
+
     if (inputs.up) {
       player.y -= SPEED;
       player.mirando = "up"
@@ -163,11 +163,11 @@ function tick(delta) {
       player.y += SPEED;
       player.mirando = "down"
     }
-    
+
     if (isCollidingWithMap(player)) {
       player.y = previousY;
     }
-    
+
     if (inputs.left) {
       player.x -= SPEED;
       player.mirando = "left"
@@ -175,22 +175,22 @@ function tick(delta) {
       player.x += SPEED;
       player.mirando = "right"
     }
-    
-    
-    
+
+
+
     if (inputs.up || inputs.down || inputs.left || inputs.right) {
       player.quieto = false
-      
+
     } else {
       player.quieto = true
     }
-    
-     
+
+
     if (player.quieto) {
-      
+
       switch (player.mirando) {
         case "up":
-          
+
           row = adjust[player.skin].stand.rowUp
           col = standUp[player.ultimoFrame] || standUp[0]
           player.ultimoFrame = player.ultimoFrame < standUp.length - 1 ? player.ultimoFrame + 1 : standUp[0]
@@ -208,7 +208,7 @@ function tick(delta) {
           //animacion izquierda
 
           row = adjust[player.skin].stand.rowLeft
-          col = standLeft[player.ultimoFrame] ||  standLeft[0]
+          col = standLeft[player.ultimoFrame] || standLeft[0]
           player.ultimoFrame = player.ultimoFrame < standLeft.length - 1 ? player.ultimoFrame + 1 : standLeft[0]
           break;
 
@@ -274,21 +274,24 @@ function tick(delta) {
 
     for (const player of players) {
 
-     //esto es de la bola original //if (player.id === snowball.playerId) continue;
+      //esto es de la bola original //if (player.id === snowball.playerId) continue;
       const distance = Math.sqrt(
-        (player.x  - snowball.x) ** 2 +
-        (player.y  - snowball.y ) ** 2
+        (player.x - snowball.x) ** 2 +
+        (player.y - snowball.y) ** 2
       );
-      if (distance <= player.w/2 ) {
-        player.y= player.y-1
+      if (distance <= player.w / 2) {
+        if (snowball.cast) {
+          player.y = player.y - 1
+        }
         const pj = players.find((player) => player.id === snowball.playerId);
-        const obj={
+        const obj = {
+          cast: snowball.cast,
           player: pj,
           tipo: "click",
-          msg:player.nombre
+          msg: player.nombre
         }
-      io.emit("recibirMensaje",obj )
-         snowball.timeLeft = -1;
+        io.emit("recibirMensaje", obj)
+        snowball.timeLeft = -1;
         break;
       }
     }
@@ -307,7 +310,7 @@ async function main() {
   io.on("connect", (socket) => {
     console.log("user connected", socket.id);
 
-    socket.on("nombre", (nombre) =>{
+    socket.on("nombre", (nombre) => {
       const player = players.find((player) => player.id === socket.id);
       player.nombre = nombre
     })
@@ -321,7 +324,9 @@ async function main() {
 
     players.push({
       id: socket.id,
-      estado:"criminal",
+      estado: "ciudadano",
+      ciudad: "Nix",
+      descripcion:"Morgolock, me duras un click",
       x: 800,
       y: 800,
       mirando: "down",
@@ -348,17 +353,18 @@ async function main() {
     // dataTiles: dataTiles
 
 
-    socket.on("enviarMensaje", (obj)=>{
+    socket.on("enviarMensaje", (obj) => {
       const player = players.find((player) => player.id === socket.id);
-     let msg = obj.msg
-     msg = msg.trim()
-      if (msg !== ""){
-        player.ultimoMensaje = obj.msg
-         msg = player.nombre +": "+ obj.msg
-         obj.player= player
-         console.log(obj)
+      
+      let msg = obj.msg
+      if (msg !== "") {
+        msg = msg.trim()
+        player.ultimoMensaje = msg
+        msg = player.nombre + ": " + obj.msg
+        obj.player = player
+
         io.emit("recibirMensaje", obj)
-      }else{
+      } else {
         player.ultimoMensaje = msg
       }
     })
@@ -384,14 +390,15 @@ async function main() {
 
     socket.on("point", (obj) => {
       const player = players.find((player) => player.id === socket.id);
-     
+
       snowballs.push({
+        cast: obj.cast,
         x: obj.x,
         y: obj.y,
         timeLeft: 10000,
         playerId: socket.id,
       });
-   
+
     });
 
     socket.on("disconnect", () => {

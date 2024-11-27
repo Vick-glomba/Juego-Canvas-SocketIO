@@ -41,6 +41,7 @@ const otrosAgua = new Audio("./audio/agua.wav");
 otrosAgua.volume = 0.1
 //agua.playbackRate = 0.5;
 
+const HUD = document.getElementById("HUD");
 const canvasEl = document.getElementById("canvas");
 const principal = document.getElementById("principal");
 
@@ -68,8 +69,8 @@ const cajaMensajes = document.getElementById("cajaMensajes")
 const mensaje = document.getElementById("mensaje")
 
 //AJUSTE DE TAMAÑO PARA TENER COORDENADAS CORRECTAS
- canvasEl.width =  1200 * 0.75  // el primer valor son los pixeles del HUD cambiar si cambia la resolucion
- canvasEl.height =  675*0.75   
+canvasEl.width = 1200 * 0.75  // el primer valor son los pixeles del HUD cambiar si cambia la resolucion
+canvasEl.height = 675 * 0.75
 
 canvasEl.focus()
 
@@ -87,6 +88,14 @@ const localTracks = {
 };
 
 let isPlaying = true;
+
+// COLORES MENSAJES CONSOLA
+const colorChat = "#c2bd58"
+const colorCiuda = "#023bf7"
+const colorCrimi = "#ea0c05"
+const colorNeutral = "#bfc1c1"
+
+
 
 const remoteUsers = {};
 window.remoteUsers = remoteUsers;
@@ -146,8 +155,20 @@ flechaArriba.addEventListener("click", () => {
 flechaAbajo.addEventListener("click", () => {
   console.log("flechaAbajo")
 })
+
+HUD.addEventListener("click", (e) => {
+  if (cast && e.target !== lanzar) {
+
+    HUD.style.cursor = "default"
+    cast = false
+    console.log("saca lanzar")
+  }
+})
+
 lanzar.addEventListener("click", () => {
   console.log("lanzar")
+  HUD.style.cursor = "crosshair"
+  cast = true
 })
 info.addEventListener("click", () => {
   console.log("info")
@@ -217,8 +238,8 @@ let cameraX = 0;
 let cameraY = 0;
 
 
-let clickPoint = []
 
+let cast = false
 let mensajesConsola = []
 let groundMap = [[]];
 let decalMap = [[]];
@@ -273,13 +294,18 @@ socket.on("snowballs", (serverSnowballs) => {
 });
 
 
-socket.on("recibirMensaje", ( obj )=> {
-  if(obj.tipo ==="click" && obj.player.id === myPlayer.id){
-    console.log(obj)
+socket.on("recibirMensaje", (obj) => {
+
+  if (obj.tipo === "click" && obj.player.id === myPlayer.id) {
+    if (obj.cast) {
+      console.log("Es un cast ", obj.cast)
+    } else {
+      console.log("No es ", obj.cast)
+    }
     mensajesConsola.push(obj)
     actualizarMensajes()
   }
-  if(obj.tipo ==="chat"){
+  if (obj.tipo === "chat") {
     mensajesConsola.push(obj)
     actualizarMensajes()
   }
@@ -292,37 +318,36 @@ const inputs = {
   left: false,
   right: false,
 };
-
+//CONSOLA MENSAJES
 const actualizarMensajes = () => {
-  
+
   cajaMensajes.innerHTML = ""
   let html = ""
   if (mensajesConsola.length > 15) mensajesConsola.shift()
   for (let i = 0; i < mensajesConsola.length; i++) {
     let msg
-    const colorChat= "yellow"
-    const colorCiuda= "#07b0d1"
-    const colorCrimi= "red"
+
     if (mensajesConsola[i] && mensajesConsola[i].msg) {
       switch (mensajesConsola[i].tipo) {
         case "chat":
-          msg = mensajesConsola[i].player.nombre +": "+ mensajesConsola[i].msg
+          msg = mensajesConsola[i].player.nombre + ": " + mensajesConsola[i].msg
           html += `
          <p style="color:${colorChat};margin:0px; padding:0px; margin-left: 15px; font-size:200">${msg}</p>
          `
           break;
         case "click":
-          msg = mensajesConsola[i].msg
-          const color = mensajesConsola[i].player.estado === "criminal"? colorCrimi: colorCiuda
+          const estado = mensajesConsola[i].player.estado === "criminal" || mensajesConsola[i].player.estado === "ciudadano" ? mensajesConsola[i].player.estado.toUpperCase() : "NEUTRAL"
+          msg = `< ${mensajesConsola[i].msg} > ${mensajesConsola[i].player.descripcion} < ${estado} > < ${mensajesConsola[i].player.ciudad} >`
+          const color = mensajesConsola[i].player.estado === "criminal" ? colorCrimi : mensajesConsola[i].player.estado === "ciudadano" ? colorCiuda : colorNeutral
           html += `
          <p style="color:${color};margin:0px; padding:0px; margin-left: 15px; font-size:200">${msg}</p>
          `
           break;
         case "info":
-          
+
           break;
         case "daño":
-          
+
           break;
       }
 
@@ -343,7 +368,7 @@ window.addEventListener("keydown", (e) => {
 
     if (escribiendo) {
       const msg = {
-        tipo:"chat",
+        tipo: "chat",
         msg: mensaje.value
       }
       socket.emit("enviarMensaje", msg)
@@ -353,8 +378,8 @@ window.addEventListener("keydown", (e) => {
       escribiendo = false
       actualizarMensajes()
       setTimeout(() => {
-        if (myPlayer.ultimoMensaje === msg) socket.emit("enviarMensaje", "")
-      }, 10000);
+        if (myPlayer.ultimoMensaje === msg.msg) socket.emit("enviarMensaje", { tipo: "chat", msg: "" })
+      }, 5000);
 
     } else {
       mensaje.focus()
@@ -438,10 +463,14 @@ window.addEventListener("keyup", (e) => {
 //EVENTO DE CLICK EN CANVAS
 canvasEl.addEventListener("click", (e) => {
 
-  const point = { x:myPlayer.x +e.clientX -canvasEl.width/2 +window.scrollX, y:myPlayer.y + e.clientY- canvasEl.height +window.scrollY +myPlayer.h};
+  const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
+  point.cast = cast
   socket.emit("point", point);
 
 });
+
+
+
 
 function loop() {
 
@@ -551,9 +580,10 @@ function loop() {
 
       //NOMBRE PERSONAJE
       //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
+      const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
       canvas.fillStyle = 'black'
-      canvas.fillStyle = "#FF0000";
-      canvas.font = "bold 12px arial";
+      canvas.fillStyle = color;
+      canvas.font = "bold 12px";
       canvas.textAlign = "center"
       canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
 
@@ -591,7 +621,7 @@ function loop() {
     canvas.beginPath();
     canvas.arc(
       snowball.x - cameraX,
-      snowball.y - cameraY +10,
+      snowball.y - cameraY + 10,
       SNOWBALL_RADIUS,
       0,
       2 * Math.PI
