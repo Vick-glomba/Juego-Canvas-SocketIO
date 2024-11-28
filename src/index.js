@@ -288,7 +288,7 @@ function tick(delta) {
           cast: snowball.cast,
           player: pj,
           tipo: "click",
-          msg: player.nombre
+          msg: player
         }
         io.emit("recibirMensaje", obj)
         snowball.timeLeft = -1;
@@ -324,11 +324,7 @@ async function main() {
 
     players.push({
       id: socket.id,
-      estado: "ciudadano",
-      ciudad: "Nix",
-      descripcion:"Morgolock, me duras un click",
-      hechizos: [0,6,2,0,4,5,0,3],
-      reputacion:1000,
+      hechizos: [0, 6, 2, 0, 4, 5, 0, 3],
       x: 800,
       y: 800,
       mirando: "down",
@@ -336,12 +332,27 @@ async function main() {
       skin: "link",
       w: 0,
       h: 0,
-      nombre: "El Vittor",
       quieto: true,
       mirando: "down",
       row: 0,
       col: 0,
-      ultimoMensaje: ""
+      ultimoMensaje: "",
+      nombre: "El Vittor",
+      nivel: 1,
+      energiaTotal:400,
+      saludTotal: 300,
+      manaTotal:200,
+      hambreTotal:100,
+      sedTotal:100,
+      energia:300,
+      salud: 100,
+      mana:100,
+      hambre:20,
+      sed:15,
+      reputacion: 1000,
+      estado: "ciudadano",
+      ciudad: "Nix",
+      descripcion: "Morgolock, me duras un click",
       // ultimoFrame: 0,
     });
 
@@ -357,7 +368,7 @@ async function main() {
 
     socket.on("enviarMensaje", (obj) => {
       const player = players.find((player) => player.id === socket.id);
-      
+
       let msg = obj.msg
       if (msg !== "") {
         msg = msg.trim()

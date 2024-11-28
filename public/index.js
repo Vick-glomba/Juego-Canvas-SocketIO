@@ -34,7 +34,7 @@ miAgua.volume = 0.1
 // onidos de otros personajes
 const otrosPasos = new Audio("./audio/caminar.WAV");
 otrosPasos.preload = "auto"
-otrosPasos.muted = "muted"
+
 otrosPasos.playbackRate = 1
 otrosPasos.volume = 0.1
 const otrosAgua = new Audio("./audio/agua.wav");
@@ -427,9 +427,9 @@ socket.on("recibirMensaje", (obj) => {
       }
       if (obj.cast.accion === "trabajo") {
 
-        hechizo = hechizosData[obj.cast.hechizoSelect] ?? "no existe el hechizo en DB"
+        hechizo = hechizosData[obj.cast.hechizoSelect]["nombre"] ?? "no existe el hechizo en DB"
       }
-      console.log("Es un cast ", hechizo)
+      console.log("Es un cast ", obj)
     } else {
       console.log("No es ", obj.cast)
     }
