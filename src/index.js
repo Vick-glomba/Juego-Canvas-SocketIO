@@ -327,7 +327,7 @@ async function main() {
       estado: "ciudadano",
       ciudad: "Nix",
       descripcion:"Morgolock, me duras un click",
-      hechizos: [0,1,2,0,4,5,0,3],
+      hechizos: [0,6,2,0,4,5,0,3],
       reputacion:1000,
       x: 800,
       y: 800,

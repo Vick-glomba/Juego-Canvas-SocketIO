@@ -169,19 +169,25 @@ boxHechizos.addEventListener("click", (e) => {
 
 HUD.addEventListener("click", (e) => {
   if (cast && e.target !== lanzar) {
-     boxHechizos.style.cursor = "default"
+    boxHechizos.style.cursor = "default"
     HUD.style.cursor = "default"
     cast = false
-    console.log("saca lanzar")
+    accion = ""
+   // console.log("saca lanzar")
   }
 })
 
 lanzar.addEventListener("click", () => {
- const nombre= document.getElementById(hechizoSelect).innerText
-  console.log("lanzar ", nombre)
-  boxHechizos.style.cursor ="crosshair"
-  HUD.style.cursor = "crosshair"
-  cast = true
+  const nombre = document.getElementById(hechizoSelect).innerText
+  if (nombre !== hechizosData[0]) {
+    accion = acciones[0]
+  //  console.log("lanzar ", nombre)
+    boxHechizos.style.cursor = "crosshair"
+    HUD.style.cursor = "crosshair"
+    cast = true
+  }else{ 
+    accion =""
+  }
 })
 info.addEventListener("click", () => {
   console.log("info")
@@ -262,7 +268,9 @@ let decalMap = [[]];
 let pj
 let dataTile
 let players = [];
-const hechizosData= ["--------------Vacio--------------","Dardo magico","Flecha Magica","Curar Heridas Leves","Inmovilizar", "Rayo Peronizador", "Misil Magico", "Tormenta Electrica"]
+const hechizosData = ["--------------Vacio--------------" ,"Dardo magico", "Flecha Magica", "Curar Heridas Leves", "Inmovilizar", "Rayo Peronizador", "Misil Magico", "Tormenta Electrica","Talar"]
+const acciones = ["hechizo", "trabajo"]
+let accion
 let snowballs = [];
 let ultimoFrame = 0
 let personajes
@@ -284,14 +292,14 @@ const actualizarHechizos = (hechizo) => {
     boxHechizos.innerHTML = ""
     let html = ""
     for (let i = 0; i < 20; i++) {
-      const texto = myPlayer.hechizos[i] ||hechizosData[myPlayer.hechizos[i]] ?hechizosData[myPlayer.hechizos[i]]: hechizosData[0]
+      const texto = myPlayer.hechizos[i] || hechizosData[myPlayer.hechizos[i]] ? hechizosData[myPlayer.hechizos[i]] : hechizosData[0]
       const id = i
       const color = hechizoSelect === id ? "#f9e79f50" : "#00000000"
       html += `
        <div id="${id}" style="border: 1px; border-style:solid; border-color: aliceblue;color: #ffffff; width: 99%%;text-align: center; height: 20px; background-color:${color};">${texto}</div>
        `
     }
-   
+
     boxHechizos.innerHTML = html
   }
 }
@@ -311,7 +319,7 @@ socket.on("map", (loadedMap) => {
 
 socket.on("pjs", (pjs) => {
   personajes = pjs
-  
+
   // pj = personajes.find(pj => pj.skin === "barca")
 });
 
@@ -332,10 +340,20 @@ socket.on("snowballs", (serverSnowballs) => {
 
 
 socket.on("recibirMensaje", (obj) => {
-
+  
   if (obj.tipo === "click" && obj.player.id === myPlayer.id) {
-    if (obj.cast) {
-      console.log("Es un cast ", obj.cast)
+
+    if (obj.cast.cast) {
+      let hechizo
+      if(obj.cast.accion ==="hechizo"){
+
+        hechizo = hechizosData[myPlayer.hechizos[obj.cast.hechizoSelect]] ?? "no existe el hechizo en DB"
+      } 
+      if (obj.cast.accion ==="trabajo") {
+
+        hechizo = hechizosData[obj.cast.hechizoSelect] ?? "no existe el hechizo en DB"
+      }
+      console.log("Es un cast ",  hechizo ,obj)
     } else {
       console.log("No es ", obj.cast)
     }
@@ -431,6 +449,14 @@ window.addEventListener("keydown", (e) => {
 
 
     switch (e.key) {
+      case "u":
+          accion = acciones[1]
+    //console.log("lanzar ", hechizosData[8])
+    boxHechizos.style.cursor = "crosshair"
+    HUD.style.cursor = "crosshair"
+    cast = true
+    hechizoSelect= 8
+    break
 
       case "w":
         inputs["up"] = true;
@@ -504,7 +530,11 @@ window.addEventListener("keyup", (e) => {
 canvasEl.addEventListener("click", (e) => {
 
   const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
-  point.cast = cast
+  point.cast = {
+    cast,
+    accion,
+    hechizoSelect
+  }
   socket.emit("point", point);
 
 });
