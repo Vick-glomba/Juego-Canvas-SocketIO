@@ -173,20 +173,20 @@ HUD.addEventListener("click", (e) => {
     HUD.style.cursor = "default"
     cast = false
     accion = ""
-   // console.log("saca lanzar")
+    // console.log("saca lanzar")
   }
 })
 
 lanzar.addEventListener("click", () => {
   const nombre = document.getElementById(hechizoSelect).innerText
-  if (nombre !== hechizosData[0]) {
+  if (nombre !== hechizosData[0]["nombre"]) {
     accion = acciones[0]
-  //  console.log("lanzar ", nombre)
+    //  console.log("lanzar ", nombre)
     boxHechizos.style.cursor = "crosshair"
     HUD.style.cursor = "crosshair"
     cast = true
-  }else{ 
-    accion =""
+  } else {
+    accion = ""
   }
 })
 info.addEventListener("click", () => {
@@ -268,7 +268,83 @@ let decalMap = [[]];
 let pj
 let dataTile
 let players = [];
-const hechizosData = ["--------------Vacio--------------" ,"Dardo magico", "Flecha Magica", "Curar Heridas Leves", "Inmovilizar", "Rayo Peronizador", "Misil Magico", "Tormenta Electrica","Talar"]
+// const hechizosData = ["--------------Vacio--------------" ,"Dardo magico", "Flecha Magica", "Curar Heridas Leves", "Inmovilizar", "Rayo Peronizador", "Misil Magico", "Tormenta Electrica","Talar"]
+const hechizosData = [
+  {
+    "nombre": "--------------Vacio--------------",
+  },
+  {
+    "nombre": "Dardo magico",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  },
+  {
+    "nombre": "Flecha Magica",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  },
+  {
+    "nombre": "Misil magico",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  },
+  {
+    "nombre": "Curar Heridas Leves",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  },
+  {
+    "nombre": "Rayo Peronizador",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  },
+  {
+    "nombre": "Inmovilizar",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  },
+  {
+    "nombre": "Paralizar",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  },
+  {
+    "nombre": "Talar",
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel":1,
+    "texto": ""
+  }]
+  const hechi= {
+    "nombre": "Dardo magico",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel":1,
+    "texto": "VAX IN TAR"
+  }
 const acciones = ["hechizo", "trabajo"]
 let accion
 let snowballs = [];
@@ -292,7 +368,7 @@ const actualizarHechizos = (hechizo) => {
     boxHechizos.innerHTML = ""
     let html = ""
     for (let i = 0; i < 20; i++) {
-      const texto = myPlayer.hechizos[i] || hechizosData[myPlayer.hechizos[i]] ? hechizosData[myPlayer.hechizos[i]] : hechizosData[0]
+      const texto = myPlayer.hechizos[i] || hechizosData[myPlayer.hechizos[i]] ? hechizosData[myPlayer.hechizos[i]]["nombre"] : hechizosData[0]["nombre"]
       const id = i
       const color = hechizoSelect === id ? "#f9e79f50" : "#00000000"
       html += `
@@ -340,20 +416,20 @@ socket.on("snowballs", (serverSnowballs) => {
 
 
 socket.on("recibirMensaje", (obj) => {
-  
+
   if (obj.tipo === "click" && obj.player.id === myPlayer.id) {
 
     if (obj.cast.cast) {
       let hechizo
-      if(obj.cast.accion ==="hechizo"){
+      if (obj.cast.accion === "hechizo") {
 
         hechizo = hechizosData[myPlayer.hechizos[obj.cast.hechizoSelect]] ?? "no existe el hechizo en DB"
-      } 
-      if (obj.cast.accion ==="trabajo") {
+      }
+      if (obj.cast.accion === "trabajo") {
 
         hechizo = hechizosData[obj.cast.hechizoSelect] ?? "no existe el hechizo en DB"
       }
-      console.log("Es un cast ",  hechizo ,obj)
+      console.log("Es un cast ", hechizo)
     } else {
       console.log("No es ", obj.cast)
     }
@@ -450,13 +526,13 @@ window.addEventListener("keydown", (e) => {
 
     switch (e.key) {
       case "u":
-          accion = acciones[1]
-    //console.log("lanzar ", hechizosData[8])
-    boxHechizos.style.cursor = "crosshair"
-    HUD.style.cursor = "crosshair"
-    cast = true
-    hechizoSelect= 8
-    break
+        accion = acciones[1]
+        //console.log("lanzar ", hechizosData[8])
+        boxHechizos.style.cursor = "crosshair"
+        HUD.style.cursor = "crosshair"
+        cast = true
+        hechizoSelect = 8
+        break
 
       case "w":
         inputs["up"] = true;
