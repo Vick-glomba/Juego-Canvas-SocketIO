@@ -1,5 +1,8 @@
 
-const nombre = prompt("elije tu nombre")
+const resolucionX = 1025
+const resolucionY= 550
+
+const nombre = "BetaTester"//prompt("elije tu nombre")
 const mapImage = new Image();
 mapImage.src = "./images/mapas/dungeon-newbie.png";
 
@@ -66,8 +69,8 @@ const cajaMensajes = document.getElementById("cajaMensajes")
 const mensaje = document.getElementById("mensaje")
 
 //AJUSTE DE TAMAÑO PARA TENER COORDENADAS CORRECTAS
-canvasEl.width = 1200 * 0.75  // el primer valor son los pixeles del HUD cambiar si cambia la resolucion
-canvasEl.height = 675 * 0.75
+canvasEl.width = resolucionX * 0.75  // el primer valor son los pixeles del HUD cambiar si cambia la resolucion
+canvasEl.height = resolucionY * 0.75
 
 canvasEl.focus()
 
@@ -372,7 +375,7 @@ const actualizarHechizos = (hechizo) => {
       const id = i
       const color = hechizoSelect === id ? "#f9e79f50" : "#00000000"
       html += `
-       <div id="${id}" style="border: 1px; border-style:solid; border-color: aliceblue;color: #ffffff; width: 99%%;text-align: center; height: 20px; background-color:${color};">${texto}</div>
+       <div id="${id}" style="border: 1px; border-style:solid;font-size:12px;padding-top:2px; border-color: aliceblue;color: #ffffff; width: 99%%;text-align: center; height: 20px; background-color:${color};">${texto}</div>
        `
     }
 
@@ -466,15 +469,15 @@ const actualizarMensajes = () => {
         case "chat":
           msg = mensajesConsola[i].player.nombre + ": " + mensajesConsola[i].msg
           html += `
-         <p style="color:${colorChat};margin:0px; padding:0px; margin-left: 15px; font-size:200">${msg}</p>
+         <p style="color:${colorChat};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
          `
           break;
         case "click":
           const estado = mensajesConsola[i].player.estado === "criminal" || mensajesConsola[i].player.estado === "ciudadano" ? mensajesConsola[i].player.estado.toUpperCase() : "NEUTRAL"
-          msg = `< ${mensajesConsola[i].msg} > ${mensajesConsola[i].player.descripcion} < ${estado} > < ${mensajesConsola[i].player.ciudad} >`
+          msg = `< ${mensajesConsola[i].msg.nombre} > ${mensajesConsola[i].player.descripcion} < ${estado} > < ${mensajesConsola[i].player.ciudad} >`
           const color = mensajesConsola[i].player.estado === "criminal" ? colorCrimi : mensajesConsola[i].player.estado === "ciudadano" ? colorCiuda : colorNeutral
           html += `
-         <p style="color:${color};margin:0px; padding:0px; margin-left: 15px; font-size:200">${msg}</p>
+         <p style="color:${color};margin:0px; padding:0px; margin-left: 15px; font-size:13px">${msg}</p>
          `
           break;
         case "info":
@@ -605,7 +608,7 @@ window.addEventListener("keyup", (e) => {
 //EVENTO DE CLICK EN CANVAS
 canvasEl.addEventListener("click", (e) => {
 
-  const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
+  const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX , y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
   point.cast = {
     cast,
     accion,
@@ -779,4 +782,4 @@ function loop() {
 }
 setInterval(() => {
   loop();
-}, 16);
+}, 40);
