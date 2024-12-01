@@ -4,20 +4,20 @@ const resolucionY= 550
 
 const nombre = "BetaTester"//prompt("elije tu nombre")
 const mapImage = new Image();
-mapImage.src = "images/dungeon-newbie.png";
+mapImage.src = "images/mapas/dungeon-newbie.png";
 
 const imagenes = {}
 
 imagenes.link = new Image();
-imagenes.link.src = "images/sprite.png"
+imagenes.link.src = "./images/sprite.png"
 
 imagenes.barca = new Image();
-imagenes.barca.src = "images/barcanueva.png"
+imagenes.barca.src = "./images/barcanueva.png"
 
 
 
 const speakerImage = new Image();
-speakerImage.src = "images/speaker.png";
+speakerImage.src = "./images/speaker.png";
 
 
 //AUDIOS
