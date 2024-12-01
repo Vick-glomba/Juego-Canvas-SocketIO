@@ -4,7 +4,7 @@ const resolucionY= 550
 
 const nombre = "BetaTester"//prompt("elije tu nombre")
 const mapImage = new Image();
-mapImage.src = "images/mapas/dungeon-newbie.png";
+mapImage.src = "./images/mapas/dungeon-newbie.png";
 
 const imagenes = {}
 
