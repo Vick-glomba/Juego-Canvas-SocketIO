@@ -281,10 +281,45 @@ function tick(delta) {
         (player.y - snowball.y) ** 2
       );
       if (distance <= player.w / 2) {
+        const pj = players.find((player) => player.id === snowball.playerId);
         if (snowball.cast) {
+          //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
+          if (snowball.cast.hechizoSelect === 4 && snowball.cast.cast) {
+            console.log("toco la bola y es : ", snowball.cast)
+            if (pj.mana > 10) {
+              pj.mana = pj.mana - 10
+              player.salud = player.salud + 15
+              player.salud > player.saludTotal ? player.salud = player.saludTotal : player.salud
+              const destino = {
+                tipo: "daño",
+                msg: "Has lanzado Curar Heridas Leves." ,
+                playerDestino:player ,
+                playerOrigen: pj
+              }
+              io.to(pj.id).emit('privado', destino);
+              const origen = {
+                tipo: "daño",
+                msg: pj.id===player.id? "Te has curado "+15+" puntos de vida.":"te ha curado "+15+" puntos de vida." ,
+                playerDestino:player ,
+                playerOrigen: pj
+              }
+              io.to(player.id).emit('privado', origen);
+              if(player.id !== pj.id){
+                const destino = {
+                  tipo: "daño",
+                  msg: "Has curado a "+player.nombre+" por " + 15 + " puntos." ,
+                  playerDestino:player ,
+                  playerOrigen: pj
+                }
+                io.to(pj.id).emit('privado', destino);
+              }
+            } else {
+              console.log("no tienes suficiente mana")
+            }
+          }
           player.y = player.y - 1
         }
-        const pj = players.find((player) => player.id === snowball.playerId);
+     
         const obj = {
           cast: snowball.cast,
           player: pj,
@@ -340,21 +375,20 @@ async function main() {
       ultimoMensaje: "",
       nombre: "El Vittor",
       nivel: 1,
-      energiaTotal:400,
+      energiaTotal: 400,
       saludTotal: 300,
-      manaTotal:200,
-      hambreTotal:100,
-      sedTotal:100,
-      energia:300,
+      manaTotal: 200,
+      hambreTotal: 100,
+      sedTotal: 100,
+      energia: 300,
       salud: 100,
-      mana:100,
-      hambre:20,
-      sed:15,
+      mana: 100,
+      hambre: 20,
+      sed: 15,
       reputacion: 1000,
       estado: "ciudadano",
       ciudad: "Nix",
-      descripcion: "Morgolock, me duras un click",
-      // ultimoFrame: 0,
+      descripcion: "Morgolock, me duras un click"
     });
 
     socket.emit("map", {
@@ -371,7 +405,7 @@ async function main() {
       const player = players.find((player) => player.id === socket.id);
 
       let msg = obj.msg
-      if (msg !== "") {
+      if (msg.trim() !== "") {
         msg = msg.trim()
         player.ultimoMensaje = msg
         msg = player.nombre + ": " + obj.msg

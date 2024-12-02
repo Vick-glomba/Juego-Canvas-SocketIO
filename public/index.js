@@ -1,6 +1,9 @@
 
 const resolucionX = 1025
-const resolucionY= 550
+const resolucionY = 550
+let zoom = 1
+// document.body.style.width = window.innerWidth
+// document.body.style.height= window.innerHeight
 
 const nombre = "BetaTester"//prompt("elije tu nombre")
 const mapImage = new Image();
@@ -69,6 +72,7 @@ const cajaMensajes = document.getElementById("cajaMensajes")
 const mensaje = document.getElementById("mensaje")
 
 //AJUSTE DE TAMAÑO PARA TENER COORDENADAS CORRECTAS
+
 canvasEl.width = resolucionX * 0.75  // el primer valor son los pixeles del HUD cambiar si cambia la resolucion
 canvasEl.height = resolucionY * 0.75
 
@@ -98,6 +102,15 @@ const colorNeutral = "#bfc1c1"
 
 const remoteUsers = {};
 window.remoteUsers = remoteUsers;
+
+//Barras
+const energia = document.getElementById("energia")
+const mana = document.getElementById("mana")
+const salud = document.getElementById("salud")
+const hambre = document.getElementById("hambre")
+const sed = document.getElementById("sed")
+
+
 const boxHechizos = document.getElementById("boxHechizos")
 const hechizos = document.getElementById("hechizos")
 const inventario = document.getElementById("inventario")
@@ -184,6 +197,7 @@ lanzar.addEventListener("click", () => {
   const nombre = document.getElementById(hechizoSelect).innerText
   if (nombre !== hechizosData[0]["nombre"]) {
     accion = acciones[0]
+    hechizoTemp= hechizoSelect
     //  console.log("lanzar ", nombre)
     boxHechizos.style.cursor = "crosshair"
     HUD.style.cursor = "crosshair"
@@ -260,6 +274,7 @@ let cameraX = 0;
 let cameraY = 0;
 
 let hechizoSelect
+let hechizoTemp
 
 
 let escribiendo = false
@@ -281,7 +296,7 @@ const hechizosData = [
     "mana necesario": 5,
     "min": 1,
     "max": 3,
-    "nivel":1,
+    "nivel": 1,
     "texto": "VAX IN TAR"
   },
   {
@@ -289,7 +304,7 @@ const hechizosData = [
     "mana necesario": 5,
     "min": 1,
     "max": 3,
-    "nivel":1,
+    "nivel": 1,
     "texto": "VAX IN TAR"
   },
   {
@@ -297,7 +312,7 @@ const hechizosData = [
     "mana necesario": 5,
     "min": 1,
     "max": 3,
-    "nivel":1,
+    "nivel": 1,
     "texto": "VAX IN TAR"
   },
   {
@@ -305,7 +320,7 @@ const hechizosData = [
     "mana necesario": 5,
     "min": 1,
     "max": 3,
-    "nivel":1,
+    "nivel": 1,
     "texto": "VAX IN TAR"
   },
   {
@@ -313,7 +328,7 @@ const hechizosData = [
     "mana necesario": 5,
     "min": 1,
     "max": 3,
-    "nivel":1,
+    "nivel": 1,
     "texto": "VAX IN TAR"
   },
   {
@@ -321,7 +336,7 @@ const hechizosData = [
     "mana necesario": 5,
     "min": 1,
     "max": 3,
-    "nivel":1,
+    "nivel": 1,
     "texto": "VAX IN TAR"
   },
   {
@@ -329,7 +344,7 @@ const hechizosData = [
     "mana necesario": 5,
     "min": 1,
     "max": 3,
-    "nivel":1,
+    "nivel": 1,
     "texto": "VAX IN TAR"
   },
   {
@@ -337,17 +352,17 @@ const hechizosData = [
     "mana necesario": 0,
     "min": 0,
     "max": 1,
-    "nivel":1,
+    "nivel": 1,
     "texto": ""
   }]
-  const hechi= {
-    "nombre": "Dardo magico",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel":1,
-    "texto": "VAX IN TAR"
-  }
+const hechi = {
+  "nombre": "Dardo magico",
+  "mana necesario": 5,
+  "min": 1,
+  "max": 3,
+  "nivel": 1,
+  "texto": "VAX IN TAR"
+}
 const acciones = ["hechizo", "trabajo"]
 let accion
 let snowballs = [];
@@ -413,6 +428,9 @@ socket.on("players", (serverPlayers) => {
   }
 });
 
+
+
+
 socket.on("snowballs", (serverSnowballs) => {
   snowballs = serverSnowballs;
 });
@@ -467,7 +485,7 @@ const actualizarMensajes = () => {
     if (mensajesConsola[i] && mensajesConsola[i].msg) {
       switch (mensajesConsola[i].tipo) {
         case "chat":
-          msg = mensajesConsola[i].player.nombre + ": " + mensajesConsola[i].msg
+          msg = mensajesConsola[i].player.nombre?mensajesConsola[i].player.nombre + ": " + mensajesConsola[i].msg:mensajesConsola[i].msg
           html += `
          <p style="color:${colorChat};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
          `
@@ -484,7 +502,10 @@ const actualizarMensajes = () => {
 
           break;
         case "daño":
-
+        msg = mensajesConsola[i].playerOrigen.id!== myPlayer.id?mensajesConsola[i].playerOrigen.nombre+" "+ mensajesConsola[i].msg:mensajesConsola[i].msg
+        html += `
+       <p style="color:${colorCrimi};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
+       `
           break;
       }
 
@@ -497,6 +518,12 @@ const actualizarMensajes = () => {
   cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
 
 }
+
+socket.on("privado", (mensaje)=>{
+
+mensajesConsola.push(mensaje)
+actualizarMensajes()
+})
 
 
 window.addEventListener("keydown", (e) => {
@@ -534,9 +561,18 @@ window.addEventListener("keydown", (e) => {
         boxHechizos.style.cursor = "crosshair"
         HUD.style.cursor = "crosshair"
         cast = true
+        hechizoTemp = hechizoSelect
         hechizoSelect = 8
+        actualizarHechizos()
         break
-
+      case "+":
+        zoom = zoom + 0.02
+        document.body.style.zoom = zoom
+        break
+      case "-":
+        zoom = zoom - 0.02
+        document.body.style.zoom = zoom
+        break
       case "w":
         inputs["up"] = true;
         inputs["down"] = false;
@@ -608,12 +644,18 @@ window.addEventListener("keyup", (e) => {
 //EVENTO DE CLICK EN CANVAS
 canvasEl.addEventListener("click", (e) => {
 
-  const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX , y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
+  const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
   point.cast = {
     cast,
     accion,
     hechizoSelect
   }
+  boxHechizos.style.cursor = "default"
+  HUD.style.cursor = "default"
+  cast = false
+  //accion = ""
+  hechizoSelect = hechizoTemp
+  actualizarHechizos()
   socket.emit("point", point);
 
 });
@@ -678,6 +720,44 @@ function loop() {
   for (const player of players) {
 
     const pjrender = personajes.find(pj => pj.skin === player.skin)
+
+    // id: socket.id,
+    // hechizos: [0, 6, 2, 0, 4, 5, 0, 3],
+    // x: 800,
+    // y: 800,
+    // mirando: "down",
+    // quieto: true,
+    // skin: "link",
+    // w: 0,
+    // h: 0,
+    // quieto: true,
+    // mirando: "down",
+    // row: 0,
+    // col: 0,
+    // ultimoMensaje: "",
+    // nombre: "El Vittor",
+    // nivel: 1,
+    // energiaTotal:400,
+    // saludTotal: 300,
+    // manaTotal:200,
+    // hambreTotal:100,
+    // sedTotal:100,
+    // energia:300,
+    // salud: 100,
+    // mana:100,
+    // hambre:20,
+    // sed:15,
+    // reputacion: 1000,
+    // estado: "ciudadano",
+    // ciudad: "Nix",
+    // descripcion: "Morgolock, me duras un click"
+
+  
+    energia.style.width = `${(player.energia /player.energiaTotal) *100}%`
+    mana.style.width = `${(player.mana /player.manaTotal) *100}%`
+    salud.style.width = `${(player.salud /player.saludTotal) *100}%`
+    hambre.style.width = `${(player.hambre /player.hambreTotal) *100}%`
+    sed.style.width = `${(player.sed /player.sedTotal) *100}%`
 
 
     const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
