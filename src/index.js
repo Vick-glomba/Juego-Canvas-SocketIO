@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
+const db = require("./hechizosDB");
 
 const SPEED = 8;
 const TICK_RATE = 16;
@@ -284,22 +285,22 @@ function tick(delta) {
         const pj = players.find((player) => player.id === snowball.playerId);
         if (snowball.cast) {
           //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
-          if (snowball.cast.hechizoSelect === 4 && snowball.cast.cast) {
+          if (snowball.cast.hechizoSelect.clase === "curacion" && snowball.cast.cast) {
             console.log("toco la bola y es : ", snowball.cast)
-            if (pj.mana > 10) {
-              pj.mana = pj.mana - 10
-              player.salud = player.salud + 15
+            if (pj.mana >= snowball.cast.hechizoSelect["mana necesario"]) {
+              pj.mana = pj.mana - snowball.cast.hechizoSelect["mana necesario"]
+              player.salud = player.salud + snowball.cast.hechizoSelect["max"]
               player.salud > player.saludTotal ? player.salud = player.saludTotal : player.salud
               const destino = {
                 tipo: "daño",
-                msg: "Has lanzado Curar Heridas Leves." ,
+                msg: `Has lanzado ${snowball.cast.hechizoSelect["nombre"]} ` ,
                 playerDestino:player ,
                 playerOrigen: pj
               }
               io.to(pj.id).emit('privado', destino);
               const origen = {
                 tipo: "daño",
-                msg: pj.id===player.id? "Te has curado "+15+" puntos de vida.":"te ha curado "+15+" puntos de vida." ,
+                msg: pj.id===player.id? "Te has curado "+snowball.cast.hechizoSelect["max"]+" puntos de vida.":"te ha curado "+snowball.cast.hechizoSelect["max"]+" puntos de vida." ,
                 playerDestino:player ,
                 playerOrigen: pj
               }
@@ -307,14 +308,20 @@ function tick(delta) {
               if(player.id !== pj.id){
                 const destino = {
                   tipo: "daño",
-                  msg: "Has curado a "+player.nombre+" por " + 15 + " puntos." ,
+                  msg: "Has curado a "+player.nombre+" por " + snowball.cast.hechizoSelect["max"] + " puntos." ,
                   playerDestino:player ,
                   playerOrigen: pj
                 }
                 io.to(pj.id).emit('privado', destino);
               }
             } else {
-              console.log("no tienes suficiente mana")
+              const destino = {
+                tipo: "daño",
+                msg: "No tienes suficiente mana. NO DEBERIA PODER LANZARLO",
+                playerDestino: player,
+                playerOrigen: pj
+              }
+              io.to(pj.id).emit('privado', destino);
             }
           }
           player.y = player.y - 1
@@ -394,6 +401,7 @@ async function main() {
     socket.emit("map", {
       ground: ground2D,
       decal: decal2D,
+      db
     });
 
     socket.emit("pjs", personajes);

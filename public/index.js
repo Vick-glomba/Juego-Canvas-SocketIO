@@ -98,6 +98,7 @@ const colorChat = "#c2bd58"
 const colorCiuda = "#023bf7"
 const colorCrimi = "#ea0c05"
 const colorNeutral = "#bfc1c1"
+const colorConsola = "#95b38b"
 
 
 const remoteUsers = {};
@@ -194,16 +195,27 @@ HUD.addEventListener("click", (e) => {
 })
 
 lanzar.addEventListener("click", () => {
-  const nombre = document.getElementById(hechizoSelect).innerText
-  if (nombre !== hechizosData[0]["nombre"]) {
-    accion = acciones[0]
-    hechizoTemp= hechizoSelect
-    //  console.log("lanzar ", nombre)
-    boxHechizos.style.cursor = "crosshair"
-    HUD.style.cursor = "crosshair"
-    cast = true
-  } else {
-    accion = ""
+  if(myPlayer.mana >= hechizosData[hechizoSelect]["mana necesario"]){
+    console.log("lanzo", myPlayer.mana , hechizosData[hechizoSelect]["mana necesario"])
+    const nombre = document.getElementById(hechizoSelect).innerText
+
+    if (nombre !== hechizosData[0]["nombre"]) {
+      accion = acciones[0]
+      hechizoTemp = hechizoSelect
+      //  console.log("lanzar ", nombre)
+      boxHechizos.style.cursor = "crosshair"
+      HUD.style.cursor = "crosshair"
+      cast = true
+    } else {
+      accion = ""
+    }
+  }else{
+    const msg = {
+      msg: "No tienes suficiente mana.",
+      tipo:"consola"
+    }
+    mensajesConsola.push(msg)
+    actualizarMensajes()
   }
 })
 info.addEventListener("click", () => {
@@ -283,86 +295,13 @@ let cast = false
 let mensajesConsola = []
 let groundMap = [[]];
 let decalMap = [[]];
+let db = []
 let pj
 let dataTile
 let players = [];
 // const hechizosData = ["--------------Vacio--------------" ,"Dardo magico", "Flecha Magica", "Curar Heridas Leves", "Inmovilizar", "Rayo Peronizador", "Misil Magico", "Tormenta Electrica","Talar"]
-const hechizosData = [
-  {
-    "nombre": "--------------Vacio--------------",
-  },
-  {
-    "nombre": "Dardo magico",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel": 1,
-    "texto": "VAX IN TAR"
-  },
-  {
-    "nombre": "Flecha Magica",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel": 1,
-    "texto": "VAX IN TAR"
-  },
-  {
-    "nombre": "Misil magico",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel": 1,
-    "texto": "VAX IN TAR"
-  },
-  {
-    "nombre": "Curar Heridas Leves",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel": 1,
-    "texto": "VAX IN TAR"
-  },
-  {
-    "nombre": "Rayo Peronizador",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel": 1,
-    "texto": "VAX IN TAR"
-  },
-  {
-    "nombre": "Inmovilizar",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel": 1,
-    "texto": "VAX IN TAR"
-  },
-  {
-    "nombre": "Paralizar",
-    "mana necesario": 5,
-    "min": 1,
-    "max": 3,
-    "nivel": 1,
-    "texto": "VAX IN TAR"
-  },
-  {
-    "nombre": "Talar",
-    "mana necesario": 0,
-    "min": 0,
-    "max": 1,
-    "nivel": 1,
-    "texto": ""
-  }]
-const hechi = {
-  "nombre": "Dardo magico",
-  "mana necesario": 5,
-  "min": 1,
-  "max": 3,
-  "nivel": 1,
-  "texto": "VAX IN TAR"
-}
+let hechizosData = []
+
 const acciones = ["hechizo", "trabajo"]
 let accion
 let snowballs = [];
@@ -407,6 +346,8 @@ socket.emit("nombre", nombre)
 socket.on("map", (loadedMap) => {
   groundMap = loadedMap.ground;
   decalMap = loadedMap.decal;
+  hechizosData = loadedMap.db.hechizos
+  console.log(hechizosData)
 });
 
 
@@ -485,7 +426,7 @@ const actualizarMensajes = () => {
     if (mensajesConsola[i] && mensajesConsola[i].msg) {
       switch (mensajesConsola[i].tipo) {
         case "chat":
-          msg = mensajesConsola[i].player.nombre?mensajesConsola[i].player.nombre + ": " + mensajesConsola[i].msg:mensajesConsola[i].msg
+          msg = mensajesConsola[i].player.nombre ? mensajesConsola[i].player.nombre + ": " + mensajesConsola[i].msg : mensajesConsola[i].msg
           html += `
          <p style="color:${colorChat};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
          `
@@ -502,9 +443,15 @@ const actualizarMensajes = () => {
 
           break;
         case "daño":
-        msg = mensajesConsola[i].playerOrigen.id!== myPlayer.id?mensajesConsola[i].playerOrigen.nombre+" "+ mensajesConsola[i].msg:mensajesConsola[i].msg
-        html += `
+          msg = mensajesConsola[i].playerOrigen.id !== myPlayer.id ? mensajesConsola[i].playerOrigen.nombre + " " + mensajesConsola[i].msg : mensajesConsola[i].msg
+          html += `
        <p style="color:${colorCrimi};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
+       `
+          break;
+        case "consola":
+          msg = mensajesConsola[i].msg 
+          html += `
+       <p style="color:${colorConsola};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
        `
           break;
       }
@@ -519,10 +466,10 @@ const actualizarMensajes = () => {
 
 }
 
-socket.on("privado", (mensaje)=>{
+socket.on("privado", (mensaje) => {
 
-mensajesConsola.push(mensaje)
-actualizarMensajes()
+  mensajesConsola.push(mensaje)
+  actualizarMensajes()
 })
 
 
@@ -648,7 +595,7 @@ canvasEl.addEventListener("click", (e) => {
   point.cast = {
     cast,
     accion,
-    hechizoSelect
+   hechizoSelect: hechizosData[hechizoSelect]
   }
   boxHechizos.style.cursor = "default"
   HUD.style.cursor = "default"
@@ -752,12 +699,12 @@ function loop() {
     // ciudad: "Nix",
     // descripcion: "Morgolock, me duras un click"
 
-  
-    energia.style.width = `${(player.energia /player.energiaTotal) *100}%`
-    mana.style.width = `${(player.mana /player.manaTotal) *100}%`
-    salud.style.width = `${(player.salud /player.saludTotal) *100}%`
-    hambre.style.width = `${(player.hambre /player.hambreTotal) *100}%`
-    sed.style.width = `${(player.sed /player.sedTotal) *100}%`
+
+    energia.style.width = `${(player.energia / player.energiaTotal) * 100}%`
+    mana.style.width = `${(player.mana / player.manaTotal) * 100}%`
+    salud.style.width = `${(player.salud / player.saludTotal) * 100}%`
+    hambre.style.width = `${(player.hambre / player.hambreTotal) * 100}%`
+    sed.style.width = `${(player.sed / player.sedTotal) * 100}%`
 
 
     const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
