@@ -285,7 +285,7 @@ function tick(delta) {
         const pj = players.find((player) => player.id === snowball.playerId);
         if (snowball.cast) {
           //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
-          if (snowball.cast.hechizoSelect.clase === "curacion" && snowball.cast.cast) {
+          if (snowball.cast.cast && snowball.cast.hechizoSelect.clase && snowball.cast.hechizoSelect.clase === "curacion" ) {
             console.log("toco la bola y es : ", snowball.cast)
             if (pj.mana >= snowball.cast.hechizoSelect["mana necesario"]) {
               pj.mana = pj.mana - snowball.cast.hechizoSelect["mana necesario"]
@@ -367,7 +367,7 @@ async function main() {
 
     players.push({
       id: socket.id,
-      hechizos: [0, 6, 2, 0, 4, 5, 0, 3],
+      hechizos: [2, 6, 2, 0, 4, 5, 0, 3],
       x: 800,
       y: 800,
       mirando: "down",

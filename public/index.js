@@ -2,6 +2,7 @@
 const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
+let distanciaRender = 75
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
 
@@ -195,11 +196,13 @@ HUD.addEventListener("click", (e) => {
 })
 
 lanzar.addEventListener("click", () => {
-  if(myPlayer.mana >= hechizosData[hechizoSelect]["mana necesario"]){
-    console.log("lanzo", myPlayer.mana , hechizosData[hechizoSelect]["mana necesario"])
-    const nombre = document.getElementById(hechizoSelect).innerText
 
-    if (nombre !== hechizosData[0]["nombre"]) {
+
+  console.log("lanzo", myPlayer.mana, hechizoSelect, hechizosData[myPlayer["hechizos"][hechizoSelect]])
+  const nombre = document.getElementById(hechizoSelect).innerText
+
+  if (nombre !== hechizosData[0]["nombre"]) {
+    if (myPlayer.mana >= hechizosData[myPlayer["hechizos"][hechizoSelect]]["mana necesario"]) {
       accion = acciones[0]
       hechizoTemp = hechizoSelect
       //  console.log("lanzar ", nombre)
@@ -207,16 +210,17 @@ lanzar.addEventListener("click", () => {
       HUD.style.cursor = "crosshair"
       cast = true
     } else {
-      accion = ""
+      const msg = {
+        msg: "No tienes suficiente mana.",
+        tipo: "consola"
+      }
+      mensajesConsola.push(msg)
+      actualizarMensajes()
     }
-  }else{
-    const msg = {
-      msg: "No tienes suficiente mana.",
-      tipo:"consola"
-    }
-    mensajesConsola.push(msg)
-    actualizarMensajes()
+  } else {
+    accion = ""
   }
+
 })
 info.addEventListener("click", () => {
   console.log("info")
@@ -449,7 +453,7 @@ const actualizarMensajes = () => {
        `
           break;
         case "consola":
-          msg = mensajesConsola[i].msg 
+          msg = mensajesConsola[i].msg
           html += `
        <p style="color:${colorConsola};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
        `
@@ -595,7 +599,7 @@ canvasEl.addEventListener("click", (e) => {
   point.cast = {
     cast,
     accion,
-   hechizoSelect: hechizosData[hechizoSelect]
+    hechizoSelect: hechizosData[myPlayer["hechizos"][hechizoSelect]]
   }
   boxHechizos.style.cursor = "default"
   HUD.style.cursor = "default"
@@ -629,17 +633,29 @@ function loop() {
       let { id } = groundMap[row][col] ?? { id: undefined };
       const imageRow = parseInt(id / TILES_IN_ROW);
       const imageCol = id % TILES_IN_ROW;
-      canvas.drawImage(
-        mapImage,
-        imageCol * TILE_SIZE,
-        imageRow * TILE_SIZE,
-        TILE_SIZE,
-        TILE_SIZE,
-        col * TILE_SIZE - cameraX,
-        row * TILE_SIZE - cameraY,
-        TILE_SIZE,
-        TILE_SIZE
-      );
+      const decalX = col * TILE_SIZE// - cameraX
+      const decalY = row * TILE_SIZE //- cameraY
+      const distance = Math.sqrt((decalX - myPlayer.x) ** 2 + (decalY - myPlayer.y) ** 2);
+      const ratio = 1.0 - Math.min(distance / 700, 1);
+
+      const proximidad = Math.floor(ratio * 100)
+
+      if (proximidad > distanciaRender) {
+
+
+
+        canvas.drawImage(
+          mapImage,
+          imageCol * TILE_SIZE,
+          imageRow * TILE_SIZE,
+          TILE_SIZE,
+          TILE_SIZE,
+          col * TILE_SIZE - cameraX,
+          row * TILE_SIZE - cameraY,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      }
     }
   }
 
@@ -650,17 +666,27 @@ function loop() {
       const imageRow = parseInt(id / TILES_IN_ROW);
       const imageCol = id % TILES_IN_ROW;
 
-      canvas.drawImage(
-        mapImage,
-        imageCol * TILE_SIZE,
-        imageRow * TILE_SIZE,
-        TILE_SIZE,
-        TILE_SIZE,
-        col * TILE_SIZE - cameraX,
-        row * TILE_SIZE - cameraY,
-        TILE_SIZE,
-        TILE_SIZE
-      );
+      const decalX = col * TILE_SIZE// - cameraX
+      const decalY = row * TILE_SIZE //- cameraY
+      const distance = Math.sqrt((decalX - myPlayer.x) ** 2 + (decalY - myPlayer.y) ** 2);
+      const ratio = 1.0 - Math.min(distance / 700, 1);
+
+      const proximidad = Math.floor(ratio * 100)
+
+      if (proximidad > distanciaRender) {
+
+        canvas.drawImage(
+          mapImage,
+          imageCol * TILE_SIZE,
+          imageRow * TILE_SIZE,
+          TILE_SIZE,
+          TILE_SIZE,
+          col * TILE_SIZE - cameraX,
+          row * TILE_SIZE - cameraY,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      }
     }
   }
   //Personaje
@@ -723,56 +749,58 @@ function loop() {
       // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
 
 
+      if (proximidad > distanciaRender) {
 
-      TILES_IN_ROW_PJ = pjrender.info.rows
-      TILES_IN_COL_PJ = pjrender.info.cols
-      PJ_SIZE_W = pjrender.info.tileWidth
-      PJ_SIZE_H = pjrender.info.tileHeight
-      let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
-      const imageRow = parseInt(id / TILES_IN_ROW_PJ);
-      const imageCol = id % TILES_IN_ROW_PJ;
-      // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-
-      canvas.drawImage(
-        imagenes[player.skin],
-        imageCol * PJ_SIZE_W,
-        imageRow * PJ_SIZE_H,
-        PJ_SIZE_W,
-        PJ_SIZE_H,
-        player.x - cameraX - player.w / 2,
-        player.y - cameraY - player.h / 2,
-        player.w,
-        player.h
-      );
-
-
-      //ULTIMO MENSAJE PERSONAJE
-      canvas.fillStyle = 'black'
-      canvas.fillStyle = "#f0f3f4";
-      canvas.font = "bold 12px arial";
-      canvas.textAlign = "center"
-      canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
-
-
-      //NOMBRE PERSONAJE
-      //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
-      const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
-      canvas.fillStyle = 'black'
-      canvas.fillStyle = color;
-      canvas.font = "bold 12px";
-      canvas.textAlign = "center"
-      canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
-
-
+        TILES_IN_ROW_PJ = pjrender.info.rows
+        TILES_IN_COL_PJ = pjrender.info.cols
+        PJ_SIZE_W = pjrender.info.tileWidth
+        PJ_SIZE_H = pjrender.info.tileHeight
+        let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
+        const imageRow = parseInt(id / TILES_IN_ROW_PJ);
+        const imageCol = id % TILES_IN_ROW_PJ;
+        // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+        
+        canvas.drawImage(
+          imagenes[player.skin],
+          imageCol * PJ_SIZE_W,
+          imageRow * PJ_SIZE_H,
+          PJ_SIZE_W,
+          PJ_SIZE_H,
+          player.x - cameraX - player.w / 2,
+          player.y - cameraY - player.h / 2,
+          player.w,
+          player.h
+        );
+        
+        
+        
+        
+        //NOMBRE PERSONAJE
+        //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
+        const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
+        canvas.fillStyle = 'black'
+        canvas.fillStyle = color;
+        canvas.font = "bold 12px";
+        canvas.textAlign = "center"
+        canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
+        
+      }
+      
       //dibujar Click
       //console.log(clickPoint)
       // canvas.strokeStyle = "rgb(0,255,0)";
       // canvas.beginPath();
       // canvas.arc(clickPoint[0], clickPoint[1], 2, 0, 100, false);
       // canvas.stroke();
-
-
+      
+      
     }
+    //ULTIMO MENSAJE PERSONAJE
+    canvas.fillStyle = 'black'
+    canvas.fillStyle = "#f0f3f4";
+    canvas.font = "bold 12px arial";
+    canvas.textAlign = "center"
+    canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
 
     if (!player.isMuted) {
       //   canvas.drawImage(
