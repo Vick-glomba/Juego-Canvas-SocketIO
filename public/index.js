@@ -2,7 +2,7 @@
 const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
-let distanciaRender = 75
+let distanciaRender = 32
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
 
@@ -71,7 +71,7 @@ const info = document.getElementById("info")
 
 const cajaMensajes = document.getElementById("cajaMensajes")
 const mensaje = document.getElementById("mensaje")
-
+const online = document.getElementById("online")
 //AJUSTE DE TAMAÑO PARA TENER COORDENADAS CORRECTAS
 
 canvasEl.width = resolucionX * 0.75  // el primer valor son los pixeles del HUD cambiar si cambia la resolucion
@@ -297,6 +297,9 @@ let escribiendo = false
 
 let cast = false
 let mensajesConsola = []
+let mapaActual
+let mundoMaps = [];
+
 let groundMap = [[]];
 let decalMap = [[]];
 let db = []
@@ -321,6 +324,23 @@ const TILE_SIZE = 32;
 
 const SNOWBALL_RADIUS = 4;
 
+// setInterval(() => {
+//   groundMap = []
+
+//   const tileY = parseInt(myPlayer.y / TILE_SIZE)
+//   const tileX = parseInt(myPlayer.x / TILE_SIZE)
+
+
+//   for (let row = 0; row < MundoGround.length; row++) {
+//     //console.log(tileX, tileY, MundoGround[row])
+//     if (row === tileY){
+//       console.log("si")
+//       groundMap[row] = MundoGround[row]
+//     } else{
+//       groundMap[row] ={id: undefined}
+//     }
+//   }
+// }, 5000);
 
 const actualizarHechizos = (hechizo) => {
   if (hechizo) {
@@ -347,11 +367,17 @@ socket.on("connect", () => {
 
 socket.emit("nombre", nombre)
 
-socket.on("map", (loadedMap) => {
-  groundMap = loadedMap.ground;
-  decalMap = loadedMap.decal;
-  hechizosData = loadedMap.db.hechizos
-  console.log(hechizosData)
+socket.on("map", ({ mundo, inicial, db }) => {
+
+  mundoMaps = mundo
+  groundMap = mundoMaps[inicial].ground2D;
+
+  decalMap = mundoMaps[inicial].decal2D;
+
+
+
+  hechizosData = db.hechizos
+
 });
 
 
@@ -371,6 +397,7 @@ socket.on("players", (serverPlayers) => {
     cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
     cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
   }
+
 });
 
 
@@ -617,11 +644,14 @@ canvasEl.addEventListener("click", (e) => {
 function loop() {
 
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  if (myPlayer) {
 
-
-
-
-
+    energia.style.width = `${(myPlayer.energia / myPlayer.energiaTotal) * 100}%`
+    mana.style.width = `${(myPlayer.mana / myPlayer.manaTotal) * 100}%`
+    salud.style.width = `${(myPlayer.salud / myPlayer.saludTotal) * 100}%`
+    hambre.style.width = `${(myPlayer.hambre / myPlayer.hambreTotal) * 100}%`
+    sed.style.width = `${(myPlayer.sed / myPlayer.sedTotal) * 100}%`
+  }
 
 
 
@@ -726,11 +756,7 @@ function loop() {
     // descripcion: "Morgolock, me duras un click"
 
 
-    energia.style.width = `${(player.energia / player.energiaTotal) * 100}%`
-    mana.style.width = `${(player.mana / player.manaTotal) * 100}%`
-    salud.style.width = `${(player.salud / player.saludTotal) * 100}%`
-    hambre.style.width = `${(player.hambre / player.hambreTotal) * 100}%`
-    sed.style.width = `${(player.sed / player.sedTotal) * 100}%`
+
 
 
     const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
@@ -759,7 +785,7 @@ function loop() {
         const imageRow = parseInt(id / TILES_IN_ROW_PJ);
         const imageCol = id % TILES_IN_ROW_PJ;
         // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-        
+
         canvas.drawImage(
           imagenes[player.skin],
           imageCol * PJ_SIZE_W,
@@ -771,10 +797,10 @@ function loop() {
           player.w,
           player.h
         );
-        
-        
-        
-        
+
+
+
+
         //NOMBRE PERSONAJE
         //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
         const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
@@ -783,17 +809,17 @@ function loop() {
         canvas.font = "bold 12px";
         canvas.textAlign = "center"
         canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
-        
+
       }
-      
+
       //dibujar Click
       //console.log(clickPoint)
       // canvas.strokeStyle = "rgb(0,255,0)";
       // canvas.beginPath();
       // canvas.arc(clickPoint[0], clickPoint[1], 2, 0, 100, false);
       // canvas.stroke();
-      
-      
+
+
     }
     //ULTIMO MENSAJE PERSONAJE
     canvas.fillStyle = 'black'
@@ -801,6 +827,21 @@ function loop() {
     canvas.font = "bold 12px arial";
     canvas.textAlign = "center"
     canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
+
+    // PLAYERS ONLINE  
+    mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
+    const onlines = "Online: " + players.length + "   X: " + parseInt(myPlayer.x / TILE_SIZE) + " Y: " + parseInt(myPlayer.y / TILE_SIZE) + "  Mapa: " + mapaActual
+    online.innerText = onlines
+    if(mapaActual !== myPlayer.mapa){
+      console.log("esta en distinto mapa al que tiene")
+      socket.emit("cambiarMapa", mapaActual)
+      groundMap = mundoMaps[myPlayer.mapa].ground2D;
+      decalMap = mundoMaps[myPlayer.mapa].decal2D;
+    }
+
+
+
+
 
     if (!player.isMuted) {
       //   canvas.drawImage(
@@ -832,6 +873,7 @@ function loop() {
     );
     canvas.fill();
   }
+
 
 
 }

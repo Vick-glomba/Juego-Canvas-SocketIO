@@ -108,9 +108,9 @@ function isColliding(rect1, rect2) {
 }
 
 function isCollidingWithMap(player) {
-  for (let row = 0; row < decal2D.length; row++) {
-    for (let col = 0; col < decal2D[0].length; col++) {
-      const tile = decal2D[row][col];
+  for (let row = 0; row < mundo[player.mapa].decal2D.length; row++) {
+    for (let col = 0; col < mundo[player.mapa].decal2D[0].length; col++) {
+      const tile = mundo[player.mapa].decal2D[row][col];
 
       if (
         tile &&
@@ -344,9 +344,10 @@ function tick(delta) {
   io.emit("players", players);
   io.emit("snowballs", snowballs);
 }
-
+const mundo = []
 async function main() {
-  ({ ground2D, decal2D } = await loadMap());
+  mundo[1]= await loadMap(1);
+  mundo[2]= await loadMap(2);
   await loadPersonajes()
 
 
@@ -368,6 +369,7 @@ async function main() {
     players.push({
       id: socket.id,
       hechizos: [2, 6, 2, 0, 4, 5, 0, 3],
+      mapa:1,
       x: 800,
       y: 800,
       mirando: "down",
@@ -398,9 +400,10 @@ async function main() {
       descripcion: "Morgolock, me duras un click"
     });
 
+    const player = players.find((player) => player.id === socket.id);
     socket.emit("map", {
-      ground: ground2D,
-      decal: decal2D,
+      mundo,
+      inicial: player.mapa,
       db
     });
 
@@ -428,7 +431,27 @@ async function main() {
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;
     });
-
+    socket.on("cambiarMapa", (mapa) =>{
+      const player = players.find((player) => player.id === socket.id);
+      player.mapa = mapa
+      switch (player.mirando) {
+        case "up":
+              player.y =1120
+          break;
+        case "down":
+              player.y =100
+          break;
+        case "left":
+              player.x =1120
+          break;
+        case "right":
+              player.x =100
+          break;
+      
+        default:
+          break;
+      }
+    })
 
 
     socket.on("mute", (isMuted) => {

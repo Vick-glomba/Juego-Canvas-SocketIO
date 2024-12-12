@@ -1,8 +1,9 @@
 const tmx = require("tmx-parser");
 
-async function loadMap() {
+async function loadMap(mapa) {
+  const ruta = "./src/render/"+`${mapa}`+".tmx"
   const map = await new Promise((resolve, reject) => {
-    tmx.parseFile("./src/render/dungeon-newbie.tmx", function (err, loadedMap) {
+    tmx.parseFile(ruta, function (err, loadedMap) {
       if (err) return reject(err);
       resolve(loadedMap);
     });
