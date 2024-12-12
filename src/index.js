@@ -135,6 +135,31 @@ function isCollidingWithMap(player) {
   }
   return false;
 }
+function isCollidingWithPlayer(player) {
+  const playerEnMapa = players.filter(p => p.mapa === player.mapa && p.id !== player.id)
+  for (let i = 0; i < playerEnMapa.length; i++) {
+    const otroPlayer= playerEnMapa[i] 
+    if ( isColliding(
+        {
+          x: player.x,
+          y: player.y,
+          w: 0,
+          h: 0,
+        },
+        {
+          x: otroPlayer.x-otroPlayer.w/2,
+          y: otroPlayer.y-otroPlayer.h/2,
+          w: otroPlayer.w,
+          h: otroPlayer.h,
+        }
+      )
+    ) {
+      return otroPlayer.id;
+    }
+
+  }
+  return false;
+}
 
 function tick(delta) {
   for (const player of players) {
@@ -166,7 +191,7 @@ function tick(delta) {
       player.mirando = "down"
     }
 
-    if (isCollidingWithMap(player)) {
+    if (isCollidingWithMap(player) || isCollidingWithPlayer(player) ) {
       player.y = previousY;
     }
 
@@ -264,7 +289,7 @@ function tick(delta) {
 
 
 
-    if (isCollidingWithMap(player)) {
+    if (isCollidingWithMap(player) || isCollidingWithPlayer(player) ) {
       player.x = previousX;
     }
   }
@@ -407,6 +432,17 @@ async function main() {
     });
 
     const player = players.find((player) => player.id === socket.id);
+    const otroPlayer = isCollidingWithPlayer(player)
+    if(otroPlayer){
+     
+      io.sockets.sockets.forEach((socket) => {
+        // If given socket id is exist in list of all sockets, kill it
+        if(socket.id === otroPlayer)
+            socket.disconnect(true);
+    });
+    
+      
+    }
     socket.emit("map", {
       mundo,
       player,
@@ -416,9 +452,9 @@ async function main() {
     socket.emit("pjs", personajes);
     // pj: pj2D,
     // dataTiles: dataTiles
-    socket.on("enMapa",(mapa, callback)=>{
-      const playersEnMapa = players.filter(p=> p.mapa === mapa )
-      const snowballsEnMapa = snowballs.filter(s=> s.mapa === mapa )
+    socket.on("enMapa", (mapa, callback) => {
+      const playersEnMapa = players.filter(p => p.mapa === mapa)
+      const snowballsEnMapa = snowballs.filter(s => s.mapa === mapa)
       const data = {
         playersEnMapa,
         snowballsEnMapa,
@@ -440,7 +476,7 @@ async function main() {
         const playersMapa = players.filter(p => p.mapa === player.mapa)
         for (let i = 0; i < playersMapa.length; i++) {
           socket.broadcast.to(playersMapa[i].id).emit("recibirMensaje", obj);
-          
+
         }
         socket.emit("recibirMensaje", obj)
 
@@ -507,7 +543,7 @@ async function main() {
       const player = players.find((player) => player.id === socket.id);
       player.voiceId = voiceId;
     });
-    socket.on("myPlayer", (callback)=>{
+    socket.on("myPlayer", (callback) => {
       const player = players.find((player) => player.id === socket.id);
       return callback(player)
     })

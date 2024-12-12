@@ -364,6 +364,9 @@ const actualizarHechizos = (hechizo) => {
 socket.on("connect", () => {
   console.log("connected");
 });
+socket.on("disconnect", ()=>{
+  window.location= "error.html"
+})
 
 socket.emit("nombre", nombre)
 
