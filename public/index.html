@@ -60,7 +60,7 @@
 
     #mensaje {
 
-      width: 97.5%;
+      width: 60%;
 
       background-color: rgb(255, 255, 255);
     }
@@ -97,8 +97,10 @@
       
       <div id="consola">
         <div id="cajaMensajes"></div>
+        <div style="position: absolute; left: 485px;">
+          <p id="online" style="position: relative; left: 0px; margin: 0px; font-weight: 900; color: rgb(253, 244, 74); -webkit-text-stroke: 1px; -webkit-text-stroke-color: rgb(93, 95, 2);">Online: 0</p>
+        </div>
         <input type="text" id="mensaje">
-        <p id="online" style="color: rgb(171, 200, 24);position: absolute; right: 470px;">Online: 0</p>
       </div>
       <canvas id="canvas"></canvas>
     </div>

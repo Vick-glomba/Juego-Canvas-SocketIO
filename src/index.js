@@ -275,79 +275,85 @@ function tick(delta) {
     snowball.timeLeft -= delta;
 
     for (const player of players) {
+      if (snowball.mapa === player.mapa) {
 
-      //esto es de la bola original //if (player.id === snowball.playerId) continue;
-      const distance = Math.sqrt(
-        (player.x - snowball.x) ** 2 +
-        (player.y - snowball.y) ** 2
-      );
-      if (distance <= player.w / 2) {
-        const pj = players.find((player) => player.id === snowball.playerId);
-        if (snowball.cast) {
-          //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
-          if (snowball.cast.cast && snowball.cast.hechizoSelect.clase && snowball.cast.hechizoSelect.clase === "curacion" ) {
-            console.log("toco la bola y es : ", snowball.cast)
-            if (pj.mana >= snowball.cast.hechizoSelect["mana necesario"]) {
-              pj.mana = pj.mana - snowball.cast.hechizoSelect["mana necesario"]
-              player.salud = player.salud + snowball.cast.hechizoSelect["max"]
-              player.salud > player.saludTotal ? player.salud = player.saludTotal : player.salud
-              const destino = {
-                tipo: "daño",
-                msg: `Has lanzado ${snowball.cast.hechizoSelect["nombre"]} ` ,
-                playerDestino:player ,
-                playerOrigen: pj
-              }
-              io.to(pj.id).emit('privado', destino);
-              const origen = {
-                tipo: "daño",
-                msg: pj.id===player.id? "Te has curado "+snowball.cast.hechizoSelect["max"]+" puntos de vida.":"te ha curado "+snowball.cast.hechizoSelect["max"]+" puntos de vida." ,
-                playerDestino:player ,
-                playerOrigen: pj
-              }
-              io.to(player.id).emit('privado', origen);
-              if(player.id !== pj.id){
+        //esto es de la bola original //if (player.id === snowball.playerId) continue;
+        const distance = Math.sqrt(
+          (player.x - snowball.x) ** 2 +
+          (player.y - snowball.y) ** 2
+        );
+        if (distance <= player.w / 2) {
+          const pj = players.find((player) => player.id === snowball.playerId);
+          if (snowball.cast) {
+            //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
+            if (snowball.cast.cast && snowball.cast.hechizoSelect.clase && snowball.cast.hechizoSelect.clase === "curacion") {
+              console.log("toco la bola y es : ", snowball.cast)
+              if (pj.mana >= snowball.cast.hechizoSelect["mana necesario"]) {
+                pj.mana = pj.mana - snowball.cast.hechizoSelect["mana necesario"]
+                player.salud = player.salud + snowball.cast.hechizoSelect["max"]
+                player.salud > player.saludTotal ? player.salud = player.saludTotal : player.salud
                 const destino = {
                   tipo: "daño",
-                  msg: "Has curado a "+player.nombre+" por " + snowball.cast.hechizoSelect["max"] + " puntos." ,
-                  playerDestino:player ,
+                  msg: `Has lanzado ${snowball.cast.hechizoSelect["nombre"]} `,
+                  playerDestino: player,
+                  playerOrigen: pj
+                }
+                io.to(pj.id).emit('privado', destino);
+                const origen = {
+                  tipo: "daño",
+                  msg: pj.id === player.id ? "Te has curado " + snowball.cast.hechizoSelect["max"] + " puntos de vida." : "te ha curado " + snowball.cast.hechizoSelect["max"] + " puntos de vida.",
+                  playerDestino: player,
+                  playerOrigen: pj
+                }
+                io.to(player.id).emit('privado', origen);
+                if (player.id !== pj.id) {
+                  const destino = {
+                    tipo: "daño",
+                    msg: "Has curado a " + player.nombre + " por " + snowball.cast.hechizoSelect["max"] + " puntos.",
+                    playerDestino: player,
+                    playerOrigen: pj
+                  }
+                  io.to(pj.id).emit('privado', destino);
+                }
+              } else {
+                const destino = {
+                  tipo: "daño",
+                  msg: "No tienes suficiente mana. NO DEBERIA PODER LANZARLO",
+                  playerDestino: player,
                   playerOrigen: pj
                 }
                 io.to(pj.id).emit('privado', destino);
               }
-            } else {
-              const destino = {
-                tipo: "daño",
-                msg: "No tienes suficiente mana. NO DEBERIA PODER LANZARLO",
-                playerDestino: player,
-                playerOrigen: pj
-              }
-              io.to(pj.id).emit('privado', destino);
             }
+            player.y = player.y - 1
           }
-          player.y = player.y - 1
+
+          const obj = {
+            cast: snowball.cast,
+            player: pj,
+            tipo: "click",
+            msg: player
+          }
+          io.emit("recibirMensaje", obj)
+          snowball.timeLeft = -1;
+          break;
         }
-     
-        const obj = {
-          cast: snowball.cast,
-          player: pj,
-          tipo: "click",
-          msg: player
-        }
-        io.emit("recibirMensaje", obj)
-        snowball.timeLeft = -1;
-        break;
       }
     }
   }
   snowballs = snowballs.filter((snowball) => snowball.timeLeft > 0);
 
-  io.emit("players", players);
-  io.emit("snowballs", snowballs);
+  // io.emit("players", players);
+  // io.emit("snowballs", snowballs);
 }
 const mundo = []
 async function main() {
-  mundo[1]= await loadMap(1);
-  mundo[2]= await loadMap(2);
+  mundo[1] = await loadMap(1);
+  mundo[2] = await loadMap(2);
+  mundo[3] = await loadMap(3);
+  mundo[21] = await loadMap(21);
+  mundo[22] = await loadMap(22);
+  mundo[23] = await loadMap(23);
   await loadPersonajes()
 
 
@@ -369,7 +375,7 @@ async function main() {
     players.push({
       id: socket.id,
       hechizos: [2, 6, 2, 0, 4, 5, 0, 3],
-      mapa:1,
+      mapa: 1,
       x: 800,
       y: 800,
       mirando: "down",
@@ -403,13 +409,23 @@ async function main() {
     const player = players.find((player) => player.id === socket.id);
     socket.emit("map", {
       mundo,
-      inicial: player.mapa,
+      player,
       db
     });
 
     socket.emit("pjs", personajes);
     // pj: pj2D,
     // dataTiles: dataTiles
+    socket.on("enMapa",(mapa, callback)=>{
+      const playersEnMapa = players.filter(p=> p.mapa === mapa )
+      const snowballsEnMapa = snowballs.filter(s=> s.mapa === mapa )
+      const data = {
+        playersEnMapa,
+        snowballsEnMapa,
+        playersOnlines: players.length
+      }
+      return callback(data)
+    })
 
 
     socket.on("enviarMensaje", (obj) => {
@@ -421,8 +437,13 @@ async function main() {
         player.ultimoMensaje = msg
         msg = player.nombre + ": " + obj.msg
         obj.player = player
+        const playersMapa = players.filter(p => p.mapa === player.mapa)
+        for (let i = 0; i < playersMapa.length; i++) {
+          socket.broadcast.to(playersMapa[i].id).emit("recibirMensaje", obj);
+          
+        }
+        socket.emit("recibirMensaje", obj)
 
-        io.emit("recibirMensaje", obj)
       } else {
         player.ultimoMensaje = msg
       }
@@ -431,25 +452,45 @@ async function main() {
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;
     });
-    socket.on("cambiarMapa", (mapa) =>{
+    socket.on("cambiarMapa", (mapa) => {
       const player = players.find((player) => player.id === socket.id);
-      player.mapa = mapa
-      switch (player.mirando) {
-        case "up":
-              player.y =1120
-          break;
-        case "down":
-              player.y =100
-          break;
-        case "left":
-              player.x =1120
-          break;
-        case "right":
-              player.x =100
-          break;
-      
-        default:
-          break;
+      if (mundo[mapa]) {
+        player.mapa = mapa
+        switch (player.mirando) {
+          case "up":
+            player.y = 1490
+            break;
+          case "down":
+            player.y = 20
+            break;
+          case "left":
+            player.x = 1490
+            break;
+          case "right":
+            player.x = 20
+            break;
+
+          default:
+            break;
+        }
+      } else {
+        switch (player.mirando) {
+          case "up":
+            player.y = player.y + 10
+            break;
+          case "down":
+            player.y = player.y - 10
+            break;
+          case "left":
+            player.x = player.x + 10
+            break;
+          case "right":
+            player.x = player.x - 10
+            break;
+
+          default:
+            break;
+        }
       }
     })
 
@@ -466,12 +507,17 @@ async function main() {
       const player = players.find((player) => player.id === socket.id);
       player.voiceId = voiceId;
     });
+    socket.on("myPlayer", (callback)=>{
+      const player = players.find((player) => player.id === socket.id);
+      return callback(player)
+    })
 
     socket.on("point", (obj) => {
       const player = players.find((player) => player.id === socket.id);
 
       snowballs.push({
         cast: obj.cast,
+        mapa: player.mapa,
         x: obj.x,
         y: obj.y,
         timeLeft: 10000,

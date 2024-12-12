@@ -314,7 +314,7 @@ let accion
 let snowballs = [];
 let ultimoFrame = 0
 let personajes
-
+let playersOnline
 let TILES_IN_ROW_PJ
 let TILES_IN_COL_PJ
 let PJ_SIZE_W
@@ -367,12 +367,13 @@ socket.on("connect", () => {
 
 socket.emit("nombre", nombre)
 
-socket.on("map", ({ mundo, inicial, db }) => {
+socket.on("map", ({ mundo, player, db }) => {
 
+  myPlayer = player
   mundoMaps = mundo
-  groundMap = mundoMaps[inicial].ground2D;
+  groundMap = mundoMaps[myPlayer.mapa].ground2D;
 
-  decalMap = mundoMaps[inicial].decal2D;
+  decalMap = mundoMaps[myPlayer.mapa].decal2D;
 
 
 
@@ -388,24 +389,27 @@ socket.on("pjs", (pjs) => {
   // pj = personajes.find(pj => pj.skin === "barca")
 });
 
-socket.on("players", (serverPlayers) => {
-  players = serverPlayers;
-  myPlayer = players.find((player) => player.id === socket.id);
-  players = players.filter((player) => player.id !== socket.id)
-  players.push(myPlayer)
-  if (myPlayer) {
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-  }
-
-});
 
 
 
+// socket.on("players", (serverPlayers) => {
+//   players = serverPlayers;
+//   myPlayer = players.find((player) => player.id === socket.id);
+//   players = players.filter((player) => player.id !== socket.id)
+//   players.push(myPlayer)
+//   if (myPlayer) {
+//     cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+//     cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+//   }
 
-socket.on("snowballs", (serverSnowballs) => {
-  snowballs = serverSnowballs;
-});
+// });
+
+
+
+
+// socket.on("snowballs", (serverSnowballs) => {
+//   snowballs = serverSnowballs;
+// });
 
 
 socket.on("recibirMensaje", (obj) => {
@@ -639,9 +643,30 @@ canvasEl.addEventListener("click", (e) => {
 });
 
 
+// setInterval(() => {
+
+
+//     socket.emit("enMapa", myPlayer.mapa, ({playersEnMapa, snowballsEnMapa}) =>{
+
+//       players = playersEnMapa
+//       myPlayer = players.find((player) => player.id === socket.id);
+//       //  players = players.filter((player) => player.id !== socket.id)
+//       //  players.push(myPlayer)
+//       if (myPlayer) {
+//         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+//         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+//       }
+
+//       snowballs = snowballsEnMapa
+
+//     })
+
+
+// }, 40);
 
 
 function loop() {
+
 
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
   if (myPlayer) {
@@ -651,232 +676,281 @@ function loop() {
     salud.style.width = `${(myPlayer.salud / myPlayer.saludTotal) * 100}%`
     hambre.style.width = `${(myPlayer.hambre / myPlayer.hambreTotal) * 100}%`
     sed.style.width = `${(myPlayer.sed / myPlayer.sedTotal) * 100}%`
-  }
 
 
 
-  const TILES_IN_ROW = 20;
+    const TILES_IN_ROW = 20;
 
-  // ground
-  for (let row = 0; row < groundMap.length; row++) {
-    for (let col = 0; col < groundMap[0].length; col++) {
-      let { id } = groundMap[row][col] ?? { id: undefined };
-      const imageRow = parseInt(id / TILES_IN_ROW);
-      const imageCol = id % TILES_IN_ROW;
-      const decalX = col * TILE_SIZE// - cameraX
-      const decalY = row * TILE_SIZE //- cameraY
-      const distance = Math.sqrt((decalX - myPlayer.x) ** 2 + (decalY - myPlayer.y) ** 2);
-      const ratio = 1.0 - Math.min(distance / 700, 1);
-
-      const proximidad = Math.floor(ratio * 100)
-
-      if (proximidad > distanciaRender) {
-
-
-
-        canvas.drawImage(
-          mapImage,
-          imageCol * TILE_SIZE,
-          imageRow * TILE_SIZE,
-          TILE_SIZE,
-          TILE_SIZE,
-          col * TILE_SIZE - cameraX,
-          row * TILE_SIZE - cameraY,
-          TILE_SIZE,
-          TILE_SIZE
-        );
-      }
-    }
-  }
-
-  // decals
-  for (let row = 0; row < decalMap.length; row++) {
-    for (let col = 0; col < decalMap[0].length; col++) {
-      let { id } = decalMap[row][col] ?? { id: undefined };
-      const imageRow = parseInt(id / TILES_IN_ROW);
-      const imageCol = id % TILES_IN_ROW;
-
-      const decalX = col * TILE_SIZE// - cameraX
-      const decalY = row * TILE_SIZE //- cameraY
-      const distance = Math.sqrt((decalX - myPlayer.x) ** 2 + (decalY - myPlayer.y) ** 2);
-      const ratio = 1.0 - Math.min(distance / 700, 1);
-
-      const proximidad = Math.floor(ratio * 100)
-
-      if (proximidad > distanciaRender) {
-
-        canvas.drawImage(
-          mapImage,
-          imageCol * TILE_SIZE,
-          imageRow * TILE_SIZE,
-          TILE_SIZE,
-          TILE_SIZE,
-          col * TILE_SIZE - cameraX,
-          row * TILE_SIZE - cameraY,
-          TILE_SIZE,
-          TILE_SIZE
-        );
-      }
-    }
-  }
-  //Personaje
-  for (const player of players) {
-
-    const pjrender = personajes.find(pj => pj.skin === player.skin)
-
-    // id: socket.id,
-    // hechizos: [0, 6, 2, 0, 4, 5, 0, 3],
-    // x: 800,
-    // y: 800,
-    // mirando: "down",
-    // quieto: true,
-    // skin: "link",
-    // w: 0,
-    // h: 0,
-    // quieto: true,
-    // mirando: "down",
-    // row: 0,
-    // col: 0,
-    // ultimoMensaje: "",
-    // nombre: "El Vittor",
-    // nivel: 1,
-    // energiaTotal:400,
-    // saludTotal: 300,
-    // manaTotal:200,
-    // hambreTotal:100,
-    // sedTotal:100,
-    // energia:300,
-    // salud: 100,
-    // mana:100,
-    // hambre:20,
-    // sed:15,
-    // reputacion: 1000,
-    // estado: "ciudadano",
-    // ciudad: "Nix",
-    // descripcion: "Morgolock, me duras un click"
-
-
-
-
-
-    const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
-    const ratio = 1.0 - Math.min(distance / 700, 1);
-
-    const proximidad = Math.floor(ratio * 100)
-
-    if (proximidad > 50) {
-      if (player === myPlayer) {
-        if (!player.quieto) player.skin === "barca" ? miAgua.play() : !otrosPasos.isPlaying ? misPasos.play() : misPasos.currentTime = 0
-      } else {
-        if (!player.quieto) player.skin === "barca" ? otrosAgua.play() : !misPasos.isPlaying ? otrosPasos.play() : otrosPasos.currentTime = 0
-      }
-
-
-      // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
-
-
-      if (proximidad > distanciaRender) {
-
-        TILES_IN_ROW_PJ = pjrender.info.rows
-        TILES_IN_COL_PJ = pjrender.info.cols
-        PJ_SIZE_W = pjrender.info.tileWidth
-        PJ_SIZE_H = pjrender.info.tileHeight
-        let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
-        const imageRow = parseInt(id / TILES_IN_ROW_PJ);
-        const imageCol = id % TILES_IN_ROW_PJ;
-        // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-
-        canvas.drawImage(
-          imagenes[player.skin],
-          imageCol * PJ_SIZE_W,
-          imageRow * PJ_SIZE_H,
-          PJ_SIZE_W,
-          PJ_SIZE_H,
-          player.x - cameraX - player.w / 2,
-          player.y - cameraY - player.h / 2,
-          player.w,
-          player.h
-        );
-
-
-
-
-        //NOMBRE PERSONAJE
-        //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
-        const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
-        canvas.fillStyle = 'black'
-        canvas.fillStyle = color;
-        canvas.font = "bold 12px";
-        canvas.textAlign = "center"
-        canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
-
-      }
-
-      //dibujar Click
-      //console.log(clickPoint)
-      // canvas.strokeStyle = "rgb(0,255,0)";
-      // canvas.beginPath();
-      // canvas.arc(clickPoint[0], clickPoint[1], 2, 0, 100, false);
-      // canvas.stroke();
-
-
-    }
-    //ULTIMO MENSAJE PERSONAJE
-    canvas.fillStyle = 'black'
-    canvas.fillStyle = "#f0f3f4";
-    canvas.font = "bold 12px arial";
-    canvas.textAlign = "center"
-    canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
-
-    // PLAYERS ONLINE  
-    mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
-    const onlines = "Online: " + players.length + "   X: " + parseInt(myPlayer.x / TILE_SIZE) + " Y: " + parseInt(myPlayer.y / TILE_SIZE) + "  Mapa: " + mapaActual
-    online.innerText = onlines
-    if(mapaActual !== myPlayer.mapa){
-      console.log("esta en distinto mapa al que tiene")
-      socket.emit("cambiarMapa", mapaActual)
-      groundMap = mundoMaps[myPlayer.mapa].ground2D;
-      decalMap = mundoMaps[myPlayer.mapa].decal2D;
-    }
-
-
-
-
-
-    if (!player.isMuted) {
-      //   canvas.drawImage(
-      //     speakerImage,
-      //     player.x - cameraX + 5,
-      //     player.y - cameraY - 28
-      //   );
-    }
-
-
-    if (player !== myPlayer) {
-      if (remoteUsers[player.voiceId] && remoteUsers[player.voiceId].audioTrack) {
-        const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
+    // ground
+    for (let row = 0; row < groundMap.length; row++) {
+      for (let col = 0; col < groundMap[0].length; col++) {
+        let { id } = groundMap[row][col] ?? { id: undefined };
+        const imageRow = parseInt(id / TILES_IN_ROW);
+        const imageCol = id % TILES_IN_ROW;
+        const decalX = col * TILE_SIZE// - cameraX
+        const decalY = row * TILE_SIZE //- cameraY
+        const distance = Math.sqrt((decalX - myPlayer.x) ** 2 + (decalY - myPlayer.y) ** 2);
         const ratio = 1.0 - Math.min(distance / 700, 1);
-        remoteUsers[player.voiceId].audioTrack.setVolume(Math.floor(ratio * 100));
+
+        const proximidad = Math.floor(ratio * 100)
+
+        if (proximidad > distanciaRender) {
+
+
+
+          canvas.drawImage(
+            mapImage,
+            imageCol * TILE_SIZE,
+            imageRow * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE,
+            col * TILE_SIZE - cameraX,
+            row * TILE_SIZE - cameraY,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+        }
       }
     }
+
+    // decals
+    for (let row = 0; row < decalMap.length; row++) {
+      for (let col = 0; col < decalMap[0].length; col++) {
+        let { id } = decalMap[row][col] ?? { id: undefined };
+        const imageRow = parseInt(id / TILES_IN_ROW);
+        const imageCol = id % TILES_IN_ROW;
+
+        const decalX = col * TILE_SIZE// - cameraX
+        const decalY = row * TILE_SIZE //- cameraY
+        const distance = Math.sqrt((decalX - myPlayer.x) ** 2 + (decalY - myPlayer.y) ** 2);
+        const ratio = 1.0 - Math.min(distance / 700, 1);
+
+        const proximidad = Math.floor(ratio * 100)
+
+        if (proximidad > distanciaRender) {
+
+          canvas.drawImage(
+            mapImage,
+            imageCol * TILE_SIZE,
+            imageRow * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE,
+            col * TILE_SIZE - cameraX,
+            row * TILE_SIZE - cameraY,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+        }
+      }
+    }
+    //Personaje
+    for (const player of players) {
+
+      const pjrender = personajes.find(pj => pj.skin === player.skin)
+
+      // id: socket.id,
+      // hechizos: [0, 6, 2, 0, 4, 5, 0, 3],
+      // x: 800,
+      // y: 800,
+      // mirando: "down",
+      // quieto: true,
+      // skin: "link",
+      // w: 0,
+      // h: 0,
+      // quieto: true,
+      // mirando: "down",
+      // row: 0,
+      // col: 0,
+      // ultimoMensaje: "",
+      // nombre: "El Vittor",
+      // nivel: 1,
+      // energiaTotal:400,
+      // saludTotal: 300,
+      // manaTotal:200,
+      // hambreTotal:100,
+      // sedTotal:100,
+      // energia:300,
+      // salud: 100,
+      // mana:100,
+      // hambre:20,
+      // sed:15,
+      // reputacion: 1000,
+      // estado: "ciudadano",
+      // ciudad: "Nix",
+      // descripcion: "Morgolock, me duras un click"
+
+
+
+
+
+      const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
+      const ratio = 1.0 - Math.min(distance / 700, 1);
+
+      const proximidad = Math.floor(ratio * 100)
+
+      if (proximidad > 50) {
+        if (player === myPlayer) {
+          if (!player.quieto) player.skin === "barca" ? miAgua.play() : !otrosPasos.isPlaying ? misPasos.play() : misPasos.currentTime = 0
+        } else {
+          if (!player.quieto) player.skin === "barca" ? otrosAgua.play() : !misPasos.isPlaying ? otrosPasos.play() : otrosPasos.currentTime = 0
+        }
+
+
+        // player.skin === "barca" ? !player.quieto ? agua.play() : agua.pause() : !player.quieto ? pasos.play() : pasos.pause()
+
+
+        if (proximidad > distanciaRender) {
+
+          TILES_IN_ROW_PJ = pjrender.info.rows
+          TILES_IN_COL_PJ = pjrender.info.cols
+          PJ_SIZE_W = pjrender.info.tileWidth
+          PJ_SIZE_H = pjrender.info.tileHeight
+          let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
+          const imageRow = parseInt(id / TILES_IN_ROW_PJ);
+          const imageCol = id % TILES_IN_ROW_PJ;
+          // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+
+          canvas.drawImage(
+            imagenes[player.skin],
+            imageCol * PJ_SIZE_W,
+            imageRow * PJ_SIZE_H,
+            PJ_SIZE_W,
+            PJ_SIZE_H,
+            player.x - cameraX - player.w / 2,
+            player.y - cameraY - player.h / 2,
+            player.w,
+            player.h
+          );
+
+
+
+
+          //NOMBRE PERSONAJE
+          //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
+          const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
+          canvas.fillStyle = 'black'
+          canvas.fillStyle = color;
+          canvas.font = "bold 12px";
+          canvas.textAlign = "center"
+          canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
+
+        }
+
+        //dibujar Click
+        //console.log(clickPoint)
+        // canvas.strokeStyle = "rgb(0,255,0)";
+        // canvas.beginPath();
+        // canvas.arc(clickPoint[0], clickPoint[1], 2, 0, 100, false);
+        // canvas.stroke();
+
+
+      }
+      //ULTIMO MENSAJE PERSONAJE
+      canvas.fillStyle = 'black'
+      canvas.fillStyle = "#f0f3f4";
+      canvas.font = "bold 12px arial";
+      canvas.textAlign = "center"
+      canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
+
+      // PLAYERS ONLINE  
+      // mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
+      const onlines = `Mapa: ${myPlayer.mapa} - x:  ${myPlayer.x} -  y:  ${myPlayer.y}  -  Online: ${playersOnline} `
+      online.innerText = onlines
+      const anchoMundo = 20
+      if (myPlayer) {
+
+        let nuevoMapa
+        if (myPlayer.y < 10) {
+          nuevoMapa = (myPlayer.mapa - anchoMundo)
+          //myPlayer.mapa = nuevoMapa
+          socket.emit("cambiarMapa", nuevoMapa)
+          console.log("cambio a mapa: ", nuevoMapa)
+
+        }
+        if (myPlayer.y > 1500) {
+          nuevoMapa = (myPlayer.mapa + anchoMundo)
+        //  myPlayer.mapa = nuevoMapa
+          socket.emit("cambiarMapa", nuevoMapa)
+          console.log("cambio a mapa: ", nuevoMapa)
+
+        }
+        if (myPlayer.x < 10) {
+          nuevoMapa = (myPlayer.mapa - 1)
+       //   myPlayer.mapa = nuevoMapa
+          socket.emit("cambiarMapa", nuevoMapa)
+          console.log("cambio a mapa: ", nuevoMapa)
+
+        }
+        if (myPlayer.x > 1500) {
+          nuevoMapa = (myPlayer.mapa + 1)
+       //   myPlayer.mapa = nuevoMapa
+          socket.emit("cambiarMapa", nuevoMapa)
+          console.log("cambio a mapa: ", nuevoMapa)
+
+        }
+
+
+      }
+
+
+
+      if (!player.isMuted) {
+        //   canvas.drawImage(
+        //     speakerImage,
+        //     player.x - cameraX + 5,
+        //     player.y - cameraY - 28
+        //   );
+      }
+
+
+      if (player !== myPlayer) {
+        if (remoteUsers[player.voiceId] && remoteUsers[player.voiceId].audioTrack) {
+          const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
+          const ratio = 1.0 - Math.min(distance / 700, 1);
+          remoteUsers[player.voiceId].audioTrack.setVolume(Math.floor(ratio * 100));
+        }
+      }
+    }
+
+    for (const snowball of snowballs) {
+      canvas.fillStyle = "#d1d107";
+      canvas.beginPath();
+      canvas.arc(
+        snowball.x - cameraX,
+        snowball.y - cameraY + 10,
+        SNOWBALL_RADIUS,
+        0,
+        2 * Math.PI
+      );
+      canvas.fill();
+    }
   }
-
-  for (const snowball of snowballs) {
-    canvas.fillStyle = "#d1d107";
-    canvas.beginPath();
-    canvas.arc(
-      snowball.x - cameraX,
-      snowball.y - cameraY + 10,
-      SNOWBALL_RADIUS,
-      0,
-      2 * Math.PI
-    );
-    canvas.fill();
-  }
-
-
-
+  socket.emit("myPlayer", player => {
+    myPlayer = player
+    socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
+      
+      players = playersEnMapa
+      myPlayer = players.find((player) => player.id === socket.id);
+      players = players.filter((player) => player.id !== socket.id)
+      players.push(myPlayer)
+      if (mundoMaps[myPlayer.mapa]) {
+        groundMap = mundoMaps[myPlayer.mapa].ground2D;
+        decalMap = mundoMaps[myPlayer.mapa].decal2D;
+      }
+      
+      if (myPlayer) {
+        cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+        cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+      }
+      playersOnline = playersOnlines
+      snowballs = snowballsEnMapa
+      
+    })
+  })
+    
 }
 setInterval(() => {
+
   loop();
-}, 40);
+
+}, 30);
