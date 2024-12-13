@@ -403,6 +403,7 @@ async function main() {
       mapa: 1,
       x: 800,
       y: 800,
+      meditar: false,
       mirando: "down",
       quieto: true,
       skin: "link",
@@ -484,6 +485,21 @@ async function main() {
         player.ultimoMensaje = msg
       }
     })
+
+    socket.on("meditar", (callback)=>{
+      const player = players.find((player) => player.id === socket.id);
+      if(player.mana < player.manaTotal){
+        player.mana += 25
+        callback("Has recuperado 25 de mana")
+        if(player.mana > player.manaTotal){
+          player.mana = player.manaTotal
+        }
+      }
+      
+    })
+
+
+
 
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;

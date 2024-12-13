@@ -25,7 +25,7 @@ speakerImage.src = "personajes/speaker.png";
 
 
 //AUDIOS
-
+let meditar = false
 const walkSnow = new Audio("./audio/walk-snow.mp3");
 
 const clcik1 = new Audio("./audio/click1.WAV");
@@ -511,24 +511,93 @@ socket.on("privado", (mensaje) => {
 })
 
 
+setInterval(() => {
+  if(meditar){
+    if(myPlayer.mana < myPlayer.manaTotal){
+      
+      socket.emit("meditar", (texto)=>{
+        const msg = {
+          msg: texto,
+          tipo: "consola"
+        }
+        mensajesConsola.push(msg)
+        actualizarMensajes()
+      })
+    } else {
+      const msg = {
+        msg: "Dejas de meditar.",
+        tipo: "consola"
+      }
+      mensajesConsola.push(msg)
+      actualizarMensajes()
+      meditar = false
+      setInterval(() => {
+        
+        socket.emit("cambiarSkin", "link")
+      }, 500);
+    }
+  } 
+}, 2000);
+
+
 window.addEventListener("keydown", (e) => {
 
   if (e.key === "Enter") {
 
     if (escribiendo) {
-      const msg = {
-        tipo: "chat",
-        msg: mensaje.value
-      }
-      socket.emit("enviarMensaje", msg)
-      //mensajesConsola.push(mensaje.value)
-      mensaje.value = ""
-      mensaje.blur()
-      escribiendo = false
-      actualizarMensajes()
-      setTimeout(() => {
+      const comandos = ["/meditar", "/descansar", "/comerciar"]
+
+
+      if(!comandos.includes(mensaje.value.split(" ")[0])){
+
+        const msg = {
+          tipo: "chat",
+          msg: mensaje.value
+        }
+        socket.emit("enviarMensaje", msg)
+        //mensajesConsola.push(mensaje.value)
+        mensaje.value = ""
+        mensaje.blur()
+        escribiendo = false
+        actualizarMensajes()
+        setTimeout(() => {
         if (myPlayer.ultimoMensaje === msg.msg) socket.emit("enviarMensaje", { tipo: "chat", msg: "" })
-      }, 5000);
+        }, 5000);
+      } else {
+        switch (mensaje.value) {
+          case "/meditar":
+            const msg = {
+              msg: "Comienzas a meditar.",
+              tipo: "consola"
+            }
+            mensajesConsola.push(msg)
+            actualizarMensajes()
+            if(myPlayer.skin !== "barca" && myPlayer.mana < myPlayer.manaTotal){
+              socket.emit("cambiarSkin", "barca")
+              meditar = true
+
+            } else {
+              meditar =false
+              socket.emit("cambiarSkin", "link")
+              const msg = {
+                msg: "Dejas de meditar.",
+                tipo: "consola"
+              }
+              mensajesConsola.push(msg)
+              actualizarMensajes()
+            }
+            break;
+        
+          default:
+            break;
+        }
+        
+        console.log(mensaje.value)
+        mensaje.value = ""
+        mensaje.blur()
+        escribiendo = false
+
+      }
 
     } else {
       mensaje.focus()
@@ -540,6 +609,7 @@ window.addEventListener("keydown", (e) => {
 
 
     switch (e.key) {
+
       case "u":
         accion = acciones[1]
         //console.log("lanzar ", hechizosData[8])
@@ -589,7 +659,20 @@ window.addEventListener("keydown", (e) => {
     }
   }
 
-  if (["a", "s", "w", "d"].includes(e.key)) {
+  if (["a", "s", "w", "d"].includes(e.key) && !escribiendo) {
+    setTimeout(() => {
+      console.log("pasa por aca")
+        if(myPlayer.skin === "barca"){
+          socket.emit("cambiarSkin", "link")
+          meditar=false
+          const msg = {
+            msg: "Dejas de meditar.",
+            tipo: "consola"
+          }
+          mensajesConsola.push(msg)
+          actualizarMensajes()
+        }    
+    }, 10);
     //inputs["quieto"] = false
     // inputs["ultimoFrame"] = ultimoFrame
 
@@ -808,12 +891,14 @@ function loop() {
           TILES_IN_COL_PJ = pjrender.info.cols
           PJ_SIZE_W = pjrender.info.tileWidth
           PJ_SIZE_H = pjrender.info.tileHeight
-          let { id } = pjrender.pj2D[player.row][player.col] ?? { id: 0 };
-          const imageRow = parseInt(id / TILES_IN_ROW_PJ);
-          const imageCol = id % TILES_IN_ROW_PJ;
-          // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+          let { id } = pjrender.pj2D[player.row][player.col] ?? { id: undefined };
+          if(id !== undefined){
 
-          canvas.drawImage(
+            const imageRow = parseInt(id / TILES_IN_ROW_PJ);
+            const imageCol = id % TILES_IN_ROW_PJ;
+            // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            
+            canvas.drawImage(
             imagenes[player.skin],
             imageCol * PJ_SIZE_W,
             imageRow * PJ_SIZE_H,
@@ -824,7 +909,8 @@ function loop() {
             player.w,
             player.h
           );
-
+          
+        }
 
 
 
@@ -928,14 +1014,19 @@ function loop() {
       canvas.fill();
     }
   }
+
+  
+}
+setInterval(() => {
+  
   socket.emit("myPlayer", player => {
     myPlayer = player
+  
     socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
       
       players = playersEnMapa
       myPlayer = players.find((player) => player.id === socket.id);
-      players = players.filter((player) => player.id !== socket.id)
-      players.push(myPlayer)
+      players.sort(((a, b) => a.y - b.y))
       if (mundoMaps[myPlayer.mapa]) {
         groundMap = mundoMaps[myPlayer.mapa].ground2D;
         decalMap = mundoMaps[myPlayer.mapa].decal2D;
@@ -950,10 +1041,6 @@ function loop() {
       
     })
   })
-    
-}
-setInterval(() => {
-
   loop();
 
 }, 30);
