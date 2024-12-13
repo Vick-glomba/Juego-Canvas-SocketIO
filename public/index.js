@@ -765,7 +765,7 @@ function loop() {
 
 
 
-    const TILES_IN_ROW = 20;
+    const TILES_IN_ROW = 100; //numero de tiles en imagen /public/mapas/dungeon-newbie.jpg
 
     // ground
     for (let row = 0; row < groundMap.length; row++) {
@@ -943,7 +943,7 @@ function loop() {
 
       // PLAYERS ONLINE  
       // mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
-      const onlines = `Mapa: ${myPlayer.mapa} - x:  ${myPlayer.x} -  y:  ${myPlayer.y}  -  Online: ${playersOnline} `
+      const onlines = `Mapa: ${myPlayer.mapa} - x:  ${parseInt(myPlayer.x/10)} -  y:  ${parseInt(myPlayer.y/10)}  -  Online: ${playersOnline} `
       online.innerText = onlines
       const anchoMundo = 20
       if (myPlayer) {
