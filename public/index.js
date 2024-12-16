@@ -18,6 +18,8 @@ imagenes.link.src = "personajes/sprite.png"
 imagenes.barca = new Image();
 imagenes.barca.src = "personajes/barcanueva.png"
 
+imagenes.arboles = new Image();
+imagenes.arboles.src = "personajes/arboles.png"
 
 
 const speakerImage = new Image();
@@ -661,7 +663,7 @@ window.addEventListener("keydown", (e) => {
 
   if (["a", "s", "w", "d"].includes(e.key) && !escribiendo) {
     setTimeout(() => {
-      console.log("pasa por aca")
+      
         if(myPlayer.skin === "barca"){
           socket.emit("cambiarSkin", "link")
           meditar=false
@@ -829,6 +831,8 @@ function loop() {
         }
       }
     }
+
+
     //Personaje
     for (const player of players) {
 
@@ -904,8 +908,8 @@ function loop() {
             imageRow * PJ_SIZE_H,
             PJ_SIZE_W,
             PJ_SIZE_H,
-            player.x - cameraX - player.w / 2,
-            player.y - cameraY - player.h / 2,
+            player.skin === "arboles"?player.x- cameraX - player.w/2- player.w/20: player.x - cameraX - player.w / 2,
+            player.skin === "arboles"?player.y- cameraY - player.h+myPlayer.h:player.y - cameraY - player.h / 2,
             player.w,
             player.h
           );
@@ -921,8 +925,7 @@ function loop() {
           canvas.fillStyle = color;
           canvas.font = "bold 12px";
           canvas.textAlign = "center"
-          canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
-
+          canvas.fillText(player.nombre, player.skin === "arboles"?player.x- cameraX:player.x - cameraX,player.skin === "arboles"?player.y- cameraY +myPlayer.h: (player.y - cameraY - player.h / 2) + player.h + 15)
         }
 
         //dibujar Click
@@ -935,12 +938,14 @@ function loop() {
 
       }
       //ULTIMO MENSAJE PERSONAJE
-      canvas.fillStyle = 'black'
-      canvas.fillStyle = "#f0f3f4";
-      canvas.font = "bold 12px arial";
-      canvas.textAlign = "center"
-      canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
-
+      if(player.ultimoMensaje){
+        canvas.fillStyle = 'black'
+        canvas.fillStyle = "#f0f3f4";
+        canvas.font = "bold 12px arial";
+        canvas.textAlign = "center"
+        canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
+      }
+        
       // PLAYERS ONLINE  
       // mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
       const onlines = `Mapa: ${myPlayer.mapa} - x:  ${parseInt(myPlayer.x/10)} -  y:  ${parseInt(myPlayer.y/10)}  -  Online: ${playersOnline} `
@@ -1025,6 +1030,7 @@ setInterval(() => {
     socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
       
       players = playersEnMapa
+
       myPlayer = players.find((player) => player.id === socket.id);
       players.sort(((a, b) => a.y - b.y))
       if (mundoMaps[myPlayer.mapa]) {

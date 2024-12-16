@@ -20,13 +20,26 @@ const TICK_RATE = 16;
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
 
-let players = [];
+let players = [{
+  mapa:1,
+  id:1,
+  x: 845,
+  y: 1080,
+  skin: "arboles",
+  w: 256,
+  h: 320,
+  row: 0,
+  col: 0,
+  nombre: "Arbol",
+  quieto: true,
+  estado: "criminal"
+}];
 let snowballs = [];
 const inputsMap = {};
 let ground2D, decal2D;
 
 let pj2D
-let pjDB = ["link", "barca"]
+let pjDB = ["link", "barca", "arboles"]
 
 
 let adjust = {
@@ -78,6 +91,30 @@ let adjust = {
       right: [0, 1, 2, 3],
     }
   },
+   arboles: {
+     w: 256,
+     h: 320,
+     stand: {
+       rowUp: 0,
+       up: [0, 1, 2, 3, 4],
+       rowDown: 1,
+       down: [0, 1, 2, 3, 4],
+       rowLeft: 0,
+       left: [0, 1, 2, 3, 4],
+       rowRight: 1,
+       right: [0, 1, 2, 3, 4],
+     },
+     walk: {
+       rowUp: 0,
+       up: [0, 1, 2, 3, 4],
+       rowDown: 1,
+       down: [0, 1, 2, 3, 4],
+       rowLeft: 0,
+       left: [0, 1, 2, 3, 4],
+       rowRight: 1,
+       right: [0, 1, 2, 3, 4],
+     }
+   },
 
 }
 
@@ -138,25 +175,24 @@ function isCollidingWithMap(player) {
 function isCollidingWithPlayer(player) {
   const playerEnMapa = players.filter(p => p.mapa === player.mapa && p.id !== player.id)
   for (let i = 0; i < playerEnMapa.length; i++) {
-    const otroPlayer= playerEnMapa[i] 
-    if ( isColliding(
-        {
-          x: player.x,
-          y: player.y,
-          w: 0,
-          h: 0,
-        },
-        {
-          x: otroPlayer.x-otroPlayer.w/2,
-          y: otroPlayer.y-otroPlayer.h/2,
-          w: otroPlayer.w,
-          h: otroPlayer.h,
-        }
-      )
+    const otroPlayer = playerEnMapa[i]
+    if (isColliding(
+      {
+        x: otroPlayer.skin === "arboles"?0:otroPlayer.x - otroPlayer.w / 2,
+        y: otroPlayer.skin === "arboles"?0:otroPlayer.y - otroPlayer.h / 2,
+        w: otroPlayer.skin === "arboles"?50:otroPlayer.w,
+        h: otroPlayer.skin === "arboles"?50:otroPlayer.h,
+      },
+      {
+        x: player.x,
+        y: player.y,
+        w: 0,
+        h: 0,
+      },
+    )
     ) {
       return otroPlayer.id;
     }
-
   }
   return false;
 }
@@ -183,29 +219,30 @@ function tick(delta) {
 
 
 
-    if (inputs.up) {
+    if (inputs && inputs.up) {
       player.y -= SPEED;
       player.mirando = "up"
-    } else if (inputs.down) {
+    } else if (inputs&&inputs.down) {
       player.y += SPEED;
       player.mirando = "down"
     }
 
-    if (isCollidingWithMap(player) || isCollidingWithPlayer(player) ) {
+    if (player.skin !== "arboles"&& (isCollidingWithMap(player) ||isCollidingWithPlayer(player)) ) {
       player.y = previousY;
     }
 
-    if (inputs.left) {
+
+    if (inputs&&inputs.left) {
       player.x -= SPEED;
       player.mirando = "left"
-    } else if (inputs.right) {
+    } else if (inputs&&inputs.right) {
       player.x += SPEED;
       player.mirando = "right"
     }
 
 
 
-    if (inputs.up || inputs.down || inputs.left || inputs.right) {
+    if (inputs && (inputs.up || inputs.down || inputs.left || inputs.right)) {
       player.quieto = false
 
     } else {
@@ -289,8 +326,10 @@ function tick(delta) {
 
 
 
-    if (isCollidingWithMap(player) || isCollidingWithPlayer(player) ) {
-      player.x = previousX;
+    if (player.skin !== "arboles"&& (isCollidingWithMap(player) ||isCollidingWithPlayer(player))) {
+
+        player.x = previousX;
+      
     }
   }
 
@@ -350,7 +389,7 @@ function tick(delta) {
                 io.to(pj.id).emit('privado', destino);
               }
             }
-            player.y = player.y - 1
+            
           }
 
           const obj = {
@@ -434,15 +473,15 @@ async function main() {
 
     const player = players.find((player) => player.id === socket.id);
     const otroPlayer = isCollidingWithPlayer(player)
-    if(otroPlayer){
-     
+    if (otroPlayer) {
+
       io.sockets.sockets.forEach((socket) => {
         // If given socket id is exist in list of all sockets, kill it
-        if(socket.id === otroPlayer)
-            socket.disconnect(true);
-    });
-    
-      
+        if (socket.id === otroPlayer)
+          socket.disconnect(true);
+      });
+
+
     }
     socket.emit("map", {
       mundo,
@@ -486,16 +525,16 @@ async function main() {
       }
     })
 
-    socket.on("meditar", (callback)=>{
+    socket.on("meditar", (callback) => {
       const player = players.find((player) => player.id === socket.id);
-      if(player.mana < player.manaTotal){
+      if (player.mana < player.manaTotal) {
         player.mana += 25
         callback("Has recuperado 25 de mana")
-        if(player.mana > player.manaTotal){
+        if (player.mana > player.manaTotal) {
           player.mana = player.manaTotal
         }
       }
-      
+
     })
 
 
