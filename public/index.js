@@ -155,32 +155,32 @@ const dbItems = [
     nombre: "Pocion roja",
     stat: "salud",
     modifica: 10,
-    imagen:"./personajes/pocionRoja.BMP"
+    imagen:535
   },
   {
     nombre: "Pocion azul",
     stat: "mana",
     modifica: 10,
-    imagen:"./personajes/pocionRoja.BMP"
+    imagen:534
   },
   {
     nombre: "Pollo",
     stat: "hambre",
     modifica: 10,
-    imagen:"./personajes/pocionRoja.BMP"
+    imagen:519
   },
   {
     nombre: "Vino",
     stat: "sed",
     modifica: 10,
-    imagen:"./personajes/pocionRoja.BMP"
+    imagen:529
   },
 ]
 cajaInventario.addEventListener("click", (e) => {
   cajaInventario.blur()
   e.target.blur()
   if (e.target.id !== "cajaInventario") {
-    setTimeout(() => {
+
       cajaInventario.blur()
       e.target.blur()
       if (itemSelect === e.target.id && selecciono) {
@@ -205,14 +205,14 @@ cajaInventario.addEventListener("click", (e) => {
       e.target.blur()
       selecciono = true
       actualizarInventario()
-    }, 300);
+
 
       setTimeout(() => {
         cajaInventario.blur()
         e.target.blur()
         selecciono = 0
         actualizarInventario()
-      }, 500);
+      }, 300);
       cajaInventario.blur()
   }
 })
@@ -445,7 +445,9 @@ const actualizarInventario = () => {
         let borde
         if (myPlayer.inventario[contador][1]) {
           cantidad = myPlayer.inventario[contador][1]
-          imagen = `background-image: url('./personajes/pocionRoja.BMP');`
+          const item= myPlayer.inventario[contador][0]
+          const url = "./items/"+dbItems[item].imagen+".BMP" 
+          imagen = `background-image: url(${url});`
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
           } else {
@@ -464,44 +466,6 @@ const actualizarInventario = () => {
     }
     cajaInventario.innerHTML = html
   }
-
-
-  // const html=`
-  //   <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;')">${myPlayer.inventario[0][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[1][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[2][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[3][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[4][1]}</div>
-  //   </div>
-  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[5][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[6][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[7][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[8][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[9][1]}</div>
-  //   </div>
-  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[10][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[11][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[12][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[13][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[14][1]}</div>
-  //   </div>
-  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[15][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[16][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[17][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[18][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[19][1]}</div>
-  //   </div>
-  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[20][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[21][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[22][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[23][1]}</div>
-  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[24][1]}</div>
-  //   </div>`
 
 }
 
@@ -896,27 +860,75 @@ window.addEventListener("keydown", (e) => {
         socket.emit("beber", 10)
         break
       case "u":
-        if (myPlayer.energia > 3) {
+        
+        if ( !selecciono) {
+          selecciono = true
+          //console.log("dobleclick")
+          const slot= Number(itemSelect.split("slot")[1])
+          const item = myPlayer.inventario[slot][0]
+          
+          
+          if ( item && dbItems[item].nombre) {
+            
+            console.log("usas un :", dbItems[item].nombre)
+            
+            socket.emit("usar", slot, (objeto) => {
+              
 
-          accion = acciones[1]
-
-          boxHechizos.style.cursor = "crosshair"
-          HUD.style.cursor = "crosshair"
-          cast = true
-          hechizoTemp = hechizoSelect
-          hechizoSelect = 0
-          actualizarHechizos()
-        } else {
-          const msg = {
-            tipo: "consola",
-            msg: `No tienes suficiente energia`
-          }
-          mensajesConsola.push(msg)
-          actualizarMensajes()
+            actualizarInventario()
+            setTimeout(() => {
+              cajaInventario.blur()
+              selecciono = false
+              actualizarInventario()
+            }, 600);
+          })
         }
-        // accion = acciones[1]
+      }
 
+      actualizarInventario()
+
+     
+  
+
+
+
+        // const slot= Number(itemSelect.split("slot")[1])
+        // const item = myPlayer.inventario[slot][0]
+
+        
+        // if ( item && dbItems[item].nombre) {
+
+          
+        //   socket.emit("usar", slot, (objeto) => {
+            
+        //     console.log("usas un :", dbItems[objeto].nombre)
+
+        //     actualizarInventario()
+        //   })
+        // }
+        // setTimeout(() => {
+          
+        //   actualizarInventario()
+        // }, 300);
+        // if (myPlayer.energia > 3) {
+        //   accion = acciones[1]
+        //   boxHechizos.style.cursor = "crosshair"
+        //   HUD.style.cursor = "crosshair"
+        //   cast = true
+        //   hechizoTemp = hechizoSelect
+        //   hechizoSelect = 0
+        //   actualizarHechizos()
+        // } else {
+        //   const msg = {
+        //     tipo: "consola",
+        //     msg: `No tienes suficiente energia`
+        //   }
+        //   mensajesConsola.push(msg)
+        //   actualizarMensajes()
+        // }
+        // accion = acciones[1]
         break
+
       case "+":
         zoom = zoom + 0.02
         document.body.style.zoom = zoom
