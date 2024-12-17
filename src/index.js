@@ -21,8 +21,8 @@ const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
 
 let players = [{
-  mapa:1,
-  id:1,
+  mapa: 1,
+  id: 1,
   x: 845,
   y: 1080,
   skin: "arboles",
@@ -30,7 +30,8 @@ let players = [{
   h: 320,
   row: 0,
   col: 0,
-  nombre: "Arbol",
+  clase: "arbol",
+  nombre: "abedul",
   quieto: true,
   estado: "criminal"
 }];
@@ -40,6 +41,7 @@ let ground2D, decal2D;
 
 let pj2D
 let pjDB = ["link", "barca", "arboles"]
+
 
 
 let adjust = {
@@ -91,30 +93,30 @@ let adjust = {
       right: [0, 1, 2, 3],
     }
   },
-   arboles: {
-     w: 256,
-     h: 320,
-     stand: {
-       rowUp: 0,
-       up: [0, 1, 2, 3, 4],
-       rowDown: 1,
-       down: [0, 1, 2, 3, 4],
-       rowLeft: 0,
-       left: [0, 1, 2, 3, 4],
-       rowRight: 1,
-       right: [0, 1, 2, 3, 4],
-     },
-     walk: {
-       rowUp: 0,
-       up: [0, 1, 2, 3, 4],
-       rowDown: 1,
-       down: [0, 1, 2, 3, 4],
-       rowLeft: 0,
-       left: [0, 1, 2, 3, 4],
-       rowRight: 1,
-       right: [0, 1, 2, 3, 4],
-     }
-   },
+  arboles: {
+    w: 256,
+    h: 320,
+    stand: {
+      rowUp: 0,
+      up: [0, 1, 2, 3, 4],
+      rowDown: 1,
+      down: [0, 1, 2, 3, 4],
+      rowLeft: 0,
+      left: [0, 1, 2, 3, 4],
+      rowRight: 1,
+      right: [0, 1, 2, 3, 4],
+    },
+    walk: {
+      rowUp: 0,
+      up: [0, 1, 2, 3, 4],
+      rowDown: 1,
+      down: [0, 1, 2, 3, 4],
+      rowLeft: 0,
+      left: [0, 1, 2, 3, 4],
+      rowRight: 1,
+      right: [0, 1, 2, 3, 4],
+    }
+  },
 
 }
 
@@ -178,10 +180,10 @@ function isCollidingWithPlayer(player) {
     const otroPlayer = playerEnMapa[i]
     if (isColliding(
       {
-        x: otroPlayer.skin === "arboles"?0:otroPlayer.x - otroPlayer.w / 2,
-        y: otroPlayer.skin === "arboles"?0:otroPlayer.y - otroPlayer.h / 2,
-        w: otroPlayer.skin === "arboles"?50:otroPlayer.w,
-        h: otroPlayer.skin === "arboles"?50:otroPlayer.h,
+        x: otroPlayer.skin === "arboles" ? 0 : otroPlayer.x - otroPlayer.w / 2,
+        y: otroPlayer.skin === "arboles" ? 0 : otroPlayer.y - otroPlayer.h / 2,
+        w: otroPlayer.skin === "arboles" ? 50 : otroPlayer.w,
+        h: otroPlayer.skin === "arboles" ? 50 : otroPlayer.h,
       },
       {
         x: player.x,
@@ -222,20 +224,20 @@ function tick(delta) {
     if (inputs && inputs.up) {
       player.y -= SPEED;
       player.mirando = "up"
-    } else if (inputs&&inputs.down) {
+    } else if (inputs && inputs.down) {
       player.y += SPEED;
       player.mirando = "down"
     }
 
-    if (player.skin !== "arboles"&& (isCollidingWithMap(player) ||isCollidingWithPlayer(player)) ) {
+    if (player.skin !== "arboles" && (isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
       player.y = previousY;
     }
 
 
-    if (inputs&&inputs.left) {
+    if (inputs && inputs.left) {
       player.x -= SPEED;
       player.mirando = "left"
-    } else if (inputs&&inputs.right) {
+    } else if (inputs && inputs.right) {
       player.x += SPEED;
       player.mirando = "right"
     }
@@ -326,31 +328,62 @@ function tick(delta) {
 
 
 
-    if (player.skin !== "arboles"&& (isCollidingWithMap(player) ||isCollidingWithPlayer(player))) {
+    if (player.skin !== "arboles" && (isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
 
-        player.x = previousX;
-      
+      player.x = previousX;
+
     }
   }
 
   for (const snowball of snowballs) {
     // snowball.x
     // snowball.y 
-    snowball.timeLeft -= delta;
+    //snowball.timeLeft -= delta;
 
+    let primero = false
     for (const player of players) {
       if (snowball.mapa === player.mapa) {
+        const pj = players.find((player) => player.id === snowball.playerId);
 
         //esto es de la bola original //if (player.id === snowball.playerId) continue;
-        const distance = Math.sqrt(
-          (player.x - snowball.x) ** 2 +
-          (player.y - snowball.y) ** 2
+
+        let tamaño = player.w / 2
+        let posicionx = player.x
+        let posiciony = player.y
+
+        if (player.clase === "arbol") {
+          tamaño = 10
+          posiciony = posiciony + 20
+          posicionx = posicionx + 5
+        }
+        let distance = Math.sqrt(
+          (posicionx - snowball.x) ** 2 +
+          (posiciony - snowball.y) ** 2
         );
-        if (distance <= player.w / 2) {
-          const pj = players.find((player) => player.id === snowball.playerId);
+        if (distance <= tamaño) {
+          let obj
+          if (player.clase === "player") {
+            obj = {
+              cast: snowball.cast,
+              player: pj,
+              tipo: "click",
+              msg: player
+            }
+          } else {
+            obj = {
+              cast: snowball.cast,
+              //player: pj,
+              tipo: "consola",
+              msg: player.nombre + "."
+            }
+          }
+          io.to(pj.id).emit("recibirMensaje", obj)
+          if (primero === false) {
+            primero = true
+          }
           if (snowball.cast) {
             //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
-            if (snowball.cast.cast && snowball.cast.hechizoSelect.clase && snowball.cast.hechizoSelect.clase === "curacion") {
+            if (snowball.cast.cast && snowball.cast.hechizoSelect.clase && snowball.cast.hechizoSelect.clase === "curacion" && player.clase === "player") {
               console.log("toco la bola y es : ", snowball.cast)
               if (pj.mana >= snowball.cast.hechizoSelect["mana necesario"]) {
                 pj.mana = pj.mana - snowball.cast.hechizoSelect["mana necesario"]
@@ -389,20 +422,15 @@ function tick(delta) {
                 io.to(pj.id).emit('privado', destino);
               }
             }
-            
+
           }
 
-          const obj = {
-            cast: snowball.cast,
-            player: pj,
-            tipo: "click",
-            msg: player
-          }
-          io.emit("recibirMensaje", obj)
-          snowball.timeLeft = -1;
-          break;
+
         }
+
+        snowball.timeLeft = -1;
       }
+
     }
   }
   snowballs = snowballs.filter((snowball) => snowball.timeLeft > 0);
@@ -424,10 +452,7 @@ async function main() {
   io.on("connect", (socket) => {
     console.log("user connected", socket.id);
 
-    socket.on("nombre", (nombre) => {
-      const player = players.find((player) => player.id === socket.id);
-      player.nombre = nombre
-    })
+
 
     inputsMap[socket.id] = {
       up: false,
@@ -435,10 +460,10 @@ async function main() {
       left: false,
       right: false,
     };
-
+    //armado
     players.push({
       id: socket.id,
-      hechizos: [2, 6, 2, 0, 4, 5, 0, 3],
+      hechizos: [1, 2, 6, 2, 0, 4, 5, 0, 3],
       mapa: 1,
       x: 800,
       y: 800,
@@ -446,6 +471,7 @@ async function main() {
       mirando: "down",
       quieto: true,
       skin: "link",
+      clase: "player",
       w: 0,
       h: 0,
       quieto: true,
@@ -455,12 +481,12 @@ async function main() {
       ultimoMensaje: "",
       nombre: "El Vittor",
       nivel: 1,
-      energiaTotal: 400,
+      energiaTotal: 50,
       saludTotal: 300,
       manaTotal: 200,
       hambreTotal: 100,
       sedTotal: 100,
-      energia: 300,
+      energia: 10,
       salud: 100,
       mana: 100,
       hambre: 20,
@@ -468,7 +494,8 @@ async function main() {
       reputacion: 1000,
       estado: "ciudadano",
       ciudad: "Nix",
-      descripcion: "Morgolock, me duras un click"
+      descripcion: "Morgolock, me duras un click",
+      inventario:[[1,1],[1,0],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8],[1,9],[1,10],[1,11],[1,12],[1,0],[1,14],[1,15],[1,16],[1,17],[1,0],[1,19],[1,20],[1,0],[1,22],[1,23],[1,24],[1,25]]
     });
 
     const player = players.find((player) => player.id === socket.id);
@@ -536,9 +563,81 @@ async function main() {
       }
 
     })
+    socket.on("descansar", (cantidad, callback) => {
+      const player = players.find((player) => player.id === socket.id);
+      if (player.energia < player.energiaTotal) {
+        player.energia += cantidad
+        if (player.energia >= player.energiaTotal) {
+          player.energia = player.energiaTotal
+          callback("Dejas de descansar.", false)
+        } else {
+
+          callback("Te sientes menos cansado.", true)
+        }
+      }
+
+    })
 
 
-
+    socket.on("usar", (slot, callback) => {
+      const player = players.find((player) => player.id === socket.id);
+      console.log("usas el item: ",player.inventario[slot][0], " en el slot: ", slot," Tiene aun: ", player.inventario[slot][1])
+      if(player.inventario[slot][1]>0){
+        player.inventario[slot][1]-=1
+        if(player.inventario[slot][1]===0){
+          player.inventario[slot][0]= 0
+          player.inventario[slot][1]= 0
+      } 
+      }
+      callback()
+      
+    })
+    socket.on("beber", (cantidad) => {
+      const player = players.find((player) => player.id === socket.id);
+      if (player.sed < player.sedTotal){
+        player.sed += cantidad
+      }
+      if (player.sed > player.sedTotal) {
+        player.sed = player.sedTotal
+      }
+    })
+    socket.on("comer", (cantidad) => {
+      const player = players.find((player) => player.id === socket.id);
+      if (player.hambre < player.hambreTotal){
+        player.hambre += cantidad
+      }
+      if (player.hambre > player.hambreTotal) {
+        player.hambre = player.hambreTotal
+      }
+    })
+    socket.on("gastarSed", (cantidad) => {
+      const player = players.find((player) => player.id === socket.id);
+      if (player.sed > 0)
+        player.sed -= cantidad
+      if (player.sed < 0) {
+        player.sed = 0
+      }
+    })
+    socket.on("gastarHambre", (cantidad) => {
+      const player = players.find((player) => player.id === socket.id);
+      if (player.hambre > 0)
+        player.hambre -= cantidad
+      if (player.hambre < 0) {
+        player.hambre = 0
+      }
+    })
+    socket.on("gastarEnergia", (cantidad) => {
+      const player = players.find((player) => player.id === socket.id);
+      player.energia -= cantidad
+    })
+    socket.on("nombre", (nombre) => {
+      const player = players.find((player) => player.id === socket.id);
+      player.nombre = nombre
+    })
+    socket.on("desc", (desc) => {
+      const player = players.find((player) => player.id === socket.id);
+      player.descripcion = desc
+    })
 
     socket.on("inputs", (inputs) => {
       inputsMap[socket.id] = inputs;
@@ -605,6 +704,8 @@ async function main() {
 
     socket.on("point", (obj) => {
       const player = players.find((player) => player.id === socket.id);
+
+
 
       snowballs.push({
         cast: obj.cast,

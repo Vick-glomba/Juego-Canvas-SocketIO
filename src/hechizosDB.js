@@ -9,6 +9,17 @@ db.hechizos = [
     "nombre": "--------------Vacio--------------",
   },
   {
+    "nombre": "talar",
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "talar",
+    "recurso": "madera",
+    "cantidad": 5
+  },
+  {
     "nombre": "Dardo magico",
     "mana necesario": 5,
     "min": 1,
@@ -80,15 +91,6 @@ db.hechizos = [
     "texto": "VAX IN TAR",
     "clase": "movimiento"
   },
-  {
-    "nombre": "Talar",
-    "mana necesario": 0,
-    "min": 0,
-    "max": 1,
-    "nivel": 1,
-    "texto": "",
-    "clase": "talar"
-  }
 ]
 
 module.exports = db

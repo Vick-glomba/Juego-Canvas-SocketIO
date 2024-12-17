@@ -6,7 +6,7 @@ let distanciaRender = 32
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
 
-const nombre = "BetaTester"//prompt("elije tu nombre")
+
 const mapImage = new Image();
 mapImage.src = "mapas/dungeon-newbie.png";
 
@@ -54,6 +54,10 @@ const HUD = document.getElementById("HUD");
 const canvasEl = document.getElementById("canvas");
 const principal = document.getElementById("principal");
 
+
+function numeroRandom(min, max) {
+  return parseInt(Math.random() * (max - 1 - min) + min);
+}
 
 //BOTONES
 const btnOpciones = document.getElementById("btnOpciones")
@@ -115,6 +119,15 @@ const hambre = document.getElementById("hambre")
 const sed = document.getElementById("sed")
 
 
+const cajaInventario = document.getElementById("cajaInventario")
+let itemSelect
+
+
+
+
+
+
+
 const boxHechizos = document.getElementById("boxHechizos")
 const hechizos = document.getElementById("hechizos")
 const inventario = document.getElementById("inventario")
@@ -134,6 +147,30 @@ btnHechizos.addEventListener("click", () => {
   inventario.style.visibility = "hidden"
   actualizarHechizos()
 
+})
+let selecciono = false
+cajaInventario.addEventListener("click", (e)=>{
+  if(e.target.id !== "cajaInventario"){
+    setTimeout(() => {
+      if(itemSelect === e.target.id && selecciono){
+        console.log("dobleclick")
+        socket.emit("usar", Number(itemSelect.split("slot")[1]), ()=>{
+          selecciono=false
+          actualizarInventario()
+        })
+      }
+      
+      itemSelect = e.target.id
+      selecciono = true
+      
+       setTimeout(() => {
+        
+         selecciono= 0
+         actualizarInventario()
+     }, 250);
+    actualizarInventario()
+  }, 300);
+}
 })
 
 
@@ -199,21 +236,30 @@ HUD.addEventListener("click", (e) => {
 
 lanzar.addEventListener("click", () => {
 
-
-  console.log("lanzo", myPlayer.mana, hechizoSelect, hechizosData[myPlayer["hechizos"][hechizoSelect]])
-  const nombre = document.getElementById(hechizoSelect).innerText
+  cast = false
+  const nombre = document.getElementById(hechizoSelect)?document.getElementById(hechizoSelect).innerText:hechizosData[0]["nombre"]
 
   if (nombre !== hechizosData[0]["nombre"]) {
-    if (myPlayer.mana >= hechizosData[myPlayer["hechizos"][hechizoSelect]]["mana necesario"]) {
-      accion = acciones[0]
-      hechizoTemp = hechizoSelect
-      //  console.log("lanzar ", nombre)
-      boxHechizos.style.cursor = "crosshair"
-      HUD.style.cursor = "crosshair"
-      cast = true
-    } else {
+    if (myPlayer.energia >0) {
+
+      if (myPlayer.mana >= hechizosData[myPlayer["hechizos"][hechizoSelect]]["mana necesario"]) {
+        accion = acciones[0]
+        hechizoTemp = hechizoSelect
+        //  console.log("lanzar ", nombre)
+        boxHechizos.style.cursor = "crosshair"
+        HUD.style.cursor = "crosshair"
+        cast = true
+      } else {
+        const msg = {
+          msg: "No tienes suficiente mana.",
+          tipo: "consola"
+        }
+        mensajesConsola.push(msg)
+        actualizarMensajes()
+      }
+    }else{
       const msg = {
-        msg: "No tienes suficiente mana.",
+        msg: "No tienes suficiente energia.",
         tipo: "consola"
       }
       mensajesConsola.push(msg)
@@ -343,6 +389,79 @@ const SNOWBALL_RADIUS = 4;
 //     }
 //   }
 // }, 5000);
+const actualizarInventario = () =>{
+  if(myPlayer){
+    let contador = 0
+    let html= ""
+      for (let i = 0; i < 5; i++) {
+         html += `<div style="display: flex; width: 220px; height: 46px; color: aliceblue;">`
+        for (let a = 0; a < 5; a++) {
+          let imagen
+          let cantidad = ""
+          let borde
+          if(myPlayer.inventario[contador][1]){
+             cantidad= myPlayer.inventario[contador][1]
+             imagen = `background-image: url('./personajes/pocionRoja.BMP');`
+             if(itemSelect === "slot"+contador){
+               borde = "border-color: rgb(253, 232, 0);"
+              }else{
+               borde = "border-color: black;"
+
+             }
+          }
+          html+=`
+          <div id="${"slot"+contador}" style="width: 42px; height: 44px; color: aliceblue;border: 1px; ${borde}border-style: solid; ${imagen} background-size:100% 100%;')">${cantidad}</div>`
+          contador+=1
+          if(a === 4){
+            html+=`
+            </div>`
+          }
+        }
+      }
+      cajaInventario.innerHTML= html
+  }
+    
+    
+  // const html=`
+  //   <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;')">${myPlayer.inventario[0][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[1][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[2][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[3][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[4][1]}</div>
+  //   </div>
+  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[5][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[6][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[7][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[8][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[9][1]}</div>
+  //   </div>
+  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[10][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[11][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[12][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[13][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[14][1]}</div>
+  //   </div>
+  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[15][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[16][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[17][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[18][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[19][1]}</div>
+  //   </div>
+  //     <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[20][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[21][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[22][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[23][1]}</div>
+  //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[24][1]}</div>
+  //   </div>`
+  
+    }
+  
+
 
 const actualizarHechizos = (hechizo) => {
   if (hechizo) {
@@ -351,12 +470,15 @@ const actualizarHechizos = (hechizo) => {
     boxHechizos.innerHTML = ""
     let html = ""
     for (let i = 0; i < 20; i++) {
-      const texto = myPlayer.hechizos[i] || hechizosData[myPlayer.hechizos[i]] ? hechizosData[myPlayer.hechizos[i]]["nombre"] : hechizosData[0]["nombre"]
-      const id = i
-      const color = hechizoSelect === id ? "#f9e79f50" : "#00000000"
-      html += `
-       <div id="${id}" style="border: 1px; border-style:solid;font-size:12px;padding-top:2px; border-color: aliceblue;color: #ffffff; width: 99%%;text-align: center; height: 20px; background-color:${color};">${texto}</div>
-       `
+      if (myPlayer.hechizos[i] !== 1) {
+
+        const texto = myPlayer.hechizos[i] || hechizosData[myPlayer.hechizos[i]] ? hechizosData[myPlayer.hechizos[i]]["nombre"] : hechizosData[0]["nombre"]
+        const id = i
+        const color = hechizoSelect === id ? "#f9e79f50" : "#00000000"
+        html += `
+        <div id="${id}" style="border: 1px; border-style:solid;font-size:12px;padding-top:2px; border-color: aliceblue;color: #ffffff; width: 99%%;text-align: center; height: 20px; background-color:${color};">${texto}</div>
+        `
+      }
     }
 
     boxHechizos.innerHTML = html
@@ -366,15 +488,16 @@ const actualizarHechizos = (hechizo) => {
 socket.on("connect", () => {
   console.log("connected");
 });
-socket.on("disconnect", ()=>{
-  window.location= "error.html"
+socket.on("disconnect", () => {
+  window.location = "error.html"
 })
 
-socket.emit("nombre", nombre)
+
 
 socket.on("map", ({ mundo, player, db }) => {
 
   myPlayer = player
+  actualizarInventario()
   mundoMaps = mundo
   groundMap = mundoMaps[myPlayer.mapa].ground2D;
 
@@ -428,8 +551,12 @@ socket.on("recibirMensaje", (obj) => {
         hechizo = hechizosData[myPlayer.hechizos[obj.cast.hechizoSelect]] ?? "no existe el hechizo en DB"
       }
       if (obj.cast.accion === "trabajo") {
-
-        hechizo = hechizosData[obj.cast.hechizoSelect]["nombre"] ?? "no existe el hechizo en DB"
+        const msg = {
+          tipo: "consola",
+          msg: `No puedes ${obj.cast.hechizoSelect.nombre} a ${obj.msg.nombre}`
+        }
+        mensajesConsola.push(msg)
+        actualizarMensajes()
       }
       console.log("Es un cast ", obj)
     } else {
@@ -439,6 +566,22 @@ socket.on("recibirMensaje", (obj) => {
     actualizarMensajes()
   }
   if (obj.tipo === "chat") {
+    mensajesConsola.push(obj)
+    actualizarMensajes()
+  }
+  if (obj.tipo === "consola") {
+    if (obj.cast.cast) {
+
+      if (obj.cast.accion === "trabajo") {
+        const cantidad = numeroRandom(1, obj.cast.hechizoSelect.cantidad)
+        const msg = {
+          tipo: "consola",
+          msg: `Has conseguido ${cantidad} de ${obj.cast.hechizoSelect.recurso}`
+        }
+        mensajesConsola.push(msg)
+        actualizarMensajes()
+      }
+    }
     mensajesConsola.push(obj)
     actualizarMensajes()
   }
@@ -472,9 +615,9 @@ const actualizarMensajes = () => {
          `
           break;
         case "click":
-          const estado = mensajesConsola[i].player.estado === "criminal" || mensajesConsola[i].player.estado === "ciudadano" ? mensajesConsola[i].player.estado.toUpperCase() : "NEUTRAL"
-          msg = `< ${mensajesConsola[i].msg.nombre} > ${mensajesConsola[i].player.descripcion} < ${estado} > < ${mensajesConsola[i].player.ciudad} >`
-          const color = mensajesConsola[i].player.estado === "criminal" ? colorCrimi : mensajesConsola[i].player.estado === "ciudadano" ? colorCiuda : colorNeutral
+          const estado = mensajesConsola[i].msg.estado === "criminal" || mensajesConsola[i].msg.estado === "ciudadano" ? mensajesConsola[i].msg.estado.toUpperCase() : "NEUTRAL"
+          msg = `< ${mensajesConsola[i].msg.nombre} > ${mensajesConsola[i].msg.descripcion || ""} < ${estado} > < ${mensajesConsola[i].msg.ciudad} >`
+          const color = mensajesConsola[i].msg.estado === "criminal" ? colorCrimi : mensajesConsola[i].msg.estado === "ciudadano" ? colorCiuda : colorNeutral
           html += `
          <p style="color:${color};margin:0px; padding:0px; margin-left: 15px; font-size:13px">${msg}</p>
          `
@@ -491,7 +634,7 @@ const actualizarMensajes = () => {
         case "consola":
           msg = mensajesConsola[i].msg
           html += `
-       <p style="color:${colorConsola};margin:0px; padding:0px; margin-left: 15px; font-size:14px">${msg}</p>
+       <p style="color:${colorConsola};margin:0px; padding:0px; margin-left: 15px; font-size:12px">${msg}</p>
        `
           break;
       }
@@ -514,10 +657,10 @@ socket.on("privado", (mensaje) => {
 
 
 setInterval(() => {
-  if(meditar){
-    if(myPlayer.mana < myPlayer.manaTotal){
-      
-      socket.emit("meditar", (texto)=>{
+  if (meditar) {
+    if (myPlayer.mana < myPlayer.manaTotal) {
+
+      socket.emit("meditar", (texto) => {
         const msg = {
           msg: texto,
           tipo: "consola"
@@ -534,12 +677,58 @@ setInterval(() => {
       actualizarMensajes()
       meditar = false
       setInterval(() => {
-        
+
         socket.emit("cambiarSkin", "link")
       }, 500);
     }
-  } 
+  }
 }, 2000);
+let descansar = false
+setInterval(() => {
+  if (myPlayer.sed > 0 && myPlayer.hambre > 0) {
+    if (myPlayer.energia < myPlayer.energiaTotal && descansar) {
+      socket.emit("descansar", parseInt(myPlayer.energiaTotal * 0.1), (texto, bool) => {
+        if (!bool) {
+          descansar = false
+        }
+        const msg = {
+          msg: texto,
+          tipo: "consola"
+        }
+        mensajesConsola.push(msg)
+        actualizarMensajes()
+      })
+    } else if (!descansar) {
+      socket.emit("descansar", parseInt(myPlayer.energiaTotal * 0.05), (texto) => {
+      })
+    }
+  }
+
+}, 5000);
+setInterval(() => {
+  socket.emit("gastarSed", 5)
+  setTimeout(() => {
+    socket.emit("gastarHambre", 5)
+    if (myPlayer.sed <= 0 && myPlayer.energia === 0) {
+      const msg = {
+        msg: "Estas Sediento.",
+        tipo: "consola"
+      }
+      descansar = false
+      mensajesConsola.push(msg)
+      actualizarMensajes()
+    }
+    if (myPlayer.hambre <= 0 && myPlayer.energia === 0) {
+      const msg = {
+        msg: "Estas Hambiento.",
+        tipo: "consola"
+      }
+      descansar = false
+      mensajesConsola.push(msg)
+      actualizarMensajes()
+    }
+  }, 10000);
+}, 20000);
 
 
 window.addEventListener("keydown", (e) => {
@@ -547,10 +736,10 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
 
     if (escribiendo) {
-      const comandos = ["/meditar", "/descansar", "/comerciar"]
+      const comandos = ["/meditar", "/descansar", "/comerciar", "/nombre", "/desc"]
 
 
-      if(!comandos.includes(mensaje.value.split(" ")[0])){
+      if (!comandos.includes(mensaje.value.split(" ")[0])) {
 
         const msg = {
           tipo: "chat",
@@ -563,10 +752,10 @@ window.addEventListener("keydown", (e) => {
         escribiendo = false
         actualizarMensajes()
         setTimeout(() => {
-        if (myPlayer.ultimoMensaje === msg.msg) socket.emit("enviarMensaje", { tipo: "chat", msg: "" })
+          if (myPlayer.ultimoMensaje === msg.msg) socket.emit("enviarMensaje", { tipo: "chat", msg: "" })
         }, 5000);
       } else {
-        switch (mensaje.value) {
+        switch (mensaje.value.split(" ")[0]) {
           case "/meditar":
             const msg = {
               msg: "Comienzas a meditar.",
@@ -574,12 +763,12 @@ window.addEventListener("keydown", (e) => {
             }
             mensajesConsola.push(msg)
             actualizarMensajes()
-            if(myPlayer.skin !== "barca" && myPlayer.mana < myPlayer.manaTotal){
+            if (myPlayer.skin !== "barca" && myPlayer.mana < myPlayer.manaTotal) {
               socket.emit("cambiarSkin", "barca")
               meditar = true
 
             } else {
-              meditar =false
+              meditar = false
               socket.emit("cambiarSkin", "link")
               const msg = {
                 msg: "Dejas de meditar.",
@@ -589,12 +778,54 @@ window.addEventListener("keydown", (e) => {
               actualizarMensajes()
             }
             break;
-        
+          case "/descansar":
+            if (!descansar) {
+              if (myPlayer.hambre > 0 && myPlayer.sed > 0) {
+                const msg = {
+                  msg: "Comienzas a descansar.",
+                  tipo: "consola"
+                }
+                mensajesConsola.push(msg)
+                actualizarMensajes()
+                descansar = true
+              } else {
+                descansar = false
+                const msg = {
+                  msg: "Tienes demasiada hambre o sed.",
+                  tipo: "consola"
+                }
+                mensajesConsola.push(msg)
+                actualizarMensajes()
+              }
+
+            } else {
+              descansar = false
+              const msg = {
+                msg: "Dejas de descansar.",
+                tipo: "consola"
+              }
+              mensajesConsola.push(msg)
+              actualizarMensajes()
+            }
+            break;
+          case "/nombre":
+            const nombre = mensaje.value.split(" ")[1]
+            if (nombre !== "") {
+              socket.emit("nombre", nombre)
+            }
+            break
+          case "/desc":
+            const comando = mensaje.value.split(" ")[0].trim()
+            const desc = mensaje.value.substr(comando.length)
+            if (desc !== "") {
+              socket.emit("desc", desc)
+            }
+            break
           default:
             break;
         }
-        
-        console.log(mensaje.value)
+
+        //   console.log(mensaje.value)
         mensaje.value = ""
         mensaje.blur()
         escribiendo = false
@@ -611,16 +842,36 @@ window.addEventListener("keydown", (e) => {
 
 
     switch (e.key) {
-
+      case "i":
+        actualizarInventario()
+        break
+      case "c":
+        socket.emit("comer", 10)
+        break
+      case "b":
+        socket.emit("beber", 10)
+        break
       case "u":
-        accion = acciones[1]
-        //console.log("lanzar ", hechizosData[8])
-        boxHechizos.style.cursor = "crosshair"
-        HUD.style.cursor = "crosshair"
-        cast = true
-        hechizoTemp = hechizoSelect
-        hechizoSelect = 8
-        actualizarHechizos()
+        if (myPlayer.energia > 3) {
+
+          accion = acciones[1]
+
+          boxHechizos.style.cursor = "crosshair"
+          HUD.style.cursor = "crosshair"
+          cast = true
+          hechizoTemp = hechizoSelect
+          hechizoSelect = 0
+          actualizarHechizos()
+        } else {
+          const msg = {
+            tipo: "consola",
+            msg: `No tienes suficiente energia`
+          }
+          mensajesConsola.push(msg)
+          actualizarMensajes()
+        }
+        // accion = acciones[1]
+
         break
       case "+":
         zoom = zoom + 0.02
@@ -663,17 +914,25 @@ window.addEventListener("keydown", (e) => {
 
   if (["a", "s", "w", "d"].includes(e.key) && !escribiendo) {
     setTimeout(() => {
-      
-        if(myPlayer.skin === "barca"){
-          socket.emit("cambiarSkin", "link")
-          meditar=false
-          const msg = {
-            msg: "Dejas de meditar.",
-            tipo: "consola"
-          }
-          mensajesConsola.push(msg)
-          actualizarMensajes()
-        }    
+      if (descansar) {
+        const msg = {
+          msg: "Dejas de descansar.",
+          tipo: "consola"
+        }
+        mensajesConsola.push(msg)
+        actualizarMensajes()
+        descansar = false
+      }
+      if (myPlayer.skin === "barca") {
+        socket.emit("cambiarSkin", "link")
+        meditar = false
+        const msg = {
+          msg: "Dejas de meditar.",
+          tipo: "consola"
+        }
+        mensajesConsola.push(msg)
+        actualizarMensajes()
+      }
     }, 10);
     //inputs["quieto"] = false
     // inputs["ultimoFrame"] = ultimoFrame
@@ -722,12 +981,28 @@ canvasEl.addEventListener("click", (e) => {
   }
   boxHechizos.style.cursor = "default"
   HUD.style.cursor = "default"
-  cast = false
-  //accion = ""
   hechizoSelect = hechizoTemp
   actualizarHechizos()
   socket.emit("point", point);
-
+  if (accion === "trabajo" && cast) {
+    if (descansar) {
+      const msg = {
+        msg: "Dejas de descansar.",
+        tipo: "consola"
+      }
+      mensajesConsola.push(msg)
+      actualizarMensajes()
+    }
+    socket.emit("gastarEnergia", 3)
+    accion = ""
+    descansar = false
+  }
+  if (accion === "hechizo" && cast) {
+    socket.emit("gastarEnergia", 1)
+    accion = ""
+    descansar = false
+  }
+  cast = false
 });
 
 
@@ -755,7 +1030,7 @@ canvasEl.addEventListener("click", (e) => {
 
 function loop() {
 
-
+  
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
   if (myPlayer) {
 
@@ -896,39 +1171,41 @@ function loop() {
           PJ_SIZE_W = pjrender.info.tileWidth
           PJ_SIZE_H = pjrender.info.tileHeight
           let { id } = pjrender.pj2D[player.row][player.col] ?? { id: undefined };
-          if(id !== undefined){
+          if (id !== undefined) {
 
             const imageRow = parseInt(id / TILES_IN_ROW_PJ);
             const imageCol = id % TILES_IN_ROW_PJ;
             // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-            
+
             canvas.drawImage(
-            imagenes[player.skin],
-            imageCol * PJ_SIZE_W,
-            imageRow * PJ_SIZE_H,
-            PJ_SIZE_W,
-            PJ_SIZE_H,
-            player.skin === "arboles"?player.x- cameraX - player.w/2- player.w/20: player.x - cameraX - player.w / 2,
-            player.skin === "arboles"?player.y- cameraY - player.h+myPlayer.h:player.y - cameraY - player.h / 2,
-            player.w,
-            player.h
-          );
-          
-        }
+              imagenes[player.skin],
+              imageCol * PJ_SIZE_W,
+              imageRow * PJ_SIZE_H,
+              PJ_SIZE_W,
+              PJ_SIZE_H,
+              player.skin === "arboles" ? player.x - cameraX - player.w / 2 - player.w / 20 : player.x - cameraX - player.w / 2,
+              player.skin === "arboles" ? player.y - cameraY - player.h +55 : player.y - cameraY - player.h / 2,
+              player.w,
+              player.h
+            );
+
+          }
 
 
 
           //NOMBRE PERSONAJE
           //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
-          const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
-          canvas.fillStyle = 'black'
-          canvas.fillStyle = color;
-          canvas.font = "bold 12px";
-          canvas.textAlign = "center"
-          canvas.fillText(player.nombre, player.skin === "arboles"?player.x- cameraX:player.x - cameraX,player.skin === "arboles"?player.y- cameraY +myPlayer.h: (player.y - cameraY - player.h / 2) + player.h + 15)
+          if(player.skin !== "arboles"){
+            const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
+            canvas.fillStyle = 'black'
+            canvas.fillStyle = color;
+            canvas.font = "bold 12px";
+            canvas.textAlign = "center"
+            canvas.fillText(player.nombre, player.skin === "arboles" ? player.x - cameraX : player.x - cameraX, player.skin === "arboles" ? player.y - cameraY + 50 : (player.y - cameraY - player.h / 2) + player.h + 15)
+          }
         }
-
-        //dibujar Click
+          
+          //dibujar Click
         //console.log(clickPoint)
         // canvas.strokeStyle = "rgb(0,255,0)";
         // canvas.beginPath();
@@ -938,17 +1215,17 @@ function loop() {
 
       }
       //ULTIMO MENSAJE PERSONAJE
-      if(player.ultimoMensaje){
+      if (player.ultimoMensaje) {
         canvas.fillStyle = 'black'
         canvas.fillStyle = "#f0f3f4";
         canvas.font = "bold 12px arial";
         canvas.textAlign = "center"
         canvas.fillText(player.ultimoMensaje, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h - PJ_SIZE_H / 2.5)
       }
-        
+
       // PLAYERS ONLINE  
       // mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
-      const onlines = `Mapa: ${myPlayer.mapa} - x:  ${parseInt(myPlayer.x/10)} -  y:  ${parseInt(myPlayer.y/10)}  -  Online: ${playersOnline} `
+      const onlines = `Mapa: ${myPlayer.mapa} - x:  ${parseInt(myPlayer.x / 10)} -  y:  ${parseInt(myPlayer.y / 10)}  -  Online: ${playersOnline} `
       online.innerText = onlines
       const anchoMundo = 20
       if (myPlayer) {
@@ -963,21 +1240,21 @@ function loop() {
         }
         if (myPlayer.y > 1500) {
           nuevoMapa = (myPlayer.mapa + anchoMundo)
-        //  myPlayer.mapa = nuevoMapa
+          //  myPlayer.mapa = nuevoMapa
           socket.emit("cambiarMapa", nuevoMapa)
           console.log("cambio a mapa: ", nuevoMapa)
 
         }
         if (myPlayer.x < 10) {
           nuevoMapa = (myPlayer.mapa - 1)
-       //   myPlayer.mapa = nuevoMapa
+          //   myPlayer.mapa = nuevoMapa
           socket.emit("cambiarMapa", nuevoMapa)
           console.log("cambio a mapa: ", nuevoMapa)
 
         }
         if (myPlayer.x > 1500) {
           nuevoMapa = (myPlayer.mapa + 1)
-       //   myPlayer.mapa = nuevoMapa
+          //   myPlayer.mapa = nuevoMapa
           socket.emit("cambiarMapa", nuevoMapa)
           console.log("cambio a mapa: ", nuevoMapa)
 
@@ -1020,15 +1297,15 @@ function loop() {
     }
   }
 
-  
+
 }
 setInterval(() => {
-  
+
   socket.emit("myPlayer", player => {
     myPlayer = player
-  
+
     socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
-      
+
       players = playersEnMapa
 
       myPlayer = players.find((player) => player.id === socket.id);
@@ -1037,14 +1314,14 @@ setInterval(() => {
         groundMap = mundoMaps[myPlayer.mapa].ground2D;
         decalMap = mundoMaps[myPlayer.mapa].decal2D;
       }
-      
+
       if (myPlayer) {
         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
       }
       playersOnline = playersOnlines
       snowballs = snowballsEnMapa
-      
+
     })
   })
   loop();
