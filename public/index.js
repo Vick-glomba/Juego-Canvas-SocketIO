@@ -66,7 +66,7 @@ const btnClanes = document.getElementById("btnClanes")
 
 const oro = document.getElementById("oro")
 const plata = document.getElementById("plata")
-const bronce = document.getElementById("bronce")
+const cobre = document.getElementById("cobre")
 
 const btnHechizos = document.getElementById("btnHechizos")
 const btnInventario = document.getElementById("btnInventario")
@@ -149,71 +149,44 @@ btnHechizos.addEventListener("click", () => {
 
 })
 let selecciono = false
-const dbItems = [
-  {},
-  {
-    nombre: "Pocion roja",
-    stat: "salud",
-    modifica: 10,
-    imagen:535
-  },
-  {
-    nombre: "Pocion azul",
-    stat: "mana",
-    modifica: 10,
-    imagen:534
-  },
-  {
-    nombre: "Pollo",
-    stat: "hambre",
-    modifica: 10,
-    imagen:519
-  },
-  {
-    nombre: "Vino",
-    stat: "sed",
-    modifica: 10,
-    imagen:529
-  },
-]
 cajaInventario.addEventListener("click", (e) => {
   cajaInventario.blur()
   e.target.blur()
   if (e.target.id !== "cajaInventario") {
 
-      cajaInventario.blur()
-      e.target.blur()
-      if (itemSelect === e.target.id && selecciono) {
-        //console.log("dobleclick")
-        const slot= Number(itemSelect.split("slot")[1])
-        const item = myPlayer.inventario[slot][0]
+    cajaInventario.blur()
+    e.target.blur()
+    if (itemSelect === e.target.id && selecciono) {
+      //console.log("dobleclick")
+      const slot = Number(itemSelect.split("slot")[1])
+      const item = myPlayer.inventario[slot][0]
 
-        
-        if ( item && dbItems[item].nombre) {
 
-          console.log("usas un :", dbItems[item].nombre)
+      if (item && dbItems[item].nombre) {
 
-          socket.emit("usar", slot, (objeto) => {
-            selecciono = false
+        console.log("usas un :", dbItems[item].nombre)
 
-            actualizarInventario()
-          })
-        }
+        socket.emit("usar", slot, (mensaje) => {
+          selecciono = false
+          console.log(mensaje)
+          actualizarInventario()
+        })
       }
-      itemSelect = e.target.id
+    }
+    itemSelect = e.target.id
+    cajaInventario.blur()
+    e.target.blur()
+    selecciono = true
+    actualizarInventario()
+
+
+    setTimeout(() => {
       cajaInventario.blur()
       e.target.blur()
-      selecciono = true
+      selecciono = 0
       actualizarInventario()
-
-
-      setTimeout(() => {
-        cajaInventario.blur()
-        e.target.blur()
-        selecciono = 0
-        actualizarInventario()
-      }, 300);
-      cajaInventario.blur()
+    }, 300);
+    cajaInventario.blur()
   }
 })
 
@@ -239,7 +212,7 @@ oro.addEventListener("click", () => {
 plata.addEventListener("click", () => {
   console.log("plata")
 })
-bronce.addEventListener("click", () => {
+cobre.addEventListener("click", () => {
   console.log("bronce")
 })
 btnHechizos.addEventListener("click", () => {
@@ -392,6 +365,7 @@ let mensajesConsola = []
 let mapaActual
 let mundoMaps = [];
 
+let dbItems = []
 let groundMap = [[]];
 let decalMap = [[]];
 let db = []
@@ -445,8 +419,8 @@ const actualizarInventario = () => {
         let borde
         if (myPlayer.inventario[contador][1]) {
           cantidad = myPlayer.inventario[contador][1]
-          const item= myPlayer.inventario[contador][0]
-          const url = "./items/"+dbItems[item].imagen+".BMP" 
+          const item = myPlayer.inventario[contador][0]
+          const url = "./items/" + dbItems[item].imagen + ".BMP"
           imagen = `background-image: url(${url});`
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
@@ -505,16 +479,15 @@ socket.on("disconnect", () => {
 socket.on("map", ({ mundo, player, db }) => {
 
   myPlayer = player
-  actualizarInventario()
   mundoMaps = mundo
   groundMap = mundoMaps[myPlayer.mapa].ground2D;
 
   decalMap = mundoMaps[myPlayer.mapa].decal2D;
 
-
-
+  dbItems = db.items
   hechizosData = db.hechizos
 
+  actualizarInventario()
 });
 
 
@@ -860,20 +833,21 @@ window.addEventListener("keydown", (e) => {
         socket.emit("beber", 10)
         break
       case "u":
-        
-        if ( !selecciono) {
+
+  
+        if (!selecciono) {
           selecciono = true
           //console.log("dobleclick")
-          const slot= Number(itemSelect.split("slot")[1])
+          const slot = Number(itemSelect.split("slot")[1])
           const item = myPlayer.inventario[slot][0]
-          
-          
-          if ( item && dbItems[item].nombre) {
-            
+
+          if (item && dbItems[item].nombre) {
+
             console.log("usas un :", dbItems[item].nombre)
-            
+
             socket.emit("usar", slot, (objeto) => {
-              
+
+            })
 
             actualizarInventario()
             setTimeout(() => {
@@ -881,33 +855,32 @@ window.addEventListener("keydown", (e) => {
               selecciono = false
               actualizarInventario()
             }, 600);
-          })
+          }
         }
-      }
 
-      actualizarInventario()
+        actualizarInventario()
 
-     
-  
+
+
 
 
 
         // const slot= Number(itemSelect.split("slot")[1])
         // const item = myPlayer.inventario[slot][0]
 
-        
+
         // if ( item && dbItems[item].nombre) {
 
-          
+
         //   socket.emit("usar", slot, (objeto) => {
-            
+
         //     console.log("usas un :", dbItems[objeto].nombre)
 
         //     actualizarInventario()
         //   })
         // }
         // setTimeout(() => {
-          
+
         //   actualizarInventario()
         // }, 300);
         // if (myPlayer.energia > 3) {
@@ -1240,7 +1213,7 @@ function loop() {
               PJ_SIZE_W,
               PJ_SIZE_H,
               player.skin === "arboles" ? player.x - cameraX - player.w / 2 - player.w / 20 : player.x - cameraX - player.w / 2,
-              player.skin === "arboles" ? player.y - cameraY - player.h + 55 : player.y - cameraY - player.h / 2,
+              player.skin === "arboles" ? player.y - cameraY - player.h + 40 : player.y - cameraY - player.h / 2,
               player.w,
               player.h
             );
