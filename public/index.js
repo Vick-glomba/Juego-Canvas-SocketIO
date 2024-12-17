@@ -2,7 +2,7 @@
 const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
-let distanciaRender = 32
+let distanciaRender = 22
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
 
@@ -117,7 +117,9 @@ const mana = document.getElementById("mana")
 const salud = document.getElementById("salud")
 const hambre = document.getElementById("hambre")
 const sed = document.getElementById("sed")
-
+const cantidadOro = document.getElementById("cantidadOro")
+const cantidadPlata = document.getElementById("cantidadPlata")
+const cantidadCobre = document.getElementById("cantidadCobre")
 
 const cajaInventario = document.getElementById("cajaInventario")
 let itemSelect
@@ -164,7 +166,7 @@ cajaInventario.addEventListener("click", (e) => {
 
       if (item && dbItems[item].nombre) {
 
-        console.log("usas un :", dbItems[item].nombre)
+       
 
         socket.emit("usar", slot, (mensaje) => {
           selecciono = false
@@ -843,10 +845,10 @@ window.addEventListener("keydown", (e) => {
 
           if (item && dbItems[item].nombre) {
 
-            console.log("usas un :", dbItems[item].nombre)
-
+            
             socket.emit("usar", slot, (objeto) => {
-
+              
+              console.log(objeto)
             })
 
             actualizarInventario()
@@ -1068,7 +1070,9 @@ function loop() {
     salud.style.width = `${(myPlayer.salud / myPlayer.saludTotal) * 100}%`
     hambre.style.width = `${(myPlayer.hambre / myPlayer.hambreTotal) * 100}%`
     sed.style.width = `${(myPlayer.sed / myPlayer.sedTotal) * 100}%`
-
+    cantidadOro.innerText = myPlayer.cantidadOro
+    cantidadPlata.innerText = myPlayer.cantidadPlata
+    cantidadCobre.innerText = myPlayer.cantidadCobre
 
 
     const TILES_IN_ROW = 100; //numero de tiles en imagen /public/mapas/dungeon-newbie.jpg
@@ -1182,7 +1186,7 @@ function loop() {
 
       const proximidad = Math.floor(ratio * 100)
 
-      if (proximidad > 50) {
+      if (proximidad > distanciaRender) {
         if (player === myPlayer) {
           if (!player.quieto) player.skin === "barca" ? miAgua.play() : !otrosPasos.isPlaying ? misPasos.play() : misPasos.currentTime = 0
         } else {

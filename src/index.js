@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
-const dbItems= db.items
+const dbItems = db.items
 const SPEED = 8;
 const TICK_RATE = 16;
 
@@ -166,7 +166,7 @@ let adjust = {
       right: [0, 1, 2, 3, 4],
     }
   },
-  
+
 }
 
 
@@ -177,9 +177,9 @@ let adjust = {
 let personajes = []
 //aca tengo que cargar todos los pjs que existen hacer un loop y mandar un array.
 const loadPersonajes = async () => {
-  
+
   for (let i = 0; i < pjDB.length; i++) {
-    
+
     pj2D = await loadPj(pjDB[i])
     pj2D.skin = pjDB[i]
     personajes.push(pjDB[i] = pj2D)
@@ -199,7 +199,7 @@ function isCollidingWithMap(player) {
   for (let row = 0; row < mundo[player.mapa].decal2D.length; row++) {
     for (let col = 0; col < mundo[player.mapa].decal2D[0].length; col++) {
       const tile = mundo[player.mapa].decal2D[row][col];
-      
+
       if (
         tile &&
         isColliding(
@@ -230,10 +230,10 @@ function isCollidingWithPlayer(player) {
     const otroPlayer = playerEnMapa[i]
     if (isColliding(
       {
-         x: otroPlayer.skin === "arboles" ? otroPlayer.x-30 : otroPlayer.x - otroPlayer.w / 2,
-         y: otroPlayer.skin === "arboles" ? otroPlayer.y-10 : otroPlayer.y - otroPlayer.h / 2,
-         w: otroPlayer.skin === "arboles" ? 50: otroPlayer.w,
-         h: otroPlayer.skin === "arboles" ? 50 : otroPlayer.h,
+        x: otroPlayer.skin === "arboles" ? otroPlayer.x - 30 : otroPlayer.x - otroPlayer.w / 2,
+        y: otroPlayer.skin === "arboles" ? otroPlayer.y - 10 : otroPlayer.y - otroPlayer.h / 2,
+        w: otroPlayer.skin === "arboles" ? 50 : otroPlayer.w,
+        h: otroPlayer.skin === "arboles" ? 50 : otroPlayer.h,
       },
       {
         x: player.x,
@@ -242,39 +242,39 @@ function isCollidingWithPlayer(player) {
         h: 0,
       },
     )
-  ) {
-    console.log("choca",otroPlayer.nombre)
-    return otroPlayer.id;
+    ) {
+      console.log("choca", otroPlayer.nombre)
+      return otroPlayer.id;
+    }
   }
-}
-return false;
+  return false;
 }
 
 function tick(delta) {
   for (const player of players) {
-    if(player.id !== 1){
-      
-    
+    if (player.id !== 1) {
+
+
       const inputs = inputsMap[player.id];
       const previousY = player.y;
       const previousX = player.x;
       let row = 0
       let col = 0
-      
+
       player.w = adjust[player.skin].w
       player.h = adjust[player.skin].h
       const standUp = adjust[player.skin].stand.up
       const standDown = adjust[player.skin].stand.down
-      
+
       const standLeft = adjust[player.skin].stand.left
       const standRight = adjust[player.skin].stand.right
       const walkUp = adjust[player.skin].walk.up
       const walkDown = adjust[player.skin].walk.down
       const walkLeft = adjust[player.skin].walk.left
       const walkRight = adjust[player.skin].walk.right
-      
-      
-      
+
+
+
       if (inputs && inputs.up) {
         player.y -= SPEED;
         player.mirando = "up"
@@ -282,12 +282,12 @@ function tick(delta) {
         player.y += SPEED;
         player.mirando = "down"
       }
-      
-      if (player.skin !== "arboles" && (isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
+
+      if ((isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
         player.y = previousY;
       }
-      
-      
+
+
       if (inputs && inputs.left) {
         player.x -= SPEED;
         player.mirando = "left"
@@ -295,99 +295,99 @@ function tick(delta) {
         player.x += SPEED;
         player.mirando = "right"
       }
-      
-      
-      
+
+
+
       if (inputs && (inputs.up || inputs.down || inputs.left || inputs.right)) {
         player.quieto = false
-        
+
       } else {
         player.quieto = true
       }
-      
-      
+
+
       if (player.quieto) {
-        
+
         switch (player.mirando) {
           case "up":
-            
+
             row = adjust[player.skin].stand.rowUp
             col = standUp[player.ultimoFrame] || standUp[0]
             player.ultimoFrame = player.ultimoFrame < standUp.length - 1 ? player.ultimoFrame + 1 : standUp[0]
             break;
-            
-            case "down":
-              
-              //animacion abajo  
-              row = adjust[player.skin].stand.rowDown
-              col = standDown[player.ultimoFrame] || standDown[0]
-              player.ultimoFrame = player.ultimoFrame < standDown.length - 1 ? player.ultimoFrame + 1 : standDown[0]
-              break;
-              
-              case "left":
-                //animacion izquierda
-                
-                row = adjust[player.skin].stand.rowLeft
-                col = standLeft[player.ultimoFrame] || standLeft[0]
-                player.ultimoFrame = player.ultimoFrame < standLeft.length - 1 ? player.ultimoFrame + 1 : standLeft[0]
-                break;
-                
-                case "right":
-                  //animacion derecha
-                  
-                  row = adjust[player.skin].stand.rowRight
-                  col = standRight[player.ultimoFrame] || standRight[0]
-                  player.ultimoFrame = player.ultimoFrame < standRight.length - 1 ? player.ultimoFrame + 1 : standRight[0]
-                  break;
-                }
-                
-              } else {
-                
-                switch (player.mirando) {
-                  case "up":
-                    
-                    row = adjust[player.skin].walk.rowUp
-          col = walkUp[player.ultimoFrame] || walkUp[0]
-          player.ultimoFrame = player.ultimoFrame < walkUp.length - 1 ? player.ultimoFrame + 1 : walkUp[0]
-          break;
 
-        case "down":
-          //animacion abajo  
+          case "down":
 
-          row = adjust[player.skin].walk.rowDown
-          col = walkDown[player.ultimoFrame] || walkDown[0]
-          player.ultimoFrame = player.ultimoFrame < walkDown.length - 1 ? player.ultimoFrame + 1 : walkDown[0]
-          break;
+            //animacion abajo  
+            row = adjust[player.skin].stand.rowDown
+            col = standDown[player.ultimoFrame] || standDown[0]
+            player.ultimoFrame = player.ultimoFrame < standDown.length - 1 ? player.ultimoFrame + 1 : standDown[0]
+            break;
 
-        case "left":
-          //animacion izquierda
+          case "left":
+            //animacion izquierda
 
-          row = adjust[player.skin].walk.rowLeft
-          col = walkLeft[player.ultimoFrame] || walkLeft[0]
-          player.ultimoFrame = player.ultimoFrame < walkLeft.length - 1 ? player.ultimoFrame + 1 : walkLeft[0]
-          break;
+            row = adjust[player.skin].stand.rowLeft
+            col = standLeft[player.ultimoFrame] || standLeft[0]
+            player.ultimoFrame = player.ultimoFrame < standLeft.length - 1 ? player.ultimoFrame + 1 : standLeft[0]
+            break;
 
-        case "right":
-          //animacion derecha
+          case "right":
+            //animacion derecha
 
-          row = adjust[player.skin].walk.rowRight
-          col = walkRight[player.ultimoFrame] || 0
-          player.ultimoFrame = player.ultimoFrame < walkRight.length - 1 ? player.ultimoFrame + 1 : 0
-          break;
+            row = adjust[player.skin].stand.rowRight
+            col = standRight[player.ultimoFrame] || standRight[0]
+            player.ultimoFrame = player.ultimoFrame < standRight.length - 1 ? player.ultimoFrame + 1 : standRight[0]
+            break;
+        }
+
+      } else {
+
+        switch (player.mirando) {
+          case "up":
+
+            row = adjust[player.skin].walk.rowUp
+            col = walkUp[player.ultimoFrame] || walkUp[0]
+            player.ultimoFrame = player.ultimoFrame < walkUp.length - 1 ? player.ultimoFrame + 1 : walkUp[0]
+            break;
+
+          case "down":
+            //animacion abajo  
+
+            row = adjust[player.skin].walk.rowDown
+            col = walkDown[player.ultimoFrame] || walkDown[0]
+            player.ultimoFrame = player.ultimoFrame < walkDown.length - 1 ? player.ultimoFrame + 1 : walkDown[0]
+            break;
+
+          case "left":
+            //animacion izquierda
+
+            row = adjust[player.skin].walk.rowLeft
+            col = walkLeft[player.ultimoFrame] || walkLeft[0]
+            player.ultimoFrame = player.ultimoFrame < walkLeft.length - 1 ? player.ultimoFrame + 1 : walkLeft[0]
+            break;
+
+          case "right":
+            //animacion derecha
+
+            row = adjust[player.skin].walk.rowRight
+            col = walkRight[player.ultimoFrame] || 0
+            player.ultimoFrame = player.ultimoFrame < walkRight.length - 1 ? player.ultimoFrame + 1 : 0
+            break;
+        }
+
       }
+      player.row = row
+      player.col = col
 
+
+
+      if ((isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
+
+        player.x = previousX;
+
+      }
     }
-    player.row = row
-    player.col = col
-
-
-
-    if (player.skin !== "arboles" && (isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
-
-      player.x = previousX;
-
-    }
-  }
   }
 
   for (const snowball of snowballs) {
@@ -550,14 +550,17 @@ async function main() {
       estado: "ciudadano",
       ciudad: "Nix",
       descripcion: "Morgolock, me duras un click",
+      cantidadOro: 0,
+      cantidadPlata: 0,
+      cantidadCobre: 0,
       inventario: [
         [1, 1],
         [0, 0],
         [2, 3],
-        [3, 4],
+        [32, 1],
         [4, 5],
         [5, 6],
-        [6, 7],
+        [40, 7],
         [7, 8],
         [8, 9],
         [9, 10],
@@ -568,13 +571,13 @@ async function main() {
         [13, 15],
         [14, 16],
         [15, 17],
-        [0, 0],
+        [47, 45],
         [47, 19],
         [46, 20],
         [48, 12],
-        [33, 22],
-        [38, 23],
-        [41, 24],
+        [46, 5],
+        [48, 93],
+        [23, 24],
         [6, 25]
       ]
     });
@@ -664,11 +667,24 @@ async function main() {
       const player = players.find((player) => player.id === socket.id);
       if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
         console.log(player[dbItems[player.inventario[slot][0]].stat])
-        player[dbItems[player.inventario[slot][0]].stat]+=dbItems[player.inventario[slot][0]].modifica
-        if(dbItems[player.inventario[slot][0]].clase === "moneda"){
-
+        player[dbItems[player.inventario[slot][0]].stat] += dbItems[player.inventario[slot][0]].modifica
+        if (dbItems[player.inventario[slot][0]].clase === "moneda") {
+          switch (dbItems[player.inventario[slot][0]].imagen) {
+            case 46:
+              player.cantidadOro += player.inventario[slot][1]
+              break;
+            case 47:
+              player.cantidadPlata += player.inventario[slot][1]
+              break;
+            case 48:
+              player.cantidadCobre += player.inventario[slot][1]
+              break;
+          
+            default:
+              break;
+          }
           player.inventario[slot][1] = 0
-        }else{
+        } else {
 
           player.inventario[slot][1] -= 1
         }
@@ -677,13 +693,14 @@ async function main() {
           player.inventario[slot][1] = 0
         }
       } else {
+        
+        callback("No puedes usar eso, equipable: "+ dbItems[player.inventario[slot][0]].equipable)
 
-        callback("No puedes usar eso")
       }
       if (player.inventario[slot][1] === 0) {
         player.inventario[slot][0] = 0
       }
-      console.log(dbItems[player.inventario[slot][0]].usable,"usas el item: ", dbItems[player.inventario[slot][0]].nombre, " en el slot: ", slot, " Tiene aun: ", player.inventario[slot][1])
+      console.log(dbItems[player.inventario[slot][0]].usable, "usas el item: ", dbItems[player.inventario[slot][0]].nombre, " en el slot: ", slot, " Tiene aun: ", player.inventario[slot][1])
 
     })
     socket.on("beber", (cantidad) => {
