@@ -495,7 +495,7 @@ async function main() {
       estado: "ciudadano",
       ciudad: "Nix",
       descripcion: "Morgolock, me duras un click",
-      inventario:[[1,1],[1,0],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8],[1,9],[1,10],[1,11],[1,12],[1,0],[1,14],[1,15],[1,16],[1,17],[1,0],[1,19],[1,20],[1,0],[1,22],[1,23],[1,24],[1,25]]
+      inventario:[[1,1],[0,0],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8],[1,9],[1,10],[1,11],[1,12],[0,0],[1,14],[1,15],[1,16],[1,17],[0,0],[1,19],[1,20],[0,0],[1,22],[1,23],[1,24],[1,25]]
     });
 
     const player = players.find((player) => player.id === socket.id);
@@ -581,15 +581,18 @@ async function main() {
 
     socket.on("usar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
-      console.log("usas el item: ",player.inventario[slot][0], " en el slot: ", slot," Tiene aun: ", player.inventario[slot][1])
       if(player.inventario[slot][1]>0){
         player.inventario[slot][1]-=1
         if(player.inventario[slot][1]===0){
           player.inventario[slot][0]= 0
           player.inventario[slot][1]= 0
-      } 
+        } 
       }
-      callback()
+      if(player.inventario[slot][1]===0){
+        player.inventario[slot][0]= 0
+      }
+      console.log("usas el item: ",player.inventario[slot][0], " en el slot: ", slot," Tiene aun: ", player.inventario[slot][1])
+      callback(player.inventario[slot][0])
       
     })
     socket.on("beber", (cantidad) => {

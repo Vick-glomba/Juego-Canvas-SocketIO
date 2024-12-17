@@ -149,28 +149,72 @@ btnHechizos.addEventListener("click", () => {
 
 })
 let selecciono = false
-cajaInventario.addEventListener("click", (e)=>{
-  if(e.target.id !== "cajaInventario"){
+const dbItems = [
+  {},
+  {
+    nombre: "Pocion roja",
+    stat: "salud",
+    modifica: 10,
+    imagen:"./personajes/pocionRoja.BMP"
+  },
+  {
+    nombre: "Pocion azul",
+    stat: "mana",
+    modifica: 10,
+    imagen:"./personajes/pocionRoja.BMP"
+  },
+  {
+    nombre: "Pollo",
+    stat: "hambre",
+    modifica: 10,
+    imagen:"./personajes/pocionRoja.BMP"
+  },
+  {
+    nombre: "Vino",
+    stat: "sed",
+    modifica: 10,
+    imagen:"./personajes/pocionRoja.BMP"
+  },
+]
+cajaInventario.addEventListener("click", (e) => {
+  cajaInventario.blur()
+  e.target.blur()
+  if (e.target.id !== "cajaInventario") {
     setTimeout(() => {
-      if(itemSelect === e.target.id && selecciono){
-        console.log("dobleclick")
-        socket.emit("usar", Number(itemSelect.split("slot")[1]), ()=>{
-          selecciono=false
-          actualizarInventario()
-        })
-      }
-      
-      itemSelect = e.target.id
-      selecciono = true
-      
-       setTimeout(() => {
+      cajaInventario.blur()
+      e.target.blur()
+      if (itemSelect === e.target.id && selecciono) {
+        //console.log("dobleclick")
+        const slot= Number(itemSelect.split("slot")[1])
+        const item = myPlayer.inventario[slot][0]
+
         
-         selecciono= 0
-         actualizarInventario()
-     }, 250);
-    actualizarInventario()
-  }, 300);
-}
+        if ( item && dbItems[item].nombre) {
+
+          console.log("usas un :", dbItems[item].nombre)
+
+          socket.emit("usar", slot, (objeto) => {
+            selecciono = false
+
+            actualizarInventario()
+          })
+        }
+      }
+      itemSelect = e.target.id
+      cajaInventario.blur()
+      e.target.blur()
+      selecciono = true
+      actualizarInventario()
+    }, 300);
+
+      setTimeout(() => {
+        cajaInventario.blur()
+        e.target.blur()
+        selecciono = 0
+        actualizarInventario()
+      }, 500);
+      cajaInventario.blur()
+  }
 })
 
 
@@ -237,10 +281,10 @@ HUD.addEventListener("click", (e) => {
 lanzar.addEventListener("click", () => {
 
   cast = false
-  const nombre = document.getElementById(hechizoSelect)?document.getElementById(hechizoSelect).innerText:hechizosData[0]["nombre"]
+  const nombre = document.getElementById(hechizoSelect) ? document.getElementById(hechizoSelect).innerText : hechizosData[0]["nombre"]
 
   if (nombre !== hechizosData[0]["nombre"]) {
-    if (myPlayer.energia >0) {
+    if (myPlayer.energia > 0) {
 
       if (myPlayer.mana >= hechizosData[myPlayer["hechizos"][hechizoSelect]]["mana necesario"]) {
         accion = acciones[0]
@@ -257,7 +301,7 @@ lanzar.addEventListener("click", () => {
         mensajesConsola.push(msg)
         actualizarMensajes()
       }
-    }else{
+    } else {
       const msg = {
         msg: "No tienes suficiente energia.",
         tipo: "consola"
@@ -389,39 +433,39 @@ const SNOWBALL_RADIUS = 4;
 //     }
 //   }
 // }, 5000);
-const actualizarInventario = () =>{
-  if(myPlayer){
+const actualizarInventario = () => {
+  if (myPlayer) {
     let contador = 0
-    let html= ""
-      for (let i = 0; i < 5; i++) {
-         html += `<div style="display: flex; width: 220px; height: 46px; color: aliceblue;">`
-        for (let a = 0; a < 5; a++) {
-          let imagen
-          let cantidad = ""
-          let borde
-          if(myPlayer.inventario[contador][1]){
-             cantidad= myPlayer.inventario[contador][1]
-             imagen = `background-image: url('./personajes/pocionRoja.BMP');`
-             if(itemSelect === "slot"+contador){
-               borde = "border-color: rgb(253, 232, 0);"
-              }else{
-               borde = "border-color: black;"
+    let html = ""
+    for (let i = 0; i < 5; i++) {
+      html += `<div style="display: flex; width: 220px; height: 46px; color: aliceblue;">`
+      for (let a = 0; a < 5; a++) {
+        let imagen
+        let cantidad = ""
+        let borde
+        if (myPlayer.inventario[contador][1]) {
+          cantidad = myPlayer.inventario[contador][1]
+          imagen = `background-image: url('./personajes/pocionRoja.BMP');`
+          if (itemSelect === "slot" + contador) {
+            borde = "border-color: rgb(253, 232, 0);"
+          } else {
+            borde = "border-color: black;"
 
-             }
-          }
-          html+=`
-          <div id="${"slot"+contador}" style="width: 42px; height: 44px; color: aliceblue;border: 1px; ${borde}border-style: solid; ${imagen} background-size:100% 100%;')">${cantidad}</div>`
-          contador+=1
-          if(a === 4){
-            html+=`
-            </div>`
           }
         }
+        html += `
+          <div id="${"slot" + contador}" style="width: 42px; height: 44px; color: aliceblue;border: 1px; ${borde}border-style: solid; ${imagen} background-size:100% 100%;')">${cantidad}</div>`
+        contador += 1
+        if (a === 4) {
+          html += `
+            </div>`
+        }
       }
-      cajaInventario.innerHTML= html
+    }
+    cajaInventario.innerHTML = html
   }
-    
-    
+
+
   // const html=`
   //   <div style="display: flex; width: 100%; height: 19%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;">
   //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;')">${myPlayer.inventario[0][1]}</div>
@@ -458,9 +502,9 @@ const actualizarInventario = () =>{
   //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[23][1]}</div>
   //     <div style="width: 20%; height: 100%; color: aliceblue; border: 1px;border-style: solid; border-color: aliceblue;background-image: url('./personajes/pocionRoja.BMP');background-size:100% 100%;">${myPlayer.inventario[24][1]}</div>
   //   </div>`
-  
-    }
-  
+
+}
+
 
 
 const actualizarHechizos = (hechizo) => {
@@ -1030,7 +1074,7 @@ canvasEl.addEventListener("click", (e) => {
 
 function loop() {
 
-  
+
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
   if (myPlayer) {
 
@@ -1184,7 +1228,7 @@ function loop() {
               PJ_SIZE_W,
               PJ_SIZE_H,
               player.skin === "arboles" ? player.x - cameraX - player.w / 2 - player.w / 20 : player.x - cameraX - player.w / 2,
-              player.skin === "arboles" ? player.y - cameraY - player.h +55 : player.y - cameraY - player.h / 2,
+              player.skin === "arboles" ? player.y - cameraY - player.h + 55 : player.y - cameraY - player.h / 2,
               player.w,
               player.h
             );
@@ -1195,7 +1239,7 @@ function loop() {
 
           //NOMBRE PERSONAJE
           //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
-          if(player.skin !== "arboles"){
+          if (player.skin !== "arboles") {
             const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
             canvas.fillStyle = 'black'
             canvas.fillStyle = color;
@@ -1204,8 +1248,8 @@ function loop() {
             canvas.fillText(player.nombre, player.skin === "arboles" ? player.x - cameraX : player.x - cameraX, player.skin === "arboles" ? player.y - cameraY + 50 : (player.y - cameraY - player.h / 2) + player.h + 15)
           }
         }
-          
-          //dibujar Click
+
+        //dibujar Click
         //console.log(clickPoint)
         // canvas.strokeStyle = "rgb(0,255,0)";
         // canvas.beginPath();
