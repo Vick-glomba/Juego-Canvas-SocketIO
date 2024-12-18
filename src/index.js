@@ -563,20 +563,20 @@ async function main() {
       cantidadPlata: 0,
       cantidadCobre: 0,
       inventario: [
-        [1, 1],
+        [35, 1],
         [0, 0],
-        [6, 3],
+        [37, 3],
         [32, 1],
-        [4, 5],
-        [5, 6],
-        [40, 7],
-        [7, 8],
-        [8, 9],
-        [29, 1],
-        [10, 11],
-        [11, 12],
+        [38, 5],
+        [39, 6],
+        [33, 7],
+        [32, 8],
+        [31, 9],
+        [30, 1],
+        [29, 11],
+        [28, 12],
         [0, 0],
-        [12, 14],
+        [34, 14],
         [13, 15],
         [14, 16],
         [15, 17],
@@ -678,7 +678,7 @@ async function main() {
       if (!dbItems[player.inventario[slot][0]].equipable) {
 
         if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
-          console.log(player[dbItems[player.inventario[slot][0]].stat])
+
           player[dbItems[player.inventario[slot][0]].stat] += dbItems[player.inventario[slot][0]].modifica
           if (dbItems[player.inventario[slot][0]].clase === "moneda") {
             switch (dbItems[player.inventario[slot][0]].imagen) {
@@ -753,7 +753,6 @@ async function main() {
         //busca espacio vacio en inventario
         let slotDisponible= player.inventario.find(slot=> slot[0] === 0 && slot[1] === 0)
         if(slotDisponible){
-          console.log(slotDisponible)
           slotDisponible[0] = item[0]
           slotDisponible[1] = item[1]
           callback("agarro", true)

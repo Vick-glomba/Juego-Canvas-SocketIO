@@ -340,7 +340,7 @@ db.items = [
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 1
+    hechizo: 3
   },
   {
     nombre: "Pico de Minero",
@@ -365,7 +365,8 @@ db.items = [
     clase: "herramienta",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
-    apilable: false
+    apilable: false,
+    hechizo: 6
   },
   {
     nombre: "Martillo de Herrero",
@@ -378,7 +379,7 @@ db.items = [
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 1
+    hechizo: 5
   },
   {
     nombre: "Hacha de Leñador",
@@ -404,7 +405,7 @@ db.items = [
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 1
+    hechizo: 3
   },
   {
     nombre: "Fragua",
@@ -412,12 +413,12 @@ db.items = [
     modifica: 0,
     imagen: 34,
     usable: true,
-    equipable: false,
+    equipable: true,
     clase: "herramienta",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 1
+    hechizo: 7
   },
   {
     nombre: "Yunque",
@@ -425,12 +426,12 @@ db.items = [
     modifica: 0,
     imagen: 35,
     usable: true,
-    equipable: false,
+    equipable: true,
     clase: "herramienta",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 1
+    hechizo: 7
   },
   {
     nombre: "Madera",
@@ -455,7 +456,7 @@ db.items = [
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: true,
-    hechizo: 1
+    hechizo: 4
   },
   {
     nombre: "Mena de Plata",
@@ -468,7 +469,7 @@ db.items = [
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: true,
-    hechizo: 1
+    hechizo: 4
   },
   {
     nombre: "Mena de Oro",
@@ -481,7 +482,7 @@ db.items = [
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: true,
-    hechizo: 1
+    hechizo: 4
   },
   {
     nombre: "Lingote de Cobre",
@@ -646,7 +647,7 @@ db.hechizos = [
     "nivel": 1,
     "texto": "",
     "clase": "herreria",
-    "cantidad": 5
+    "cantidad": 2
   },
   {
     "nombre": "aserrar",
@@ -656,17 +657,17 @@ db.hechizos = [
     "nivel": 1,
     "texto": "",
     "clase": "carpinteria",
-    "cantidad": 5
+    "cantidad": 2
   },
   {
-    "nombre": undefined,
+    "nombre": "instalar",
     "mana necesario": 0,
     "min": 0,
     "max": 1,
     "nivel": 1,
     "texto": "",
-    "clase": "",
-    "cantidad": 5
+    "clase": "craft",
+    "cantidad": 2
   },
   {
     "nombre": undefined,
