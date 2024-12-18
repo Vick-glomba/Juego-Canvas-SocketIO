@@ -353,7 +353,7 @@ db.items = [
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 1
+    hechizo: 2
   },
   {
     nombre: "Serrucho",
@@ -605,8 +605,87 @@ db.hechizos = [
     "max": 1,
     "nivel": 1,
     "texto": "",
-    "clase": "talar",
-    "recurso": "madera",
+    "clase": "leñador",
+    "cantidad": 5
+  },
+  {
+    "nombre": "minar",
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "mineria",
+    "cantidad": 5
+  },
+  {
+    "nombre": "pescar",
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "pesca",
+    "cantidad": 5
+  },
+  {
+    "nombre": "refinar",
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "mineria",
+    "cantidad": 5
+  },
+  {
+    "nombre": "forjar",
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "herreria",
+    "cantidad": 5
+  },
+  {
+    "nombre": "aserrar",
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "carpinteria",
+    "cantidad": 5
+  },
+  {
+    "nombre": undefined,
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "",
+    "cantidad": 5
+  },
+  {
+    "nombre": undefined,
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "",
+    "cantidad": 5
+  },
+  {
+    "nombre": undefined,
+    "mana necesario": 0,
+    "min": 0,
+    "max": 1,
+    "nivel": 1,
+    "texto": "",
+    "clase": "",
     "cantidad": 5
   },
   {
@@ -674,6 +753,15 @@ db.hechizos = [
   },
   {
     "nombre": "Paralizar",
+    "mana necesario": 5,
+    "min": 1,
+    "max": 3,
+    "nivel": 1,
+    "texto": "VAX IN TAR",
+    "clase": "movimiento"
+  },
+  {
+    "nombre": "Metamorfosis",
     "mana necesario": 5,
     "min": 1,
     "max": 3,

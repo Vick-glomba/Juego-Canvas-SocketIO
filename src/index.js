@@ -36,7 +36,9 @@ let players = [{
   clase: "arbol",
   nombre: "abedul",
   quieto: true,
-  estado: "criminal"
+  estado: "criminal",
+  recurso:36,
+  requerido:"talar"
 },
 {
   mapa: 1,
@@ -51,22 +53,26 @@ let players = [{
   clase: "arbol",
   nombre: "cipress",
   quieto: true,
-  estado: "criminal"
+  estado: "criminal",
+  recurso:29,
+  requerido:"talar"
 },
 {
   mapa: 1,
   id: 1,
-  x: 1115,
+  x: 1215,
   y: 1180,
   skin: "arboles",
   w: 256,
   h: 320,
   row: 0,
   col: 2,
-  clase: "cipress",
+  clase: "arbol",
   nombre: "sauce",
   quieto: true,
-  estado: "criminal"
+  estado: "criminal",
+  recurso:38,
+  requerido:"talar"
 },
 {
   mapa: 1,
@@ -81,7 +87,9 @@ let players = [{
   clase: "arbol",
   nombre: "sauce naranja",
   quieto: true,
-  estado: "criminal"
+  estado: "criminal",
+  recurso:39,
+  requerido:"talar"
 },
 ];
 let snowballs = [];
@@ -243,7 +251,6 @@ function isCollidingWithPlayer(player) {
       },
     )
     ) {
-      console.log("choca", otroPlayer.nombre)
       return otroPlayer.id;
     }
   }
@@ -407,9 +414,9 @@ function tick(delta) {
         let posiciony = player.y
 
         if (player.clase === "arbol") {
-          tamaño = 10
-          posiciony = posiciony + 20
-          posicionx = posicionx + 5
+          tamaño = 15
+          posiciony = posiciony + 10
+          posicionx = posicionx - 5
         }
         let distance = Math.sqrt(
           (posicionx - snowball.x) ** 2 +
@@ -429,7 +436,9 @@ function tick(delta) {
               cast: snowball.cast,
               //player: pj,
               tipo: "consola",
-              msg: player.nombre + "."
+              msg: player.nombre + ".",
+              objetivo: player
+              
             }
           }
           io.to(pj.id).emit("recibirMensaje", obj)
@@ -518,7 +527,7 @@ async function main() {
     //armado
     players.push({
       id: socket.id,
-      hechizos: [1, 2, 6, 2, 0, 4, 5, 0, 3],
+      hechizos: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18],
       mapa: 1,
       x: 800,
       y: 800,
@@ -563,7 +572,7 @@ async function main() {
         [40, 7],
         [7, 8],
         [8, 9],
-        [9, 10],
+        [29, 1],
         [10, 11],
         [11, 12],
         [0, 0],
@@ -580,7 +589,7 @@ async function main() {
         [23, 24],
         [6, 25]
       ],
-      equipado:[]
+      equipado: []
     });
 
     const player = players.find((player) => player.id === socket.id);
@@ -666,7 +675,7 @@ async function main() {
 
     socket.on("usar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
-      if(!dbItems[player.inventario[slot][0]].equipable){
+      if (!dbItems[player.inventario[slot][0]].equipable) {
 
         if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
           console.log(player[dbItems[player.inventario[slot][0]].stat])
@@ -676,58 +685,83 @@ async function main() {
               case 46:
                 player.cantidadOro += player.inventario[slot][1]
                 break;
-                case 47:
-                  player.cantidadPlata += player.inventario[slot][1]
-              break;
+              case 47:
+                player.cantidadPlata += player.inventario[slot][1]
+                break;
               case 48:
                 player.cantidadCobre += player.inventario[slot][1]
                 break;
-                
-                default:
-                  break;
-                }
-                player.inventario[slot][1] = 0
-              } else {
-                
-                player.inventario[slot][1] -= 1
-              }
-              if (player.inventario[slot][1] === 0) {
+
+              default:
+                break;
+            }
+            player.inventario[slot][1] = 0
+          } else {
+
+            player.inventario[slot][1] -= 1
+          }
+          if (player.inventario[slot][1] === 0) {
+            player.inventario[slot][0] = 0
+            player.inventario[slot][1] = 0
+          }
+        } else {
+
+          callback("No puedes usar  " + dbItems[player.inventario[slot][0]].nombre)
+
+        }
+        if (player.inventario[slot][1] === 0) {
           player.inventario[slot][0] = 0
-          player.inventario[slot][1] = 0
         }
       } else {
-        
-        callback("No puedes usar  "+ dbItems[player.inventario[slot][0]].nombre)
-        
+        if (player.equipado.includes(slot)) {
+          callback("", dbItems[player.inventario[slot][0]].hechizo)
+        } else {
+
+          callback("Primero debes equiparlo.")
+        }
       }
-      if (player.inventario[slot][1] === 0) {
-        player.inventario[slot][0] = 0
-      }
-    }else{
-      callback("Debo preguntar si esta equipado")
-    }
       console.log(dbItems[player.inventario[slot][0]].usable, "usas el item: ", dbItems[player.inventario[slot][0]].nombre, " en el slot: ", slot, " Tiene aun: ", player.inventario[slot][1])
-      
+
     })
 
     socket.on("equipar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
-      if(dbItems[player.inventario[slot][0]].equipable){
-        
-        if(!player.equipado.includes(slot)){
-          
-          player.equipado= player.equipado.filter(s=> dbItems[player.inventario[s][0]].clase !== dbItems[player.inventario[slot][0]].clase)
+      if (dbItems[player.inventario[slot][0]].equipable) {
+
+        if (!player.equipado.includes(slot)) {
+
+          player.equipado = player.equipado.filter(s => dbItems[player.inventario[s][0]].clase !== dbItems[player.inventario[slot][0]].clase)
           player.equipado.push(slot)
-        }else{
-          player.equipado = player.equipado.filter(item=>item !== slot)
+        } else {
+          player.equipado = player.equipado.filter(item => item !== slot)
         }
         callback(true)
-      }else{
-        
+      } else {
+
         callback(false)
       }
     })
 
+    socket.on("agarrar", (item, callback)=>{
+      const player = players.find((player) => player.id === socket.id);
+      //busco si hay algun slot con ese item ya en el inventario
+      let slotMismoItem= player.inventario.find(slot=> slot[0] === item[0] )
+      if(slotMismoItem && dbItems[item[0]].apilable){
+        slotMismoItem[1] += item[1]
+        callback("agarro", true)
+      }else{
+        //busca espacio vacio en inventario
+        let slotDisponible= player.inventario.find(slot=> slot[0] === 0 && slot[1] === 0)
+        if(slotDisponible){
+          console.log(slotDisponible)
+          slotDisponible[0] = item[0]
+          slotDisponible[1] = item[1]
+          callback("agarro", true)
+        }else{
+          callback("No tienes espacio suficiente.", false)
+        }
+      }
+      })
 
     socket.on("beber", (cantidad) => {
       const player = players.find((player) => player.id === socket.id);
