@@ -419,7 +419,12 @@ const actualizarInventario = () => {
         let imagen
         let cantidad = ""
         let borde
+        let equipado= ""
         if (myPlayer.inventario[contador][1]) {
+          if(myPlayer.equipado.includes(contador)){
+
+            equipado = `<p style="margin:0;margin-top:10px;margin-left:30px;color:yellow;font-weight: 900;">+</p>`
+          }
           cantidad = myPlayer.inventario[contador][1]
           const item = myPlayer.inventario[contador][0]
           const url = "./items/" + dbItems[item].imagen + ".BMP"
@@ -432,7 +437,7 @@ const actualizarInventario = () => {
           }
         }
         html += `
-          <div id="${"slot" + contador}" style="width: 42px; height: 44px; color: aliceblue;border: 1px; ${borde}border-style: solid; ${imagen} background-size:100% 100%;')">${cantidad}</div>`
+          <div id="${"slot" + contador}" style="width: 42px; height: 44px; color: aliceblue;border: 1px; ${borde}border-style: solid; ${imagen} background-size:100% 100%;')">${cantidad}${equipado}</div>`
         contador += 1
         if (a === 4) {
           html += `
@@ -834,6 +839,24 @@ window.addEventListener("keydown", (e) => {
       case "b":
         socket.emit("beber", 10)
         break
+      case "e":
+        const slot = Number(itemSelect.split("slot")[1])
+        socket.emit("equipar", slot,(equipoItem)=>{
+          if(!equipoItem){
+            const msg = {
+              msg: `No puedes equipar ${dbItems[myPlayer.inventario[slot][0]].nombre}.`,
+              tipo: "consola"
+            }
+            mensajesConsola.push(msg)
+            actualizarMensajes()
+          }
+          setTimeout(() => {
+            actualizarInventario()
+          }, 300);
+        })
+        break
+
+
       case "u":
 
   

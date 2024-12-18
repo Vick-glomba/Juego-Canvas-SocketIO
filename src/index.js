@@ -556,7 +556,7 @@ async function main() {
       inventario: [
         [1, 1],
         [0, 0],
-        [2, 3],
+        [6, 3],
         [32, 1],
         [4, 5],
         [5, 6],
@@ -579,7 +579,8 @@ async function main() {
         [48, 93],
         [23, 24],
         [6, 25]
-      ]
+      ],
+      equipado:[12,15,6]
     });
 
     const player = players.find((player) => player.id === socket.id);
@@ -703,6 +704,26 @@ async function main() {
       console.log(dbItems[player.inventario[slot][0]].usable, "usas el item: ", dbItems[player.inventario[slot][0]].nombre, " en el slot: ", slot, " Tiene aun: ", player.inventario[slot][1])
 
     })
+
+    socket.on("equipar", (slot, callback) => {
+      const player = players.find((player) => player.id === socket.id);
+      if(dbItems[player.inventario[slot][0]].equipable){
+
+        if(!player.equipado.includes(slot)){
+          
+          player.equipado= player.equipado.filter(s=> dbItems[player.inventario[s][0]].clase !== dbItems[player.inventario[slot][0]].clase)
+          player.equipado.push(slot)
+        }else{
+          player.equipado = player.equipado.filter(item=>item !== slot)
+        }
+        callback(true)
+      }else{
+
+        callback(false)
+      }
+    })
+
+
     socket.on("beber", (cantidad) => {
       const player = players.find((player) => player.id === socket.id);
       if (player.sed < player.sedTotal) {
