@@ -580,7 +580,7 @@ async function main() {
         [23, 24],
         [6, 25]
       ],
-      equipado:[12,15,6]
+      equipado:[]
     });
 
     const player = players.find((player) => player.id === socket.id);
@@ -666,49 +666,54 @@ async function main() {
 
     socket.on("usar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
-      if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
-        console.log(player[dbItems[player.inventario[slot][0]].stat])
-        player[dbItems[player.inventario[slot][0]].stat] += dbItems[player.inventario[slot][0]].modifica
-        if (dbItems[player.inventario[slot][0]].clase === "moneda") {
-          switch (dbItems[player.inventario[slot][0]].imagen) {
-            case 46:
-              player.cantidadOro += player.inventario[slot][1]
-              break;
-            case 47:
-              player.cantidadPlata += player.inventario[slot][1]
-              break;
-            case 48:
-              player.cantidadCobre += player.inventario[slot][1]
-              break;
-          
-            default:
-              break;
-          }
-          player.inventario[slot][1] = 0
-        } else {
+      if(!dbItems[player.inventario[slot][0]].equipable){
 
-          player.inventario[slot][1] -= 1
-        }
-        if (player.inventario[slot][1] === 0) {
+        if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
+          console.log(player[dbItems[player.inventario[slot][0]].stat])
+          player[dbItems[player.inventario[slot][0]].stat] += dbItems[player.inventario[slot][0]].modifica
+          if (dbItems[player.inventario[slot][0]].clase === "moneda") {
+            switch (dbItems[player.inventario[slot][0]].imagen) {
+              case 46:
+                player.cantidadOro += player.inventario[slot][1]
+                break;
+                case 47:
+                  player.cantidadPlata += player.inventario[slot][1]
+              break;
+              case 48:
+                player.cantidadCobre += player.inventario[slot][1]
+                break;
+                
+                default:
+                  break;
+                }
+                player.inventario[slot][1] = 0
+              } else {
+                
+                player.inventario[slot][1] -= 1
+              }
+              if (player.inventario[slot][1] === 0) {
           player.inventario[slot][0] = 0
           player.inventario[slot][1] = 0
         }
       } else {
         
-        callback("No puedes usar eso, equipable: "+ dbItems[player.inventario[slot][0]].equipable)
-
+        callback("No puedes usar  "+ dbItems[player.inventario[slot][0]].nombre)
+        
       }
       if (player.inventario[slot][1] === 0) {
         player.inventario[slot][0] = 0
       }
+    }else{
+      callback("Debo preguntar si esta equipado")
+    }
       console.log(dbItems[player.inventario[slot][0]].usable, "usas el item: ", dbItems[player.inventario[slot][0]].nombre, " en el slot: ", slot, " Tiene aun: ", player.inventario[slot][1])
-
+      
     })
 
     socket.on("equipar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
       if(dbItems[player.inventario[slot][0]].equipable){
-
+        
         if(!player.equipado.includes(slot)){
           
           player.equipado= player.equipado.filter(s=> dbItems[player.inventario[s][0]].clase !== dbItems[player.inventario[slot][0]].clase)
@@ -718,7 +723,7 @@ async function main() {
         }
         callback(true)
       }else{
-
+        
         callback(false)
       }
     })
