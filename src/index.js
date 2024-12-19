@@ -479,11 +479,23 @@ function tick(delta) {
               msg: player
             }
           } else {
+            let infoClick=`${player.nombre}`
+              infoClick +=player.timeLeft?(player.timeLeft/60) >1?` < ${Math.ceil(player.timeLeft/60)} min >`:` < ${player.timeLeft} seg >`:""
+              infoClick +=player.dueño?` < Dueño: ${player.dueño} >`:""
+              infoClick +=player.costo?` < Costo: `:""
+              infoClick +=player.costo[0]?`  ${player.costo[0]} oro`:""
+              infoClick +=player.costo[1]||player.costo[2]?`, `:""
+              infoClick +=player.costo[1]?`  ${player.costo[1]} plata`:""
+              infoClick +=player.costo[2]?`, `:""
+              infoClick +=player.costo[2]?`  ${player.costo[2]} cobre`:""
+              infoClick +=player.costo?` >`:""
+
+
             obj = {
               cast: snowball.cast,
               //player: pj,
               tipo: "consola",
-              msg: player.nombre + ".",
+              msg: infoClick ,
               objetivo: player
 
             }
@@ -833,7 +845,7 @@ async function main() {
         }
       }
     })
-    socket.on("soltar", (slot, { x, y }, callback) => {
+    socket.on("soltar", (slot, { x, y }, cantidad = 1, callback) => {
       const player = players.find((player) => player.id === socket.id);
       if (dbItems[player.inventario[slot][0]]) {
         if (player.equipado.includes(slot)) {
@@ -841,13 +853,14 @@ async function main() {
 
         }
         const item = player.inventario[slot]
-         player.inventario[slot][1] -= 1
+         player.inventario[slot][1] -= cantidad
          if(player.inventario[slot][1] ===0) {
           player.inventario[slot]= [0,0]
         }
 
         console.log(dbItems[item[0]])
         const fisico = {
+          objeto: [item[0],cantidad],
           mapa: 1,
           id: 1,
           x: x,
@@ -864,7 +877,8 @@ async function main() {
           recurso: 0,
           requerido: dbItems[item[0]].requerido,
           dueño: player.nombre,
-          timeLeft: dbItems[item[0]].duracion,
+          timeLeft: dbItems[item[0]].duracion, // 1 = 1 segundo
+          costo:[1,8,5]
         //  drop: item,
         }
         players.push(fisico)
@@ -1026,7 +1040,6 @@ async function main() {
   
     for (const player of conTimer) {
       player.timeLeft -= 1
-      console.log(player.timeLeft)
       if(player.timeLeft < 1){
       players =  players.filter(p => p !== player)
         

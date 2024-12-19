@@ -1166,7 +1166,7 @@ canvasEl.addEventListener("click", (e) => {
       x: point.x,
       y: point.y,
     }
-    socket.emit("soltar", slot, coord, (mensaje) => {
+    socket.emit("soltar", slot, coord,1, (mensaje) => {
       const msg = {
         msg: mensaje,
         tipo: "consola"
