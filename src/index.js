@@ -260,12 +260,35 @@ function isCollidingWithPlayer(player) {
 
   for (let i = 0; i < playerEnMapa.length; i++) {
     const otroPlayer = playerEnMapa[i]
+    switch (otroPlayer.skin) {
+      case "arboles":
+       valorX= otroPlayer.x - 30
+       valorY= otroPlayer.y - 10
+       valorW= 50
+       valorH= 50
+        break;
+      case "items":
+       valorX= otroPlayer.x - otroPlayer.w +15
+       valorY= otroPlayer.y - otroPlayer.h +10
+       valorW= otroPlayer.w +5
+       valorH= otroPlayer.h -5
+       break;
+       
+       default:
+        valorX= otroPlayer.x - otroPlayer.w / 2
+        valorY= otroPlayer.y - otroPlayer.h / 2
+        valorW= otroPlayer.w
+        valorH= otroPlayer.h
+
+        break;
+    }
+
     if (isColliding(
       {
-        x: otroPlayer.skin === "arboles" ? otroPlayer.x - 30 : otroPlayer.x - otroPlayer.w / 2,
-        y: otroPlayer.skin === "arboles" ? otroPlayer.y - 10 : otroPlayer.y - otroPlayer.h / 2,
-        w: otroPlayer.skin === "arboles" ? 50 : otroPlayer.w,
-        h: otroPlayer.skin === "arboles" ? 50 : otroPlayer.h,
+        x: valorX,
+        y: valorY,
+        w: valorW,
+        h: valorH,
       },
       {
         x: player.x,
@@ -592,7 +615,7 @@ async function main() {
         [37, 3],
         [32, 1],
         [38, 5],
-        [39, 6],
+        [39, 600],
         [33, 7],
         [32, 8],
         [31, 9],
@@ -619,9 +642,8 @@ async function main() {
     const player = players.find((player) => player.id === socket.id);
     const otroPlayer = isCollidingWithPlayer(player)
     if (otroPlayer) {
-
+      //PISAR PERSONAJE Y DESCONECTARLO
       io.sockets.sockets.forEach((socket) => {
-        // If given socket id is exist in list of all sockets, kill it
         if (socket.id === otroPlayer)
           socket.disconnect(true);
       });
@@ -699,7 +721,7 @@ async function main() {
 
     socket.on("usar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
-      if (!dbItems[player.inventario[slot][0]].equipable && !dbItems[player.inventario[slot][0]].clase === "creable") {
+      if (!dbItems[player.inventario[slot][0]].equipable && dbItems[player.inventario[slot][0]].clase !== "creable" && dbItems[player.inventario[slot][0]].clase !== "refinable") {
 
         if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
 
@@ -819,7 +841,10 @@ async function main() {
 
         }
         const item = player.inventario[slot]
-        // player.inventario[slot] = [0,0]
+         player.inventario[slot][1] -= 1
+         if(player.inventario[slot][1] ===0) {
+          player.inventario[slot]= [0,0]
+        }
 
         console.log(dbItems[item[0]])
         const fisico = {
@@ -838,7 +863,9 @@ async function main() {
           estado: "neutral",
           recurso: 0,
           requerido: dbItems[item[0]].requerido,
-          drop: item
+          dueño: player.nombre,
+          timeLeft: dbItems[item[0]].duracion,
+        //  drop: item,
         }
         players.push(fisico)
         callback("tiro el objeto")
@@ -991,6 +1018,24 @@ async function main() {
     tick(delta);
     lastUpdate = now;
   }, 1000 / TICK_RATE);
+
+  //OBJETOS CON DURACION
+ 
+  setInterval(() => {
+    const conTimer = players.filter(p => p.timeLeft)
+  
+    for (const player of conTimer) {
+      player.timeLeft -= 1
+      console.log(player.timeLeft)
+      if(player.timeLeft < 1){
+      players =  players.filter(p => p !== player)
+        
+      }
+    }
+
+  }, 1000);
+
+
 }
 
 main();

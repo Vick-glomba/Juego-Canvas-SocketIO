@@ -172,7 +172,7 @@ cajaInventario.addEventListener("click", (e) => {
       if (item && dbItems[item].nombre) {
 
 
-        
+
         socket.emit("usar", slot, (objeto, hechizo) => {
           if (!hechizo) {
             const msg = {
@@ -187,10 +187,10 @@ cajaInventario.addEventListener("click", (e) => {
                 case "herramienta":
                   accion = acciones[1]
                   break;
-                  case "creable":
+                case "creable":
                   accion = acciones[2]
                   break;
-                  case "refinable":
+                case "refinable":
                   accion = acciones[1]
                   break;
                 default:
@@ -204,7 +204,7 @@ cajaInventario.addEventListener("click", (e) => {
               hechizoTemp = hechizoSelect
               hechizoSelect = dbItems[item].hechizo - 1
               setTimeout(() => {
-                
+
                 actualizarHechizos()
               }, 200);
             } else {
@@ -548,32 +548,7 @@ socket.on("map", ({ mundo, player, db }) => {
 
 socket.on("pjs", (pjs) => {
   personajes = pjs
-
-  // pj = personajes.find(pj => pj.skin === "barca")
 });
-
-
-
-
-// socket.on("players", (serverPlayers) => {
-//   players = serverPlayers;
-//   myPlayer = players.find((player) => player.id === socket.id);
-//   players = players.filter((player) => player.id !== socket.id)
-//   players.push(myPlayer)
-//   if (myPlayer) {
-//     cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-//     cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-//   }
-
-// });
-
-
-
-
-// socket.on("snowballs", (serverSnowballs) => {
-//   snowballs = serverSnowballs;
-// });
-
 
 socket.on("recibirMensaje", (obj) => {
 
@@ -598,72 +573,97 @@ socket.on("recibirMensaje", (obj) => {
       console.log("No es ", obj.cast)
     }
   }
-  if (obj.tipo === "chat") {
-    mensajesConsola.push(obj)
-    actualizarMensajes()
-  }
+  // if (obj.tipo === "chat") {
+  //   mensajesConsola.push(obj)
+  //   actualizarMensajes()
+  // }
   if (obj.tipo === "consola") {
     if (obj.cast.cast) {
 
       if (obj.cast.accion === "trabajo") {
-        console.log(obj)
-        // console.log(obj.objetivo.requerido , obj.cast.hechizoSelect.nombre)
-        console.log(obj.objetivo.requerido ,obj.cast.hechizoSelect.nombre)
+
         if (obj.objetivo.requerido === obj.cast.hechizoSelect.nombre) {
 
-          const cantidad = numeroRandom(1, obj.cast.hechizoSelect.cantidad)
+          const cantidad = numeroRandom(0, obj.cast.hechizoSelect.cantidad)
           let item = [obj.objetivo.recurso, cantidad]
           const slot = Number(itemSelect.split("slot")[1])
-          let nombre = dbItems[obj.objetivo.recurso].nombre || "no"
-          if(obj.objetivo.recurso === 0 && obj.objetivo.clase === "Fragua"){
-            const objeto = dbItems[myPlayer.inventario[slot][0]].drop
-            nombre = dbItems[objeto].nombre || "no encuentra el nombre"
-            item = [objeto ,cantidad]
-          }
-          socket.emit("borrar", slot, (bool)=>{
-            if(bool){
+          let necesita = dbItems[myPlayer.inventario[slot][0]].consume
+          let objetoNecesita = myPlayer.inventario[slot][0]
+          let tiene = myPlayer.inventario[slot][1]
+          let nombre = dbItems[obj.objetivo.recurso].nombre
+          let borro = false
+          let tieneLugar = myPlayer.inventario.find(slot => slot[0] === 0 && slot[1] === 0 || slot[0] === objetoNecesita )
 
-              socket.emit("agarrar", item, (mensaje, bool) => {
+          if (obj.objetivo.recurso === 0 && obj.objetivo.requerido=== "refinar" && tieneLugar) {
+            if (tiene >= necesita) {
+
+              const objeto = dbItems[myPlayer.inventario[slot][0]].drop
+              nombre = dbItems[objeto].nombre || "no encuentra el nombre"
+              item = [objeto, cantidad]
+              socket.emit("borrar", slot, (bool) => {
                 if (bool) {
-                  const msg = {
+                  borro = true
+                } else {
+                  borro = false
+                }
+              })
+            } 
+          }
+          if(tiene < necesita){
+            const msg = {
+              tipo: "consola",
+              msg: `No tienes suficiente cantidad.`
+            }
+            mensajesConsola.push(msg)
+            actualizarMensajes()
+          }
+
+          if(obj.objetivo.requerido!== "refinar" || obj.objetivo.requerido=== "refinar" && tiene >= necesita){
+
+            socket.emit("agarrar", item, (mensaje, bool) => {
+              if (bool) {
+                let msg
+                if(cantidad > 0){
+                   msg = {
                     tipo: "consola",
                     msg: `Has conseguido ${cantidad} de ${nombre}.`
                   }
-                  mensajesConsola.push(msg)
-                  actualizarMensajes()
-                } else {
-    
-                  const msg = {
-                    tipo: "consola",
-                    msg: mensaje
-                  }
-                  mensajesConsola.push(msg)
-                  actualizarMensajes()
-                }
-                setTimeout(() => {
-    
-                  actualizarInventario()
-                }, 300);
-              })
-            } else{
-              if(obj.objetivo.clase === "Fragua"){
+                }else{
+                  if (obj.objetivo.requerido=== "forjar"){
+                    msg = {
+                      tipo: "consola",
+                      msg: `Abrir el menu de Herreria`
+                    }
+                  }else{
 
-                const msg = {
-                  tipo: "consola",
-                  msg: `No tienes suficiente cantidad.`
+                    msg = {
+                     tipo: "consola",
+                     msg: obj.objetivo.requerido=== "refinar"?"Fallo.":`Has errado el golpe.`
+                   }
+                  }
+
                 }
                 mensajesConsola.push(msg)
                 actualizarMensajes()
               } else {
+                tieneLugar =false
+              }
+              if(!tieneLugar){
+
                 const msg = {
                   tipo: "consola",
-                  msg: `deberia abrir un menu de craft.`
+                  msg: mensaje
                 }
                 mensajesConsola.push(msg)
                 actualizarMensajes()
               }
-            }
-          } )
+              
+              setTimeout(() => {
+                
+                actualizarInventario()
+              }, 300);
+            })
+          }
         } else {
           const msg = {
             tipo: "consola",
@@ -797,7 +797,7 @@ setInterval(() => {
     }
   }
 
-}, 5000);
+}, 500);
 setInterval(() => {
   socket.emit("gastarSed", 5)
   setTimeout(() => {
@@ -839,7 +839,6 @@ window.addEventListener("keydown", (e) => {
           msg: mensaje.value
         }
         socket.emit("enviarMensaje", msg)
-        //mensajesConsola.push(mensaje.value)
         mensaje.value = ""
         mensaje.blur()
         escribiendo = false
@@ -918,7 +917,6 @@ window.addEventListener("keydown", (e) => {
             break;
         }
 
-        //   console.log(mensaje.value)
         mensaje.value = ""
         mensaje.blur()
         escribiendo = false
@@ -993,10 +991,10 @@ window.addEventListener("keydown", (e) => {
                       case "herramienta":
                         accion = acciones[1]
                         break;
-                        case "creable":
+                      case "creable":
                         accion = acciones[2]
                         break;
-                        case "refinable":
+                      case "refinable":
                         accion = acciones[1]
                         break;
                       default:
@@ -1104,13 +1102,6 @@ window.addEventListener("keydown", (e) => {
         actualizarMensajes()
       }
     }, 10);
-    //inputs["quieto"] = false
-    // inputs["ultimoFrame"] = ultimoFrame
-
-    // inputs["w"] = adjust[pj.skin].w
-    // inputs["h"] = adjust[pj.skin].h
-    //walkSnow.play();
-    // pasos.play();
 
   }
 
@@ -1128,13 +1119,7 @@ window.addEventListener("keyup", (e) => {
     inputs["left"] = false;
   }
   if (["a", "s", "w", "d"].includes(e.key)) {
-    // inputs["quieto"] = true
-    // inputs["w"] = adjust[pj.skin].w
-    // inputs["h"] = adjust[pj.skin].h
-    //  walkSnow.pause();
-    //  walkSnow.currentTime = 0;
-    // pasos.pause();
-    //pasos.currentTime = 0;
+
   }
 
   socket.emit("inputs", inputs);
@@ -1163,25 +1148,25 @@ canvasEl.addEventListener("click", (e) => {
       mensajesConsola.push(msg)
       actualizarMensajes()
     }
- 
+
     socket.emit("gastarEnergia", 3)
     accion = ""
     descansar = false
-    
+
   }
   if (accion === "hechizo" && cast) {
     socket.emit("gastarEnergia", 1)
     accion = ""
     descansar = false
   }
-  if (accion === "crear" && cast) { 
+  if (accion === "crear" && cast) {
     const slot = Number(itemSelect.split("slot")[1])
     // socket.emit("gastarEnergia", 15)
-    const coord= {
-      x:point.x,
-      y:point.y,
+    const coord = {
+      x: point.x,
+      y: point.y,
     }
-    socket.emit("soltar", slot, coord, (mensaje)=>{
+    socket.emit("soltar", slot, coord, (mensaje) => {
       const msg = {
         msg: mensaje,
         tipo: "consola"
@@ -1189,11 +1174,11 @@ canvasEl.addEventListener("click", (e) => {
       mensajesConsola.push(msg)
       actualizarMensajes()
       setTimeout(() => {
-        
+
         actualizarInventario()
       }, 200);
-        
-        console.log("esta pasando")
+
+      console.log("esta pasando")
 
     })
     accion = ""
@@ -1201,29 +1186,7 @@ canvasEl.addEventListener("click", (e) => {
   }
   cast = false
 });
- 
 
-
-// setInterval(() => {
-
-
-//     socket.emit("enMapa", myPlayer.mapa, ({playersEnMapa, snowballsEnMapa}) =>{
-
-//       players = playersEnMapa
-//       myPlayer = players.find((player) => player.id === socket.id);
-//       //  players = players.filter((player) => player.id !== socket.id)
-//       //  players.push(myPlayer)
-//       if (myPlayer) {
-//         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-//         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-//       }
-
-//       snowballs = snowballsEnMapa
-
-//     })
-
-
-// }, 40);
 
 
 function loop() {

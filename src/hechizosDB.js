@@ -419,7 +419,8 @@ db.items = [
     venta: [1, 2, 3],
     apilable: false,
     hechizo: 7,
-    requerido: "refinar"
+    requerido: "refinar",
+    duracion:60
   },
   {
     nombre: "Yunque",
@@ -433,7 +434,8 @@ db.items = [
     venta: [1, 2, 3],
     apilable: false,
     hechizo: 7,
-    requerido:"forjar"
+    requerido:"forjar",
+    duracion:800
   },
   {
     nombre: "Madera",
