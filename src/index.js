@@ -484,9 +484,9 @@ function tick(delta) {
               infoClick +=player.dueño?` < Dueño: ${player.dueño} >`:""
               infoClick +=player.costo?` < Costo: `:""
               infoClick +=player.costo[0]?`  ${player.costo[0]} oro`:""
-              infoClick +=player.costo[1]||player.costo[2]?`, `:""
+              infoClick +=player.costo[0]&& player.costo[1]?`, `:""
               infoClick +=player.costo[1]?`  ${player.costo[1]} plata`:""
-              infoClick +=player.costo[2]?`, `:""
+              infoClick +=player.costo[0] && player.costo[2] ||player.costo[1] && player.costo[2]?`, `:""
               infoClick +=player.costo[2]?`  ${player.costo[2]} cobre`:""
               infoClick +=player.costo?` >`:""
 
@@ -845,7 +845,7 @@ async function main() {
         }
       }
     })
-    socket.on("soltar", (slot, { x, y }, cantidad = 1, callback) => {
+    socket.on("soltar", (slot, { x, y }, cantidad = 1, costo, callback) => {
       const player = players.find((player) => player.id === socket.id);
       if (dbItems[player.inventario[slot][0]]) {
         if (player.equipado.includes(slot)) {
@@ -878,7 +878,7 @@ async function main() {
           requerido: dbItems[item[0]].requerido,
           dueño: player.nombre,
           timeLeft: dbItems[item[0]].duracion, // 1 = 1 segundo
-          costo:[1,8,5]
+          costo:costo?costo:""
         //  drop: item,
         }
         players.push(fisico)
