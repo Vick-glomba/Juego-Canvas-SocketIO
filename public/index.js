@@ -12,6 +12,9 @@ mapImage.src = "mapas/dungeon-newbie.png";
 
 const imagenes = {}
 
+imagenes.items = new Image();
+imagenes.items.src = "personajes/items.png"
+
 imagenes.link = new Image();
 imagenes.link.src = "personajes/sprite.png"
 
@@ -32,6 +35,8 @@ const walkSnow = new Audio("./audio/walk-snow.mp3");
 
 const clcik1 = new Audio("./audio/click1.WAV");
 const clcik2 = new Audio("./audio/click2.WAV");
+const equipar = new Audio("./audio/equipar.WAV");
+equipar.volume = 0.1
 //mis sonidos
 const misPasos = new Audio("./audio/caminar.WAV");
 misPasos.preload = "auto"
@@ -167,7 +172,7 @@ cajaInventario.addEventListener("click", (e) => {
       if (item && dbItems[item].nombre) {
 
 
-
+        
         socket.emit("usar", slot, (objeto, hechizo) => {
           if (!hechizo) {
             const msg = {
@@ -178,17 +183,30 @@ cajaInventario.addEventListener("click", (e) => {
             actualizarMensajes()
           } else {
             if (myPlayer.energia > 3) {
-              if (dbItems[item].clase === "herramienta") {
-                accion = acciones[1]
-              } else {
-                accion = acciones[0]
+              switch (dbItems[item].clase) {
+                case "herramienta":
+                  accion = acciones[1]
+                  break;
+                  case "creable":
+                  accion = acciones[2]
+                  break;
+                  case "refinable":
+                  accion = acciones[1]
+                  break;
+                default:
+                  accion = acciones[0]
+                  break;
               }
+
               boxHechizos.style.cursor = "crosshair"
               HUD.style.cursor = "crosshair"
               cast = true
               hechizoTemp = hechizoSelect
-              hechizoSelect = dbItems[item].hechizo-1 
-              actualizarHechizos()
+              hechizoSelect = dbItems[item].hechizo - 1
+              setTimeout(() => {
+                
+                actualizarHechizos()
+              }, 200);
             } else {
               const msg = {
                 tipo: "consola",
@@ -197,7 +215,7 @@ cajaInventario.addEventListener("click", (e) => {
               mensajesConsola.push(msg)
               actualizarMensajes()
             }
-            accion = acciones[1]
+
             console.log("lanza el hechizo: ", hechizo)
           }
         })
@@ -406,7 +424,7 @@ let players = [];
 // const hechizosData = ["--------------Vacio--------------" ,"Dardo magico", "Flecha Magica", "Curar Heridas Leves", "Inmovilizar", "Rayo Peronizador", "Misil Magico", "Tormenta Electrica","Talar"]
 let hechizosData = []
 
-const acciones = ["hechizo", "trabajo"]
+const acciones = ["hechizo", "trabajo", "crear"]
 let accion
 let snowballs = [];
 let ultimoFrame = 0
@@ -488,16 +506,16 @@ const actualizarHechizos = (hechizo) => {
     boxHechizos.innerHTML = ""
     let html = ""
     for (let i = 9; i < 30; i++) {
-  
 
-        const texto = myPlayer.hechizos[i] && hechizosData[myPlayer.hechizos[i]] ? hechizosData[myPlayer.hechizos[i]]["nombre"] : hechizosData[0]["nombre"]
-        const id = i
-        const color = hechizoSelect === id ? "#f9e79f50" : "#00000000"
-        html += `
+
+      const texto = myPlayer.hechizos[i] && hechizosData[myPlayer.hechizos[i]] ? hechizosData[myPlayer.hechizos[i]]["nombre"] : hechizosData[0]["nombre"]
+      const id = i
+      const color = hechizoSelect === id ? "#f9e79f50" : "#00000000"
+      html += `
         <div id="${id}" style="border: 1px; border-style:solid;font-size:12px;padding-top:2px; border-color: aliceblue;color: #ffffff; width: 99%%;text-align: center; height: 20px; background-color:${color};">${texto}</div>
         `
-      }
-    
+    }
+
 
     boxHechizos.innerHTML = html
   }
@@ -589,38 +607,67 @@ socket.on("recibirMensaje", (obj) => {
 
       if (obj.cast.accion === "trabajo") {
         console.log(obj)
-       // console.log(obj.objetivo.requerido , obj.cast.hechizoSelect.nombre)
+        // console.log(obj.objetivo.requerido , obj.cast.hechizoSelect.nombre)
+        console.log(obj.objetivo.requerido ,obj.cast.hechizoSelect.nombre)
         if (obj.objetivo.requerido === obj.cast.hechizoSelect.nombre) {
 
           const cantidad = numeroRandom(1, obj.cast.hechizoSelect.cantidad)
+          let item = [obj.objetivo.recurso, cantidad]
+          const slot = Number(itemSelect.split("slot")[1])
+          let nombre = dbItems[obj.objetivo.recurso].nombre || "no"
+          if(obj.objetivo.recurso === 0 && obj.objetivo.clase === "Fragua"){
+            const objeto = dbItems[myPlayer.inventario[slot][0]].drop
+            nombre = dbItems[objeto].nombre || "no encuentra el nombre"
+            item = [objeto ,cantidad]
+          }
+          socket.emit("borrar", slot, (bool)=>{
+            if(bool){
 
-          const item = [obj.objetivo.recurso, cantidad]
-          socket.emit("agarrar", item, (mensaje, bool) => {
-            if (bool) {
-              const msg = {
-                tipo: "consola",
-                msg: `Has conseguido ${cantidad} de ${dbItems[obj.objetivo.recurso].nombre}.`
-              }
-              mensajesConsola.push(msg)
-              actualizarMensajes()
-            } else {
+              socket.emit("agarrar", item, (mensaje, bool) => {
+                if (bool) {
+                  const msg = {
+                    tipo: "consola",
+                    msg: `Has conseguido ${cantidad} de ${nombre}.`
+                  }
+                  mensajesConsola.push(msg)
+                  actualizarMensajes()
+                } else {
+    
+                  const msg = {
+                    tipo: "consola",
+                    msg: mensaje
+                  }
+                  mensajesConsola.push(msg)
+                  actualizarMensajes()
+                }
+                setTimeout(() => {
+    
+                  actualizarInventario()
+                }, 300);
+              })
+            } else{
+              if(obj.objetivo.clase === "Fragua"){
 
-              const msg = {
-                tipo: "consola",
-                msg: mensaje
+                const msg = {
+                  tipo: "consola",
+                  msg: `No tienes suficiente cantidad.`
+                }
+                mensajesConsola.push(msg)
+                actualizarMensajes()
+              } else {
+                const msg = {
+                  tipo: "consola",
+                  msg: `deberia abrir un menu de craft.`
+                }
+                mensajesConsola.push(msg)
+                actualizarMensajes()
               }
-              mensajesConsola.push(msg)
-              actualizarMensajes()
             }
-            setTimeout(() => {
-
-              actualizarInventario()
-            }, 300);
-          })
+          } )
         } else {
           const msg = {
             tipo: "consola",
-            msg: `No puedes ${obj.cast.hechizoSelect.nombre} un ${obj.objetivo.clase}`
+            msg: `No puedes ${obj.cast.hechizoSelect.nombre}  ${obj.objetivo.clase}.`
           }
           mensajesConsola.push(msg)
           actualizarMensajes()
@@ -899,7 +946,7 @@ window.addEventListener("keydown", (e) => {
         break
       case "e":
         const slot = Number(itemSelect.split("slot")[1])
-        socket.emit("equipar", slot, (equipoItem) => {
+        socket.emit("equipar", slot, (equipoItem, sonido) => {
           if (!equipoItem) {
             const msg = {
               msg: `No puedes equipar ${dbItems[myPlayer.inventario[slot][0]].nombre}.`,
@@ -908,6 +955,10 @@ window.addEventListener("keydown", (e) => {
             mensajesConsola.push(msg)
             actualizarMensajes()
           }
+          if (sonido) {
+            equipar.play()
+          }
+
           setTimeout(() => {
             actualizarInventario()
           }, 300);
@@ -938,16 +989,25 @@ window.addEventListener("keydown", (e) => {
                   actualizarMensajes()
                 } else {
                   if (myPlayer.energia > 3) {
-                    if (dbItems[item].clase === "herramienta") {
-                      accion = acciones[1]
-                    } else {
-                      accion = acciones[0]
+                    switch (dbItems[item].clase) {
+                      case "herramienta":
+                        accion = acciones[1]
+                        break;
+                        case "creable":
+                        accion = acciones[2]
+                        break;
+                        case "refinable":
+                        accion = acciones[1]
+                        break;
+                      default:
+                        accion = acciones[0]
+                        break;
                     }
                     boxHechizos.style.cursor = "crosshair"
                     HUD.style.cursor = "crosshair"
                     cast = true
                     hechizoTemp = hechizoSelect
-                    hechizoSelect = dbItems[item].hechizo-1  
+                    hechizoSelect = dbItems[item].hechizo - 1
                     actualizarHechizos()
                   } else {
                     const msg = {
@@ -1103,17 +1163,45 @@ canvasEl.addEventListener("click", (e) => {
       mensajesConsola.push(msg)
       actualizarMensajes()
     }
+ 
     socket.emit("gastarEnergia", 3)
     accion = ""
     descansar = false
+    
   }
   if (accion === "hechizo" && cast) {
     socket.emit("gastarEnergia", 1)
     accion = ""
     descansar = false
   }
+  if (accion === "crear" && cast) { 
+    const slot = Number(itemSelect.split("slot")[1])
+    // socket.emit("gastarEnergia", 15)
+    const coord= {
+      x:point.x,
+      y:point.y,
+    }
+    socket.emit("soltar", slot, coord, (mensaje)=>{
+      const msg = {
+        msg: mensaje,
+        tipo: "consola"
+      }
+      mensajesConsola.push(msg)
+      actualizarMensajes()
+      setTimeout(() => {
+        
+        actualizarInventario()
+      }, 200);
+        
+        console.log("esta pasando")
+
+    })
+    accion = ""
+    descansar = false
+  }
   cast = false
 });
+ 
 
 
 // setInterval(() => {
@@ -1307,7 +1395,7 @@ function loop() {
 
           //NOMBRE PERSONAJE
           //canvas.drawImage(santaImage, player.x - cameraX, player.y - cameraY);
-          if (player.skin !== "arboles") {
+          if (player.clase === "player") {
             const color = player.estado === "criminal" ? colorCrimi : player.estado === "ciudadano" ? colorCiuda : colorNeutral
             canvas.fillStyle = 'black'
             canvas.fillStyle = color;

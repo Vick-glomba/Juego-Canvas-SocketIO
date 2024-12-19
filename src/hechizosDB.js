@@ -413,12 +413,13 @@ db.items = [
     modifica: 0,
     imagen: 34,
     usable: true,
-    equipable: true,
-    clase: "herramienta",
+    equipable: false,
+    clase: "creable",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 7
+    hechizo: 7,
+    requerido: "refinar"
   },
   {
     nombre: "Yunque",
@@ -426,12 +427,13 @@ db.items = [
     modifica: 0,
     imagen: 35,
     usable: true,
-    equipable: true,
-    clase: "herramienta",
+    equipable: false,
+    clase: "creable",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: false,
-    hechizo: 7
+    hechizo: 7,
+    requerido:"forjar"
   },
   {
     nombre: "Madera",
@@ -452,11 +454,13 @@ db.items = [
     imagen: 37,
     usable: true,
     equipable: false,
-    clase: "recurso",
+    clase: "refinable",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: true,
-    hechizo: 4
+    hechizo: 4,
+    consume:3,
+    drop:40
   },
   {
     nombre: "Mena de Plata",
@@ -465,11 +469,13 @@ db.items = [
     imagen: 38,
     usable: true,
     equipable: false,
-    clase: "recurso",
+    clase: "refinable",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: true,
-    hechizo: 4
+    hechizo: 4,
+    consume:3,
+    drop:41
   },
   {
     nombre: "Mena de Oro",
@@ -478,11 +484,13 @@ db.items = [
     imagen: 39,
     usable: true,
     equipable: false,
-    clase: "recurso",
+    clase: "refinable",
     compra: [2, 3, 4],
     venta: [1, 2, 3],
     apilable: true,
-    hechizo: 4
+    hechizo: 4,
+    consume:3,
+    drop:42
   },
   {
     nombre: "Lingote de Cobre",

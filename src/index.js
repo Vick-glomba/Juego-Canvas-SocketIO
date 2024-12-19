@@ -8,7 +8,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
@@ -37,8 +37,8 @@ let players = [{
   nombre: "abedul",
   quieto: true,
   estado: "criminal",
-  recurso:36,
-  requerido:"talar"
+  recurso: 36,
+  requerido: "talar"
 },
 {
   mapa: 1,
@@ -54,8 +54,8 @@ let players = [{
   nombre: "cipress",
   quieto: true,
   estado: "criminal",
-  recurso:29,
-  requerido:"talar"
+  recurso: 29,
+  requerido: "talar"
 },
 {
   mapa: 1,
@@ -71,8 +71,8 @@ let players = [{
   nombre: "sauce",
   quieto: true,
   estado: "criminal",
-  recurso:38,
-  requerido:"talar"
+  recurso: 38,
+  requerido: "talar"
 },
 {
   mapa: 1,
@@ -88,8 +88,8 @@ let players = [{
   nombre: "sauce naranja",
   quieto: true,
   estado: "criminal",
-  recurso:39,
-  requerido:"talar"
+  recurso: 39,
+  requerido: "talar"
 },
 ];
 let snowballs = [];
@@ -97,7 +97,7 @@ const inputsMap = {};
 let ground2D, decal2D;
 
 let pj2D
-let pjDB = ["link", "barca", "arboles"]
+let pjDB = ["link", "barca", "arboles", "items"]
 
 
 
@@ -153,6 +153,30 @@ let adjust = {
   arboles: {
     w: 256,
     h: 320,
+    stand: {
+      rowUp: 0,
+      up: [0, 1, 2, 3, 4],
+      rowDown: 1,
+      down: [0, 1, 2, 3, 4],
+      rowLeft: 0,
+      left: [0, 1, 2, 3, 4],
+      rowRight: 1,
+      right: [0, 1, 2, 3, 4],
+    },
+    walk: {
+      rowUp: 0,
+      up: [0, 1, 2, 3, 4],
+      rowDown: 1,
+      down: [0, 1, 2, 3, 4],
+      rowLeft: 0,
+      left: [0, 1, 2, 3, 4],
+      rowRight: 1,
+      right: [0, 1, 2, 3, 4],
+    }
+  },
+  items: {
+    w: 32,
+    h: 32,
     stand: {
       rowUp: 0,
       up: [0, 1, 2, 3, 4],
@@ -438,7 +462,7 @@ function tick(delta) {
               tipo: "consola",
               msg: player.nombre + ".",
               objetivo: player
-              
+
             }
           }
           io.to(pj.id).emit("recibirMensaje", obj)
@@ -527,7 +551,7 @@ async function main() {
     //armado
     players.push({
       id: socket.id,
-      hechizos: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18],
+      hechizos: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
       mapa: 1,
       x: 800,
       y: 800,
@@ -675,7 +699,7 @@ async function main() {
 
     socket.on("usar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
-      if (!dbItems[player.inventario[slot][0]].equipable) {
+      if (!dbItems[player.inventario[slot][0]].equipable && !dbItems[player.inventario[slot][0]].clase === "creable") {
 
         if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
 
@@ -712,7 +736,9 @@ async function main() {
         if (player.inventario[slot][1] === 0) {
           player.inventario[slot][0] = 0
         }
-      } else {
+      }
+      if (dbItems[player.inventario[slot][0]].equipable) {
+
         if (player.equipado.includes(slot)) {
           callback("", dbItems[player.inventario[slot][0]].hechizo)
         } else {
@@ -720,9 +746,32 @@ async function main() {
           callback("Primero debes equiparlo.")
         }
       }
-      console.log(dbItems[player.inventario[slot][0]].usable, "usas el item: ", dbItems[player.inventario[slot][0]].nombre, " en el slot: ", slot, " Tiene aun: ", player.inventario[slot][1])
+
+      if (dbItems[player.inventario[slot][0]].clase === "creable" || dbItems[player.inventario[slot][0]].clase === "refinable") {
+        callback("", dbItems[player.inventario[slot][0]].hechizo)
+      }
+      // console.log(dbItems[player.inventario[slot][0]].usable, "usas el item: ", dbItems[player.inventario[slot][0]].nombre, " en el slot: ", slot, " Tiene aun: ", player.inventario[slot][1])
 
     })
+
+    socket.on("borrar", (slot, callback) => {
+      const player = players.find((player) => player.id === socket.id);
+      const item = player.inventario[slot][0]
+      const cantidad = player.inventario[slot][1]
+      if (dbItems[item].consume <= cantidad) {
+        player.inventario[slot][1] -= dbItems[item].consume
+        if (player.inventario[slot][1] <= 0) {
+          player.inventario[slot][0] = 0
+          player.inventario[slot][1] = 0
+        }
+      }else{
+        
+        callback(false)
+      }
+      callback(true)
+    })
+
+
 
     socket.on("equipar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
@@ -732,35 +781,71 @@ async function main() {
 
           player.equipado = player.equipado.filter(s => dbItems[player.inventario[s][0]].clase !== dbItems[player.inventario[slot][0]].clase)
           player.equipado.push(slot)
+          callback(true, true)
         } else {
           player.equipado = player.equipado.filter(item => item !== slot)
+          callback(true, false)
         }
-        callback(true)
       } else {
 
         callback(false)
       }
     })
 
-    socket.on("agarrar", (item, callback)=>{
+    socket.on("agarrar", (item, callback) => {
       const player = players.find((player) => player.id === socket.id);
       //busco si hay algun slot con ese item ya en el inventario
-      let slotMismoItem= player.inventario.find(slot=> slot[0] === item[0] )
-      if(slotMismoItem && dbItems[item[0]].apilable){
+      let slotMismoItem = player.inventario.find(slot => slot[0] === item[0])
+      if (slotMismoItem && dbItems[item[0]].apilable) {
         slotMismoItem[1] += item[1]
         callback("agarro", true)
-      }else{
+      } else {
         //busca espacio vacio en inventario
-        let slotDisponible= player.inventario.find(slot=> slot[0] === 0 && slot[1] === 0)
-        if(slotDisponible){
+        let slotDisponible = player.inventario.find(slot => slot[0] === 0 && slot[1] === 0)
+        if (slotDisponible) {
           slotDisponible[0] = item[0]
           slotDisponible[1] = item[1]
           callback("agarro", true)
-        }else{
+        } else {
           callback("No tienes espacio suficiente.", false)
         }
       }
-      })
+    })
+    socket.on("soltar", (slot, { x, y }, callback) => {
+      const player = players.find((player) => player.id === socket.id);
+      if (dbItems[player.inventario[slot][0]]) {
+        if (player.equipado.includes(slot)) {
+          player.equipado = player.equipado.filter(item => item !== slot)
+
+        }
+        const item = player.inventario[slot]
+        // player.inventario[slot] = [0,0]
+
+        console.log(dbItems[item[0]])
+        const fisico = {
+          mapa: 1,
+          id: 1,
+          x: x,
+          y: y,
+          skin: "items",
+          w: 32,
+          h: 32,
+          row: Math.floor(item[0] / 20),
+          col: item[0] - (Math.floor(item[0] / 20) * 20) - 1,
+          clase: dbItems[item[0]].nombre,
+          nombre: dbItems[item[0]].nombre,
+          quieto: true,
+          estado: "neutral",
+          recurso: 0,
+          requerido: dbItems[item[0]].requerido,
+          drop: item
+        }
+        players.push(fisico)
+        callback("tiro el objeto")
+      } else {
+        callback("no hay nada que tirar")
+      }
+    })
 
     socket.on("beber", (cantidad) => {
       const player = players.find((player) => player.id === socket.id);
