@@ -258,28 +258,28 @@ function isCollidingWithMap(player) {
 }
 function isCollidingWithPlayer(player) {
   let playerEnMapa = players.filter(p => p.mapa === player.mapa && p.id !== player.id)
-   playerEnMapa = playerEnMapa.filter(p => !p.sinColision || p.sinColision === false)
+  playerEnMapa = playerEnMapa.filter(p => !p.sinColision || p.sinColision === false)
   for (let i = 0; i < playerEnMapa.length; i++) {
     const otroPlayer = playerEnMapa[i]
     switch (otroPlayer.skin) {
       case "arboles":
-       valorX= otroPlayer.x - 30
-       valorY= otroPlayer.y - 10
-       valorW= 50
-       valorH= 50
+        valorX = otroPlayer.x - 30
+        valorY = otroPlayer.y - 10
+        valorW = 50
+        valorH = 50
         break;
       case "items":
-       valorX= otroPlayer.x - otroPlayer.w +15
-       valorY= otroPlayer.y - otroPlayer.h 
-       valorW= otroPlayer.w +5
-       valorH= otroPlayer.h -5
-       break;
-       
-       default:
-        valorX= otroPlayer.x - 35
-        valorY= otroPlayer.y - 30
-        valorW= otroPlayer.w +30
-        valorH= otroPlayer.h +10
+        valorX = otroPlayer.x - otroPlayer.w + 15
+        valorY = otroPlayer.y - otroPlayer.h
+        valorW = otroPlayer.w + 5
+        valorH = otroPlayer.h - 5
+        break;
+
+      default:
+        valorX = otroPlayer.x - 35
+        valorY = otroPlayer.y - 30
+        valorW = otroPlayer.w + 30
+        valorH = otroPlayer.h + 10
 
         break;
     }
@@ -480,23 +480,32 @@ function tick(delta) {
               msg: player
             }
           } else {
-            let infoClick=`${player.nombre}`
-              infoClick +=player.timeLeft?(player.timeLeft/60) >1?` < ${Math.ceil(player.timeLeft/60)} min >`:` < ${player.timeLeft} seg >`:""
-              infoClick +=player.dueño  && player.sinColision === false?` < Dueño: ${player.dueño} >`:""
-              infoClick +=player.costo &&(player.costo[0] || player.costo[1] ||player.costo[2])?` < Costo: `:""
-              infoClick +=player.costo[0]?`  ${player.costo[0]} oro`:""
-              infoClick +=player.costo[0]&& player.costo[1]?`, `:""
-              infoClick +=player.costo[1]?`  ${player.costo[1]} plata`:""
-              infoClick +=player.costo[0] && player.costo[2] ||player.costo[1] && player.costo[2]?`, `:""
-              infoClick +=player.costo[2]?`  ${player.costo[2]} cobre`:""
-              infoClick +=player.costo&&(player.costo[0] || player.costo[1] ||player.costo[2])?` >`:""
-              infoClick+=player.objeto[1] && player.sinColision === true?` < Cantidad: ${player.objeto[1]} >`:""
+            let infoClick = `${player.nombre}`
+            infoClick += player.timeLeft ? (player.timeLeft / 60) > 1 ? ` < ${Math.ceil(player.timeLeft / 60)} min >` : ` < ${player.timeLeft} seg >` : ""
+            if(player.dueño){
+
+              infoClick += player.dueño && player.sinColision === false ? ` < Dueño: ${player.dueño} >` : ""
+              if (player.costo) {
+            }
+
+              infoClick += player.costo && (player.costo[0] || player.costo[1] || player.costo[2]) ? ` < Costo: ` : ""
+              infoClick += player.costo[0] ? `  ${player.costo[0]} oro` : ""
+              infoClick += player.costo[0] && player.costo[1] ? `, ` : ""
+              infoClick += player.costo[1] ? `  ${player.costo[1]} plata` : ""
+              infoClick += player.costo[0] && player.costo[2] || player.costo[1] && player.costo[2] ? `, ` : ""
+              infoClick += player.costo[2] ? `  ${player.costo[2]} cobre` : ""
+              infoClick += player.costo && (player.costo[0] || player.costo[1] || player.costo[2]) ? ` >` : ""
+            }
+            if (player.objeto) {
+
+              infoClick += player.objeto[1] && player.sinColision === true ? ` < Cantidad: ${player.objeto[1]} >` : ""
+            }
 
             obj = {
               cast: snowball.cast,
               //player: pj,
               tipo: "consola",
-              msg: infoClick ,
+              msg: infoClick,
               objetivo: player
 
             }
@@ -619,9 +628,7 @@ async function main() {
       estado: "ciudadano",
       ciudad: "Nix",
       descripcion: "Morgolock, me duras un click",
-      cantidadOro: 0,
-      cantidadPlata: 0,
-      cantidadCobre: 0,
+      billetera: [0, 0, 0],
       inventario: [
         [35, 1],
         [0, 0],
@@ -742,13 +749,13 @@ async function main() {
           if (dbItems[player.inventario[slot][0]].clase === "moneda") {
             switch (dbItems[player.inventario[slot][0]].imagen) {
               case 46:
-                player.cantidadOro += player.inventario[slot][1]
+                player.billetera[0] += player.inventario[slot][1]
                 break;
               case 47:
-                player.cantidadPlata += player.inventario[slot][1]
+                player.billetera[1] += player.inventario[slot][1]
                 break;
               case 48:
-                player.cantidadCobre += player.inventario[slot][1]
+                player.billetera[2] += player.inventario[slot][1]
                 break;
 
               default:
@@ -799,15 +806,15 @@ async function main() {
           player.inventario[slot][0] = 0
           player.inventario[slot][1] = 0
         }
-      }else{
-        
+      } else {
+
         callback(false)
       }
       callback(true)
     })
     socket.on("borrarDelSuelo", (item) => {
       console.log("aca", item.id)
-        players = players.filter(p=> p.id !==item.id) 
+      players = players.filter(p => p.id !== item.id)
 
     })
 
@@ -851,7 +858,7 @@ async function main() {
         }
       }
     })
-    socket.on("soltar", (slot, { x, y }, cantidad = 1, costo,colision, callback) => {
+    socket.on("soltar", (slot, { x, y }, cantidad = 1, costo, colision, callback) => {
       const player = players.find((player) => player.id === socket.id);
       if (dbItems[player.inventario[slot][0]]) {
         if (player.equipado.includes(slot)) {
@@ -859,16 +866,16 @@ async function main() {
 
         }
         const item = player.inventario[slot]
-         player.inventario[slot][1] -= cantidad
-         if(player.inventario[slot][1] ===0) {
-          player.inventario[slot]= [0,0]
+        player.inventario[slot][1] -= cantidad
+        if (player.inventario[slot][1] === 0) {
+          player.inventario[slot] = [0, 0]
         }
 
         let nuevoId = x.toString() + y.toString()
-          
+
         console.log(dbItems[item[0]])
         const fisico = {
-          objeto: [item[0],cantidad],
+          objeto: [item[0], cantidad],
           mapa: 1,
           id: nuevoId,
           x: x,
@@ -885,10 +892,10 @@ async function main() {
           recurso: 0,
           requerido: dbItems[item[0]].requerido,
           dueño: player.nombre,
-          timeLeft: dbItems[item[0]].duracion?dbItems[item[0]].duracion: 120, // 1 = 1 segundo
-          costo:costo?costo:"",
+          timeLeft: dbItems[item[0]].duracion ? dbItems[item[0]].duracion : 120, // 1 = 1 segundo
+          costo: costo ? costo : "",
           sinColision: colision
-        //  drop: item,
+          //  drop: item,
         }
         console.log("solto: ", fisico)
         players.push(fisico)
@@ -1044,15 +1051,15 @@ async function main() {
   }, 1000 / TICK_RATE);
 
   //OBJETOS CON DURACION
- 
+
   setInterval(() => {
     const conTimer = players.filter(p => p.timeLeft)
-  
+
     for (const player of conTimer) {
       player.timeLeft -= 1
-      if(player.timeLeft < 1){
-      players =  players.filter(p => p !== player)
-        
+      if (player.timeLeft < 1) {
+        players = players.filter(p => p !== player)
+
       }
     }
 

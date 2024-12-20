@@ -594,8 +594,17 @@ socket.on("recibirMensaje", (obj) => {
           let nombre = dbItems[obj.objetivo.recurso].nombre
           let borro = false
           let tieneLugar = myPlayer.inventario.find(slot => slot[0] === 0 && slot[1] === 0 || slot[0] === objetoNecesita)
+          let tieneSaldo = false
+          const usosPagos = ["refinar", "forjar"]
 
-          if (obj.objetivo.recurso === 0 && obj.objetivo.requerido === "refinar" && tieneLugar) {
+          if(usosPagos.includes(obj.objetivo.requerido)){
+
+            if (myPlayer.billetera[0] >= obj.objetivo.costo[0] && myPlayer.billetera[1] >= obj.objetivo.costo[1] && myPlayer.billetera[2] >= obj.objetivo.costo[2]) {
+              tieneSaldo = true
+            }
+          }
+
+          if (obj.objetivo.recurso === 0 && usosPagos.includes(obj.objetivo.requerido) && tieneLugar && tieneSaldo) {
             if (tiene >= necesita) {
 
               const objeto = dbItems[myPlayer.inventario[slot][0]].drop
@@ -619,8 +628,28 @@ socket.on("recibirMensaje", (obj) => {
             actualizarMensajes()
           }
 
-          if (obj.objetivo.requerido !== "refinar" || obj.objetivo.requerido === "refinar" && tiene >= necesita) {
+         // console.log("se cumple ", usosPagos.includes(obj.objetivo.requerido))
+          if (usosPagos.includes(obj.objetivo.requerido) && tieneSaldo === false) {
+            const msg = {
+              tipo: "consola",
+              msg: `No tienes suficiente dinero para usarlo.`
+            }
+            mensajesConsola.push(msg)
+            actualizarMensajes()
+          }
+          const abrenMenu= ["forjar","aserrar"]
+          if (abrenMenu.includes(obj.objetivo.requerido) && tieneSaldo === true) {
+            const msg = {
+              tipo: "consola",
+              msg: `Aca tengo que abrir el menu.`
+            }
+            mensajesConsola.push(msg)
+            actualizarMensajes()
+          }
 
+          console.log("tiene saldo: ", tieneSaldo)
+          if (!usosPagos.includes(obj.objetivo.requerido) || (usosPagos.includes(obj.objetivo.requerido) && tiene >= necesita && tieneSaldo)) {
+            console.log(obj.objetivo.costo)
             socket.emit("agarrar", item, (mensaje, bool) => {
               if (bool) {
                 let msg
@@ -665,6 +694,7 @@ socket.on("recibirMensaje", (obj) => {
               }, 300);
             })
           }
+
         } else {
           const msg = {
             tipo: "consola",
@@ -977,7 +1007,7 @@ window.addEventListener("keydown", (e) => {
             puede = false
           }
         })
-        const numero=Number(itemSelect.split("slot")[1])
+        const numero = Number(itemSelect.split("slot")[1])
         console.log(numero)
         if (dbItems[myPlayer.inventario[numero][0]].clase === "creable") {
           puede = false
@@ -1005,19 +1035,19 @@ window.addEventListener("keydown", (e) => {
 
           })
         } else {
-         let msg
+          let msg
           if (dbItems[myPlayer.inventario[numero][0]].clase === "creable") {
-            
+
             msg = {
               msg: "No puedes tirar este item.",
               tipo: "consola"
             }
-          }else{
+          } else {
             msg = {
               msg: "No hay espacio en el suelo",
               tipo: "consola"
             }
-            
+
           }
           mensajesConsola.push(msg)
           actualizarMensajes()
@@ -1293,9 +1323,9 @@ function loop() {
     salud.style.width = `${(myPlayer.salud / myPlayer.saludTotal) * 100}%`
     hambre.style.width = `${(myPlayer.hambre / myPlayer.hambreTotal) * 100}%`
     sed.style.width = `${(myPlayer.sed / myPlayer.sedTotal) * 100}%`
-    cantidadOro.innerText = myPlayer.cantidadOro
-    cantidadPlata.innerText = myPlayer.cantidadPlata
-    cantidadCobre.innerText = myPlayer.cantidadCobre
+    cantidadOro.innerText = myPlayer.billetera[0]
+    cantidadPlata.innerText = myPlayer.billetera[1]
+    cantidadCobre.innerText = myPlayer.billetera[2]
 
 
     const TILES_IN_ROW = 100; //numero de tiles en imagen /public/mapas/dungeon-newbie.jpg
