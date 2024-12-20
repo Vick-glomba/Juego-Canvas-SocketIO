@@ -272,20 +272,21 @@ input[type=number] { -moz-appearance:textfield; }
         <div class="modal-header">
           <div style="display: flex;">
 
-            <h2 style="color: rgb(147, 22, 22);margin-left: 90px; margin-bottom: 5px;margin-top: 0px; font-size: 30px;">Tirar</h2>
-            <button style="color: rgb(107, 7, 7);margin: 0;padding: 0; margin-left: 220px; width: 30px; height: 30px;" >X</button>
+            <h2 style="color: rgb(147, 22, 22);margin-left: 90px; margin-bottom: 5px;margin-top: 0px; font-size: 35px;">Tirar</h2>
+            <button style="color: rgb(107, 7, 7);margin: 0;padding: 0;; margin-left: 61px; width: 30px; height: 30px;" onclick="document.querySelector('#tirar').style.visibility = 'hidden', menuAbierto = false ">X</button>
           </div>
           <div style="display: flex;">
             <p style="margin: 0;margin-left: 15px; color: rgb(12, 12, 12); font-size: 25px; width: 100px;">Cantidad: </p>
-            <input type="number" value="1" min="0" max="9999" id="cuantoTirar"
-              style="text-align: center; margin-left: 10px; width: 35%; height: 30px;font-size: 18px;">
+            <input type="number" min="0" max="9999" id="cuantoTirar"
+              style="text-align: center; margin-left: 10px; width: 35%; height: 30px;font-size: 18px;"  >
           </div>
         </div >
 
         <div style= "display:flex;">
-          <button type="button" style="margin-left: 10px;margin-top: 10px; width: 40%; height: 40px;">Tirar Todo</button>
+          <button id="tirarTodo" type="button" style="margin-left: 10px;margin-top: 10px; width: 40%; height: 40px;">Maximo</button>
 
-          <button type="button" style="margin-left: 30px;margin-top: 10px; width: 40%; height: 40px;">Aceptar</button>
+          <button type="button" id="aceptarTirar" style="margin-left: 30px;margin-top: 10px; width: 40%; height: 40px;"
+       >Aceptar</button>
   
         </div>
 

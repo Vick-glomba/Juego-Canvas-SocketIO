@@ -59,7 +59,9 @@ otrosAgua.volume = 0.1
 const HUD = document.getElementById("HUD");
 const canvasEl = document.getElementById("canvas");
 const principal = document.getElementById("principal");
-const tirar= document.getElementById("tirar")
+const tirar = document.getElementById("tirar")
+const cuantoTirar = document.getElementById("cuantoTirar")
+const aceptarTirar = document.getElementById("aceptarTirar")
 
 function numeroRandom(min, max) {
   return parseInt(Math.random() * (max - 1 - min) + min);
@@ -67,15 +69,15 @@ function numeroRandom(min, max) {
 
 
 function tirarObjeto() {
-  
-  let cantidadTirar = document.getElementById("cuantoTirar").value
+
+  let cantidadTirar = Number(cuantoTirar.value)
   const slot = Number(itemSelect.split("slot")[1])
-  const cantidadTiene = myPlayer.inventario[slot][1] 
-  if(cantidadTirar > cantidadTiene){
+  const cantidadTiene = myPlayer.inventario[slot][1]
+  if (cantidadTirar > cantidadTiene) {
     console.log("cambia la cantidad")
     cantidadTirar = cantidadTiene
   }
-  if(cantidadTirar > 0){
+  if (cantidadTirar > 0) {
 
     const coord = {
       x: myPlayer.x,
@@ -83,21 +85,23 @@ function tirarObjeto() {
     }
     const costo = [0, 0, 0]
     socket.emit("soltar", slot, coord, cantidadTirar, costo, true, (mensaje) => {
-    const msg = {
-      msg: mensaje,
-      tipo: "consola"
-    }
-    mensajesConsola.push(msg)
-    actualizarMensajes()
-    setTimeout(() => {
-      
-      actualizarInventario()
-    }, 200);
-    
-    console.log("esta pasando")
-    
-  })
-}
+      const msg = {
+        msg: mensaje,
+        tipo: "consola"
+      }
+      mensajesConsola.push(msg)
+      actualizarMensajes()
+      setTimeout(() => {
+
+        actualizarInventario()
+      }, 200);
+
+      console.log("esta pasando")
+
+    })
+  }
+  tirar.style.visibility = "hidden"
+  menuAbierto = false
 }
 
 
@@ -170,7 +174,7 @@ let itemSelect
 
 
 
-
+let menuAbierto = false
 
 
 const boxHechizos = document.getElementById("boxHechizos")
@@ -178,6 +182,39 @@ const hechizos = document.getElementById("hechizos")
 const inventario = document.getElementById("inventario")
 const muteButton = document.getElementById("mute");
 const uid = Math.floor(Math.random() * 1000000);
+
+
+cuantoTirar.addEventListener("keydown", (e) => {
+  e.preventDefault()
+  if (Number(e.key) || e.key === "Backspace") {
+    if (e.key !== "e" && e.key !== "Backspace") {
+      if( cuantoTirar.value === "0"){
+        cuantoTirar.value = e.key
+      }else{
+
+        cuantoTirar.value += e.key
+      }
+    }
+    if (e.key === "Backspace" || cuantoTirar.value.length > 4) {
+      cuantoTirar.value = cuantoTirar.value.substring(0, cuantoTirar.value.length - 1)
+    }
+    if( cuantoTirar.value === "" || cuantoTirar.value.length === 0){
+      cuantoTirar.value = "0"
+    }
+  }
+})
+
+aceptarTirar.addEventListener("click", () => {
+  tirarObjeto()
+  document.querySelector('#tirar').style.visibility = 'hidden'
+  menuAbierto = false
+})
+tirarTodo.addEventListener("click", () => {
+  const slot = Number(itemSelect.split("slot")[1])
+  cuantoTirar.value = myPlayer.inventario[slot][1]
+
+
+})
 
 btnInventario.addEventListener("click", () => {
   inventario.style.visibility = "visible"
@@ -197,7 +234,7 @@ let selecciono = false
 cajaInventario.addEventListener("click", (e) => {
   cajaInventario.blur()
   e.target.blur()
-  if (e.target.id !== "cajaInventario") {
+  if (e.target.id !== "cajaInventario" && !menuAbierto) {
 
     cajaInventario.blur()
     e.target.blur()
@@ -635,7 +672,7 @@ socket.on("recibirMensaje", (obj) => {
           let tieneSaldo = false
           const usosPagos = ["refinar", "forjar"]
 
-          if(usosPagos.includes(obj.objetivo.requerido)){
+          if (usosPagos.includes(obj.objetivo.requerido)) {
 
             if (myPlayer.billetera[0] >= obj.objetivo.costo[0] && myPlayer.billetera[1] >= obj.objetivo.costo[1] && myPlayer.billetera[2] >= obj.objetivo.costo[2]) {
               tieneSaldo = true
@@ -666,7 +703,7 @@ socket.on("recibirMensaje", (obj) => {
             actualizarMensajes()
           }
 
-         // console.log("se cumple ", usosPagos.includes(obj.objetivo.requerido))
+          // console.log("se cumple ", usosPagos.includes(obj.objetivo.requerido))
           if (usosPagos.includes(obj.objetivo.requerido) && tieneSaldo === false) {
             const msg = {
               tipo: "consola",
@@ -675,7 +712,7 @@ socket.on("recibirMensaje", (obj) => {
             mensajesConsola.push(msg)
             actualizarMensajes()
           }
-          const abrenMenu= ["forjar","aserrar"]
+          const abrenMenu = ["forjar", "aserrar"]
           if (abrenMenu.includes(obj.objetivo.requerido) && tieneSaldo === true) {
             const msg = {
               tipo: "consola",
@@ -895,7 +932,7 @@ setInterval(() => {
 
 window.addEventListener("keydown", (e) => {
 
-  if (e.key === "Enter") {
+  if (e.key === "Enter" && !menuAbierto) {
 
     if (escribiendo) {
       const comandos = ["/meditar", "/descansar", "/comerciar", "/nombre", "/desc"]
@@ -997,14 +1034,12 @@ window.addEventListener("keydown", (e) => {
       escribiendo = true
     }
   }
-
-  if (!escribiendo) {
-
+  if (!escribiendo && !menuAbierto) {
 
     switch (e.key) {
       case "q":
         itemsEnMapa.forEach(player => {
-          const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY -2 ) - (myPlayer.y - cameraY)) ** 2);
+          const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY - 2) - (myPlayer.y - cameraY)) ** 2);
           const ratio = 1.0 - Math.min(distance / 700, 1);
 
           const proximidad = Math.floor(ratio * 100)
@@ -1032,8 +1067,14 @@ window.addEventListener("keydown", (e) => {
 
         })
         break
+      case "esc":
+
+        break
       case "t":
 
+        if (!itemSelect) {
+          break;
+        }
         let puede = true
         itemsEnMapa.forEach(player => {
           const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY - 10) - (myPlayer.y - cameraY)) ** 2);
@@ -1051,6 +1092,9 @@ window.addEventListener("keydown", (e) => {
         }
         if (itemSelect && puede) {
           tirar.style.visibility = "visible"
+          cuantoTirar.focus()
+          cuantoTirar.value = "1"
+          menuAbierto = true
         } else {
           let msg
           if (dbItems[myPlayer.inventario[numero][0]].clase === "creable") {
@@ -1218,7 +1262,9 @@ window.addEventListener("keydown", (e) => {
 
     }
   }
-
+  if (menuAbierto && e.key === "Enter") {
+    tirarObjeto()
+  }
   if (["a", "s", "w", "d"].includes(e.key) && !escribiendo) {
     setTimeout(() => {
       if (descansar) {
@@ -1266,8 +1312,9 @@ window.addEventListener("keyup", (e) => {
 
 //EVENTO DE CLICK EN CANVAS
 canvasEl.addEventListener("click", (e) => {
-  if(tirar.style.visibility === "visible"){
+  if (tirar.style.visibility === "visible") {
     tirar.style.visibility = "hidden"
+    menuAbierto = false
   }
   const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
   point.cast = {
@@ -1440,8 +1487,8 @@ function loop() {
 
           switch (player.skin) {
             case "items":
-                x = player.x - cameraX - player.w / 2
-                y = player.y - cameraY - player.h / 2 +10
+              x = player.x - cameraX - player.w / 2
+              y = player.y - cameraY - player.h / 2 + 10
               break;
             case "arboles":
               x = player.x - cameraX - player.w / 2 - player.w / 20
