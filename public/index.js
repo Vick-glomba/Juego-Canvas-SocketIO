@@ -29,6 +29,7 @@ const speakerImage = new Image();
 speakerImage.src = "personajes/speaker.png";
 
 
+
 //AUDIOS
 let meditar = false
 const walkSnow = new Audio("./audio/walk-snow.mp3");
@@ -58,11 +59,48 @@ otrosAgua.volume = 0.1
 const HUD = document.getElementById("HUD");
 const canvasEl = document.getElementById("canvas");
 const principal = document.getElementById("principal");
-
+const tirar= document.getElementById("tirar")
 
 function numeroRandom(min, max) {
   return parseInt(Math.random() * (max - 1 - min) + min);
 }
+
+
+function tirarObjeto() {
+  
+  let cantidadTirar = document.getElementById("cuantoTirar").value
+  const slot = Number(itemSelect.split("slot")[1])
+  const cantidadTiene = myPlayer.inventario[slot][1] 
+  if(cantidadTirar > cantidadTiene){
+    console.log("cambia la cantidad")
+    cantidadTirar = cantidadTiene
+  }
+  if(cantidadTirar > 0){
+
+    const coord = {
+      x: myPlayer.x,
+      y: myPlayer.y,
+    }
+    const costo = [0, 0, 0]
+    socket.emit("soltar", slot, coord, cantidadTirar, costo, true, (mensaje) => {
+    const msg = {
+      msg: mensaje,
+      tipo: "consola"
+    }
+    mensajesConsola.push(msg)
+    actualizarMensajes()
+    setTimeout(() => {
+      
+      actualizarInventario()
+    }, 200);
+    
+    console.log("esta pasando")
+    
+  })
+}
+}
+
+
 
 //BOTONES
 const btnOpciones = document.getElementById("btnOpciones")
@@ -966,7 +1004,7 @@ window.addEventListener("keydown", (e) => {
     switch (e.key) {
       case "q":
         itemsEnMapa.forEach(player => {
-          const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY - 10) - (myPlayer.y - cameraY)) ** 2);
+          const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY -2 ) - (myPlayer.y - cameraY)) ** 2);
           const ratio = 1.0 - Math.min(distance / 700, 1);
 
           const proximidad = Math.floor(ratio * 100)
@@ -1008,32 +1046,11 @@ window.addEventListener("keydown", (e) => {
           }
         })
         const numero = Number(itemSelect.split("slot")[1])
-        console.log(numero)
         if (dbItems[myPlayer.inventario[numero][0]].clase === "creable") {
           puede = false
         }
         if (itemSelect && puede) {
-          const slot = Number(itemSelect.split("slot")[1])
-          const coord = {
-            x: myPlayer.x,
-            y: myPlayer.y,
-          }
-          const costo = [0, 0, 0]
-          socket.emit("soltar", slot, coord, 1, costo, true, (mensaje) => {
-            const msg = {
-              msg: mensaje,
-              tipo: "consola"
-            }
-            mensajesConsola.push(msg)
-            actualizarMensajes()
-            setTimeout(() => {
-
-              actualizarInventario()
-            }, 200);
-
-            console.log("esta pasando")
-
-          })
+          tirar.style.visibility = "visible"
         } else {
           let msg
           if (dbItems[myPlayer.inventario[numero][0]].clase === "creable") {
@@ -1249,7 +1266,9 @@ window.addEventListener("keyup", (e) => {
 
 //EVENTO DE CLICK EN CANVAS
 canvasEl.addEventListener("click", (e) => {
-
+  if(tirar.style.visibility === "visible"){
+    tirar.style.visibility = "hidden"
+  }
   const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
   point.cast = {
     cast,
@@ -1421,8 +1440,8 @@ function loop() {
 
           switch (player.skin) {
             case "items":
-              x = player.x - cameraX - player.w / 2
-              y = player.y - cameraY - player.h / 2 + 5
+                x = player.x - cameraX - player.w / 2
+                y = player.y - cameraY - player.h / 2 +10
               break;
             case "arboles":
               x = player.x - cameraX - player.w / 2 - player.w / 20

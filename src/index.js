@@ -269,9 +269,9 @@ function isCollidingWithPlayer(player) {
         valorH = 50
         break;
       case "items":
-        valorX = otroPlayer.x - otroPlayer.w + 15
-        valorY = otroPlayer.y - otroPlayer.h
-        valorW = otroPlayer.w + 5
+        valorX = otroPlayer.x - otroPlayer.w + 5
+        valorY = otroPlayer.y - otroPlayer.h +15
+        valorW = otroPlayer.w + 20
         valorH = otroPlayer.h - 5
         break;
 
