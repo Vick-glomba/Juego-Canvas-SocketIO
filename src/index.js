@@ -35,11 +35,11 @@ let players = [{
   row: 0,
   col: 0,
   clase: "arbol",
-  nombre: "abedul",
+  nombre: "Yacimiento de Cobre",
   quieto: true,
   estado: "criminal",
-  recurso: 36,
-  requerido: "talar"
+  recurso: 37,
+  requerido: "minar"
 },
 {
   mapa: 1,

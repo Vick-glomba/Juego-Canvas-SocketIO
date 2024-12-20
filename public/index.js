@@ -36,9 +36,17 @@ const walkSnow = new Audio("./audio/walk-snow.mp3");
 
 const clcik1 = new Audio("./audio/click1.WAV");
 const clcik2 = new Audio("./audio/click2.WAV");
+//mis sonidos
 const equipar = new Audio("./audio/equipar.WAV");
 equipar.volume = 0.1
-//mis sonidos
+const talar = new Audio("./audio/talar.WAV");
+talar.volume = 0.1
+const minar = new Audio("./audio/minar.WAV");
+minar.volume = 0.1
+const pescar = new Audio("./audio/pescar.WAV");
+pescar.volume = 0.1
+
+
 const misPasos = new Audio("./audio/caminar.WAV");
 misPasos.preload = "auto"
 
@@ -733,6 +741,21 @@ socket.on("recibirMensaje", (obj) => {
                     tipo: "consola",
                     msg: `Has conseguido ${cantidad} de ${nombre}.`
                   }
+                  //reproducir sonido exito segun profesion
+                  switch (obj.objetivo.requerido) {
+                    case "talar":
+                     talar.play()
+                      break;
+                    case "minar":
+                      minar.play()
+                      break;
+                    case "pescar":
+                      pescar.play()
+                      break;
+                  
+                    default:
+                      break;
+                  }
                 } else {
                   if (obj.objetivo.requerido === "forjar") {
                     msg = {
@@ -773,7 +796,7 @@ socket.on("recibirMensaje", (obj) => {
         } else {
           const msg = {
             tipo: "consola",
-            msg: `No puedes ${obj.cast.hechizoSelect.nombre}  ${obj.objetivo.clase}.`
+            msg: `No puedes ${obj.cast.hechizoSelect.nombre}  ${obj.objetivo.nombre}.`
           }
           mensajesConsola.push(msg)
           actualizarMensajes()
