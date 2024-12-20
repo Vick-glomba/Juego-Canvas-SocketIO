@@ -421,6 +421,7 @@ let db = []
 let pj
 let dataTile
 let players = [];
+let itemsEnMapa = [];
 // const hechizosData = ["--------------Vacio--------------" ,"Dardo magico", "Flecha Magica", "Curar Heridas Leves", "Inmovilizar", "Rayo Peronizador", "Misil Magico", "Tormenta Electrica","Talar"]
 let hechizosData = []
 
@@ -592,9 +593,9 @@ socket.on("recibirMensaje", (obj) => {
           let tiene = myPlayer.inventario[slot][1]
           let nombre = dbItems[obj.objetivo.recurso].nombre
           let borro = false
-          let tieneLugar = myPlayer.inventario.find(slot => slot[0] === 0 && slot[1] === 0 || slot[0] === objetoNecesita )
+          let tieneLugar = myPlayer.inventario.find(slot => slot[0] === 0 && slot[1] === 0 || slot[0] === objetoNecesita)
 
-          if (obj.objetivo.recurso === 0 && obj.objetivo.requerido=== "refinar" && tieneLugar) {
+          if (obj.objetivo.recurso === 0 && obj.objetivo.requerido === "refinar" && tieneLugar) {
             if (tiene >= necesita) {
 
               const objeto = dbItems[myPlayer.inventario[slot][0]].drop
@@ -607,9 +608,9 @@ socket.on("recibirMensaje", (obj) => {
                   borro = false
                 }
               })
-            } 
+            }
           }
-          if(tiene < necesita){
+          if (tiene < necesita) {
             const msg = {
               tipo: "consola",
               msg: `No tienes suficiente cantidad.`
@@ -618,37 +619,37 @@ socket.on("recibirMensaje", (obj) => {
             actualizarMensajes()
           }
 
-          if(obj.objetivo.requerido!== "refinar" || obj.objetivo.requerido=== "refinar" && tiene >= necesita){
+          if (obj.objetivo.requerido !== "refinar" || obj.objetivo.requerido === "refinar" && tiene >= necesita) {
 
             socket.emit("agarrar", item, (mensaje, bool) => {
               if (bool) {
                 let msg
-                if(cantidad > 0){
-                   msg = {
+                if (cantidad > 0) {
+                  msg = {
                     tipo: "consola",
                     msg: `Has conseguido ${cantidad} de ${nombre}.`
                   }
-                }else{
-                  if (obj.objetivo.requerido=== "forjar"){
+                } else {
+                  if (obj.objetivo.requerido === "forjar") {
                     msg = {
                       tipo: "consola",
                       msg: `Abrir el menu de Herreria`
                     }
-                  }else{
+                  } else {
 
                     msg = {
-                     tipo: "consola",
-                     msg: obj.objetivo.requerido=== "refinar"?"Fallo.":`Has errado el golpe.`
-                   }
+                      tipo: "consola",
+                      msg: obj.objetivo.requerido === "refinar" ? "Fallo." : `Has errado el golpe.`
+                    }
                   }
 
                 }
                 mensajesConsola.push(msg)
                 actualizarMensajes()
               } else {
-                tieneLugar =false
+                tieneLugar = false
               }
-              if(!tieneLugar){
+              if (!tieneLugar) {
 
                 const msg = {
                   tipo: "consola",
@@ -657,9 +658,9 @@ socket.on("recibirMensaje", (obj) => {
                 mensajesConsola.push(msg)
                 actualizarMensajes()
               }
-              
+
               setTimeout(() => {
-                
+
                 actualizarInventario()
               }, 300);
             })
@@ -933,6 +934,82 @@ window.addEventListener("keydown", (e) => {
 
 
     switch (e.key) {
+      case "q":
+        itemsEnMapa.forEach(player => {
+          const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY - 10) - (myPlayer.y - cameraY)) ** 2);
+          const ratio = 1.0 - Math.min(distance / 700, 1);
+
+          const proximidad = Math.floor(ratio * 100)
+          //console.log(proximidad)
+          if (proximidad > 97) {
+
+            socket.emit("agarrar", player.objeto, (mensaje, bool) => {
+              if (bool) {
+                socket.emit("borrarDelSuelo", player)
+              } else {
+
+                const msg = {
+                  msg: mensaje,
+                  tipo: "consola"
+                }
+                mensajesConsola.push(msg)
+                actualizarMensajes()
+              }
+              setTimeout(() => {
+
+                actualizarInventario()
+              }, 200);
+            })
+          }
+
+        })
+        break
+        case "t":
+          
+          let puede= true
+          itemsEnMapa.forEach(player => {
+          const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY - 10) - (myPlayer.y - cameraY)) ** 2);
+          const ratio = 1.0 - Math.min(distance / 700, 1);
+          
+          const proximidad = Math.floor(ratio * 100)
+          //console.log(proximidad)
+          if (proximidad > 94) {
+            puede = false
+          }
+        })
+            if (itemSelect && puede) {
+              const slot = Number(itemSelect.split("slot")[1])
+              const coord = {
+                x: myPlayer.x,
+                y: myPlayer.y,
+              }
+              const costo = [0, 0, 0]
+              socket.emit("soltar", slot, coord, 1, costo, true, (mensaje) => {
+                const msg = {
+                  msg: mensaje,
+                  tipo: "consola"
+                }
+                mensajesConsola.push(msg)
+                actualizarMensajes()
+                setTimeout(() => {
+
+                  actualizarInventario()
+                }, 200);
+
+                console.log("esta pasando")
+
+              })
+            } else {
+              const msg = {
+                msg: "No hay espacio en el suelo",
+                tipo: "consola"
+              }
+              mensajesConsola.push(msg)
+              actualizarMensajes()
+              actualizarInventario()
+            }
+        
+        break
       case "i":
         actualizarInventario()
         break
@@ -1166,8 +1243,8 @@ canvasEl.addEventListener("click", (e) => {
       x: point.x,
       y: point.y,
     }
-    const costo = [1,0,1]
-    socket.emit("soltar", slot, coord,1,costo, (mensaje) => {
+    const costo = [1, 0, 1]
+    socket.emit("soltar", slot, coord, 1, costo, false, (mensaje) => {
       const msg = {
         msg: mensaje,
         tipo: "consola"
@@ -1271,10 +1348,72 @@ function loop() {
       }
     }
 
+    //objetos
+    for (const player of itemsEnMapa) {
+      const pjrender = personajes.find(pj => pj.skin === player.skin)
+
+      const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
+      const ratio = 1.0 - Math.min(distance / 700, 1);
+
+      const proximidad = Math.floor(ratio * 100)
+
+
+
+      if (proximidad > distanciaRender) {
+
+        TILES_IN_ROW_PJ = pjrender.info.rows
+        TILES_IN_COL_PJ = pjrender.info.cols
+        PJ_SIZE_W = pjrender.info.tileWidth
+        PJ_SIZE_H = pjrender.info.tileHeight
+        let { id } = pjrender.pj2D[player.row][player.col] ?? { id: undefined };
+        if (id !== undefined) {
+
+          const imageRow = parseInt(id / TILES_IN_ROW_PJ);
+          const imageCol = id % TILES_IN_ROW_PJ;
+          // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+          let x
+          let y
+
+          switch (player.skin) {
+            case "items":
+              x = player.x - cameraX - player.w / 2
+              y = player.y - cameraY - player.h / 2 + 5
+              break;
+            case "arboles":
+              x = player.x - cameraX - player.w / 2 - player.w / 20
+              y = player.y - cameraY - player.h + 40
+              break;
+
+            default:
+              x = player.x - cameraX - player.w / 2
+              y = player.y - cameraY - player.h / 2
+              break;
+          }
+
+
+
+          canvas.drawImage(
+            imagenes[player.skin],
+            imageCol * PJ_SIZE_W,
+            imageRow * PJ_SIZE_H,
+            PJ_SIZE_W,
+            PJ_SIZE_H,
+            x,
+            y,
+            player.w,
+            player.h
+          );
+
+        }
+
+      }
+    }
 
     //Personaje
     for (const player of players) {
-
+      if (player.skin === "items") {
+        continue;
+      }
       const pjrender = personajes.find(pj => pj.skin === player.skin)
 
       // id: socket.id,
@@ -1340,6 +1479,26 @@ function loop() {
             const imageRow = parseInt(id / TILES_IN_ROW_PJ);
             const imageCol = id % TILES_IN_ROW_PJ;
             // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            let x
+            let y
+
+            switch (player.skin) {
+              case "items":
+                x = player.x - cameraX - player.w / 2
+                y = player.y - cameraY - player.h / 2
+                break;
+              case "arboles":
+                x = player.x - cameraX - player.w / 2 - player.w / 20
+                y = player.y - cameraY - player.h + 40
+                break;
+
+              default:
+                x = player.x - cameraX - player.w / 2
+                y = player.y - cameraY - player.h / 2
+                break;
+            }
+
+
 
             canvas.drawImage(
               imagenes[player.skin],
@@ -1347,8 +1506,8 @@ function loop() {
               imageRow * PJ_SIZE_H,
               PJ_SIZE_W,
               PJ_SIZE_H,
-              player.skin === "arboles" ? player.x - cameraX - player.w / 2 - player.w / 20 : player.x - cameraX - player.w / 2,
-              player.skin === "arboles" ? player.y - cameraY - player.h + 40 : player.y - cameraY - player.h / 2,
+              x,
+              y,
               player.w,
               player.h
             );
@@ -1471,7 +1630,7 @@ setInterval(() => {
     socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
 
       players = playersEnMapa
-
+      itemsEnMapa = players.filter(p => p.skin === "items")
       myPlayer = players.find((player) => player.id === socket.id);
       players.sort(((a, b) => a.y - b.y))
       if (mundoMaps[myPlayer.mapa]) {

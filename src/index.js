@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 8080;
 const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
+const { write } = require("fs");
 const dbItems = db.items
 const SPEED = 8;
 const TICK_RATE = 16;
@@ -256,8 +257,8 @@ function isCollidingWithMap(player) {
   return false;
 }
 function isCollidingWithPlayer(player) {
-  const playerEnMapa = players.filter(p => p.mapa === player.mapa && p.id !== player.id)
-
+  let playerEnMapa = players.filter(p => p.mapa === player.mapa && p.id !== player.id)
+   playerEnMapa = playerEnMapa.filter(p => !p.sinColision || p.sinColision === false)
   for (let i = 0; i < playerEnMapa.length; i++) {
     const otroPlayer = playerEnMapa[i]
     switch (otroPlayer.skin) {
@@ -269,16 +270,16 @@ function isCollidingWithPlayer(player) {
         break;
       case "items":
        valorX= otroPlayer.x - otroPlayer.w +15
-       valorY= otroPlayer.y - otroPlayer.h +10
+       valorY= otroPlayer.y - otroPlayer.h 
        valorW= otroPlayer.w +5
        valorH= otroPlayer.h -5
        break;
        
        default:
-        valorX= otroPlayer.x - otroPlayer.w / 2
-        valorY= otroPlayer.y - otroPlayer.h / 2
-        valorW= otroPlayer.w
-        valorH= otroPlayer.h
+        valorX= otroPlayer.x - 35
+        valorY= otroPlayer.y - 30
+        valorW= otroPlayer.w +30
+        valorH= otroPlayer.h +10
 
         break;
     }
@@ -306,7 +307,7 @@ function isCollidingWithPlayer(player) {
 
 function tick(delta) {
   for (const player of players) {
-    if (player.id !== 1) {
+    if (player.clase === "player") {
 
 
       const inputs = inputsMap[player.id];
@@ -481,15 +482,15 @@ function tick(delta) {
           } else {
             let infoClick=`${player.nombre}`
               infoClick +=player.timeLeft?(player.timeLeft/60) >1?` < ${Math.ceil(player.timeLeft/60)} min >`:` < ${player.timeLeft} seg >`:""
-              infoClick +=player.dueño?` < Dueño: ${player.dueño} >`:""
-              infoClick +=player.costo?` < Costo: `:""
+              infoClick +=player.dueño  && player.sinColision === false?` < Dueño: ${player.dueño} >`:""
+              infoClick +=player.costo &&(player.costo[0] || player.costo[1] ||player.costo[2])?` < Costo: `:""
               infoClick +=player.costo[0]?`  ${player.costo[0]} oro`:""
               infoClick +=player.costo[0]&& player.costo[1]?`, `:""
               infoClick +=player.costo[1]?`  ${player.costo[1]} plata`:""
               infoClick +=player.costo[0] && player.costo[2] ||player.costo[1] && player.costo[2]?`, `:""
               infoClick +=player.costo[2]?`  ${player.costo[2]} cobre`:""
-              infoClick +=player.costo?` >`:""
-
+              infoClick +=player.costo&&(player.costo[0] || player.costo[1] ||player.costo[2])?` >`:""
+              infoClick+=player.objeto[1] && player.sinColision === true?` < Cantidad: ${player.objeto[1]} >`:""
 
             obj = {
               cast: snowball.cast,
@@ -804,6 +805,11 @@ async function main() {
       }
       callback(true)
     })
+    socket.on("borrarDelSuelo", (item) => {
+      console.log("aca", item.id)
+        players = players.filter(p=> p.id !==item.id) 
+
+    })
 
 
 
@@ -845,7 +851,7 @@ async function main() {
         }
       }
     })
-    socket.on("soltar", (slot, { x, y }, cantidad = 1, costo, callback) => {
+    socket.on("soltar", (slot, { x, y }, cantidad = 1, costo,colision, callback) => {
       const player = players.find((player) => player.id === socket.id);
       if (dbItems[player.inventario[slot][0]]) {
         if (player.equipado.includes(slot)) {
@@ -858,11 +864,13 @@ async function main() {
           player.inventario[slot]= [0,0]
         }
 
+        let nuevoId = x.toString() + y.toString()
+          
         console.log(dbItems[item[0]])
         const fisico = {
           objeto: [item[0],cantidad],
           mapa: 1,
-          id: 1,
+          id: nuevoId,
           x: x,
           y: y,
           skin: "items",
@@ -877,10 +885,12 @@ async function main() {
           recurso: 0,
           requerido: dbItems[item[0]].requerido,
           dueño: player.nombre,
-          timeLeft: dbItems[item[0]].duracion, // 1 = 1 segundo
-          costo:costo?costo:""
+          timeLeft: dbItems[item[0]].duracion?dbItems[item[0]].duracion: 120, // 1 = 1 segundo
+          costo:costo?costo:"",
+          sinColision: colision
         //  drop: item,
         }
+        console.log("solto: ", fisico)
         players.push(fisico)
         callback("tiro el objeto")
       } else {
