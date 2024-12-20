@@ -941,7 +941,7 @@ window.addEventListener("keydown", (e) => {
 
           const proximidad = Math.floor(ratio * 100)
           //console.log(proximidad)
-          if (proximidad > 97) {
+          if (proximidad > 97 && player.skin === "items" && player.clase !== "creable") {
 
             socket.emit("agarrar", player.objeto, (mensaje, bool) => {
               if (bool) {
@@ -964,51 +964,66 @@ window.addEventListener("keydown", (e) => {
 
         })
         break
-        case "t":
-          
-          let puede= true
-          itemsEnMapa.forEach(player => {
+      case "t":
+
+        let puede = true
+        itemsEnMapa.forEach(player => {
           const distance = Math.sqrt(((player.x - cameraX) - (myPlayer.x - cameraX)) ** 2 + ((player.y - cameraY - 10) - (myPlayer.y - cameraY)) ** 2);
           const ratio = 1.0 - Math.min(distance / 700, 1);
-          
+
           const proximidad = Math.floor(ratio * 100)
-          //console.log(proximidad)
+          console.log(player.clase)
           if (proximidad > 94) {
             puede = false
           }
         })
-            if (itemSelect && puede) {
-              const slot = Number(itemSelect.split("slot")[1])
-              const coord = {
-                x: myPlayer.x,
-                y: myPlayer.y,
-              }
-              const costo = [0, 0, 0]
-              socket.emit("soltar", slot, coord, 1, costo, true, (mensaje) => {
-                const msg = {
-                  msg: mensaje,
-                  tipo: "consola"
-                }
-                mensajesConsola.push(msg)
-                actualizarMensajes()
-                setTimeout(() => {
-
-                  actualizarInventario()
-                }, 200);
-
-                console.log("esta pasando")
-
-              })
-            } else {
-              const msg = {
-                msg: "No hay espacio en el suelo",
-                tipo: "consola"
-              }
-              mensajesConsola.push(msg)
-              actualizarMensajes()
-              actualizarInventario()
+        const numero=Number(itemSelect.split("slot")[1])
+        console.log(numero)
+        if (dbItems[myPlayer.inventario[numero][0]].clase === "creable") {
+          puede = false
+        }
+        if (itemSelect && puede) {
+          const slot = Number(itemSelect.split("slot")[1])
+          const coord = {
+            x: myPlayer.x,
+            y: myPlayer.y,
+          }
+          const costo = [0, 0, 0]
+          socket.emit("soltar", slot, coord, 1, costo, true, (mensaje) => {
+            const msg = {
+              msg: mensaje,
+              tipo: "consola"
             }
-        
+            mensajesConsola.push(msg)
+            actualizarMensajes()
+            setTimeout(() => {
+
+              actualizarInventario()
+            }, 200);
+
+            console.log("esta pasando")
+
+          })
+        } else {
+         let msg
+          if (dbItems[myPlayer.inventario[numero][0]].clase === "creable") {
+            
+            msg = {
+              msg: "No puedes tirar este item.",
+              tipo: "consola"
+            }
+          }else{
+            msg = {
+              msg: "No hay espacio en el suelo",
+              tipo: "consola"
+            }
+            
+          }
+          mensajesConsola.push(msg)
+          actualizarMensajes()
+          actualizarInventario()
+        }
+
         break
       case "i":
         actualizarInventario()

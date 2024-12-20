@@ -878,7 +878,7 @@ async function main() {
           h: 32,
           row: Math.floor(item[0] / 20),
           col: item[0] - (Math.floor(item[0] / 20) * 20) - 1,
-          clase: dbItems[item[0]].nombre,
+          clase: dbItems[item[0]].clase,
           nombre: dbItems[item[0]].nombre,
           quieto: true,
           estado: "neutral",
