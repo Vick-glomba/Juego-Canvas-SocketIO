@@ -16,7 +16,7 @@ const db = require("./hechizosDB");
 const { write } = require("fs");
 const dbItems = db.items
 const SPEED = 8;
-const TICK_RATE = 20;
+const TICK_RATE = 30;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
