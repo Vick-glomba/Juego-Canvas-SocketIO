@@ -772,8 +772,10 @@ const actualizarInventario = async() => {
           const item = myPlayer.inventario[contador][0]
           const url = "./items/" + dbItems[item].imagen + ".BMP"
           const url2 = "./items/" + dbItems[item].imagen + ".bmp"
-          const existe= await checkUrl(url);
-          imagen = existe === true?`background-image: url(${url});`:`background-image: url(${url2});`
+        //  const existe= await checkUrl(url);
+        const img = new Image()
+        img.src = url
+          imagen =img.onload()?`background-image: url(${url});`:`background-image: url(${url2});`
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
           } else {
