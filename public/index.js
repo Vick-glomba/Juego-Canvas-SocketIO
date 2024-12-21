@@ -706,42 +706,42 @@ const TILE_SIZE = 32;
 
 const SNOWBALL_RADIUS = 4;
 
-const checkUrl = async(url) => {
+const checkUrl = async (url) => {
   return new Promise((resolve, reject) => {
     if (url.trim() == "") {
       resolve(false)
     }
     fetch(url).then(res => {
-        const img = new Image();
-        img.src = url;
-        img.onload = () => {
-          if (res.status == 200) {
-            resolve(true)
-          } else {
-            resolve(false)
-          }
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        if (res.status == 200) {
+          resolve(true)
+        } else {
+          resolve(false)
         }
-      })
+      }
+    })
       .catch(e => {
         resolve(false)
       })
   })
 }
-const checkUrlAudio = async(url) => {
+const checkUrlAudio = async (url) => {
   return new Promise((resolve, reject) => {
     if (url.trim() == "") {
       resolve(false)
     }
     fetch(url).then(res => {
-        const audio = new Audio(url);
-        audio.onload = () => {
-          if (res.status == 200 && !(img.width == 0)) {
-            resolve(true)
-          } else {
-            resolve(false)
-          }
+      const audio = new Audio(url);
+      audio.onload = () => {
+        if (res.status == 200 && !(img.width == 0)) {
+          resolve(true)
+        } else {
+          resolve(false)
         }
-      })
+      }
+    })
       .catch(e => {
         resolve(false)
       })
@@ -752,7 +752,7 @@ const checkUrlAudio = async(url) => {
 
 
 
-const actualizarInventario = async() => {
+const actualizarInventario = async () => {
   if (myPlayer) {
     let contador = 0
     let html = ""
@@ -772,11 +772,14 @@ const actualizarInventario = async() => {
           const item = myPlayer.inventario[contador][0]
           const url = "./items/" + dbItems[item].imagen + ".BMP"
           const url2 = "./items/" + dbItems[item].imagen + ".bmp"
-        //  const existe= await checkUrl(url);
-        const img = new Image()
-              img.src = url
-          imagen = img?`background-image: url(${url});`:`background-image: url(${url2});`
-          if(img.width == 0 && img){
+          //  const existe= await checkUrl(url);
+          const img = new Image()
+          img.src = url
+          if (img) {
+            img = `background-image: url(${url});`
+          }
+
+          if (img.width == 0 && img) {
             imagen = `background-image: url(${url2});`
           }
           if (itemSelect === "slot" + contador) {
