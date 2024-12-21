@@ -80,7 +80,8 @@ const listaCraftNecesita = document.getElementById("listaCraftNecesita")
 const listaCraftItem = document.getElementById("listaCraftItem")
 const craft = document.getElementById("craft")
 const cantidadCraft = document.getElementById("cantidadCraft")
-
+let costoElegido = [0,0,0]
+let point
 
 const actualizarCraftItem = () => {
   let html = ""
@@ -106,6 +107,35 @@ const actualizarCraftNecesita = () => {
 function numeroRandom(min, max) {
   return parseInt(Math.random() * (max - 1 - min) + min);
 }
+
+
+const soltarCreable = ()=>{
+  const slot = Number(itemSelect.split("slot")[1])
+  // socket.emit("gastarEnergia", 15)
+  const coord = {
+    x: point.x,
+    y: point.y,
+  }
+  const costo = costoElegido
+  socket.emit("soltar", slot, coord, 1, costo, false, (mensaje) => {
+    const msg = {
+      msg: mensaje,
+      tipo: "consola"
+    }
+    mensajesConsola.push(msg)
+    actualizarMensajes()
+    setTimeout(() => {
+
+      actualizarInventario()
+    }, 200);
+
+    console.log("esta pasando")
+
+  })
+  accion = ""
+  descansar = false
+}
+
 
 
 function tirarObjeto() {
@@ -207,6 +237,8 @@ const sed = document.getElementById("sed")
 const cantidadOro = document.getElementById("cantidadOro")
 const cantidadPlata = document.getElementById("cantidadPlata")
 const cantidadCobre = document.getElementById("cantidadCobre")
+const colocarPrecio = document.getElementById("colocarPrecio")
+const aceptarColocarPrecio = document.getElementById("aceptarColocarPrecio")
 
 const cajaInventario = document.getElementById("cajaInventario")
 let itemSelect
@@ -223,6 +255,93 @@ const inventario = document.getElementById("inventario")
 const muteButton = document.getElementById("mute");
 const uid = Math.floor(Math.random() * 1000000);
 
+const colocarPrecioOro = document.getElementById("colocarPrecioOro")
+const colocarPrecioPlata = document.getElementById("colocarPrecioPlata")
+const colocarPrecioCobre = document.getElementById("colocarPrecioCobre")
+
+aceptarColocarPrecio.addEventListener("click", ()=>{
+  
+  costoElegido = [Number(colocarPrecioOro.value),Number(colocarPrecioPlata.value),Number(colocarPrecioCobre.value)]
+  colocarPrecio.style.visibility = "hidden"
+  soltarCreable()
+  colocarPrecioOro.value ="0"
+  colocarPrecioPlata.value="0"
+  colocarPrecioCobre.value="0"
+})
+
+
+
+
+colocarPrecioPlata.addEventListener("keydown", (e) => {
+  e.preventDefault()
+  if (Number(e.key) || e.key === "Backspace") {
+    if (e.key !== "e" && e.key !== "Backspace") {
+      if (colocarPrecioPlata.value === "0") {
+        colocarPrecioPlata.value = e.key
+      } else {
+
+        colocarPrecioPlata.value += e.key
+      }
+    }
+  }
+  if(colocarPrecioPlata.value.length >= 1 && colocarPrecioPlata.value !== "0" && (e.key === "0" || e.key === 0) ){
+    colocarPrecioPlata.value += e.key
+  }
+  if (e.key === "Backspace"  || colocarPrecioPlata.value.length > 4) {
+    colocarPrecioPlata.value = colocarPrecioPlata.value.substring(0, colocarPrecioPlata.value.length - 1)
+  }
+  if (colocarPrecioPlata.value === "" || colocarPrecioPlata.value.length === 0) {
+    colocarPrecioPlata.value = "0"
+  }
+})
+
+
+colocarPrecioCobre.addEventListener("keydown", (e) => {
+  e.preventDefault()
+  if (Number(e.key) || e.key === "Backspace") {
+    if (e.key !== "e" && e.key !== "Backspace") {
+      if (colocarPrecioCobre.value === "0") {
+        colocarPrecioCobre.value = e.key
+      } else {
+
+        colocarPrecioCobre.value += e.key
+      }
+    }
+  }
+  if(colocarPrecioCobre.value.length >= 1 && colocarPrecioCobre.value !== "0" && (e.key === "0" || e.key === 0) ){
+    colocarPrecioCobre.value += e.key
+  }
+  if (e.key === "Backspace"  || colocarPrecioCobre.value.length > 4) {
+    colocarPrecioCobre.value = colocarPrecioCobre.value.substring(0, colocarPrecioCobre.value.length - 1)
+  }
+  if (colocarPrecioCobre.value === "" || colocarPrecioCobre.value.length === 0) {
+    colocarPrecioCobre.value = "0"
+  }
+})
+
+
+colocarPrecioOro.addEventListener("keydown", (e) => {
+  e.preventDefault()
+  if (Number(e.key) || e.key === "Backspace") {
+    if (e.key !== "e" && e.key !== "Backspace") {
+      if (colocarPrecioOro.value === "0") {
+        colocarPrecioOro.value = e.key
+      } else {
+
+        colocarPrecioOro.value += e.key
+      }
+    }
+  }
+  if(colocarPrecioOro.value.length >= 1 && colocarPrecioOro.value !== "0" && (e.key === "0" || e.key === 0) ){
+    colocarPrecioOro.value += e.key
+  }
+  if (e.key === "Backspace"  || colocarPrecioOro.value.length > 4) {
+    colocarPrecioOro.value = colocarPrecioOro.value.substring(0, colocarPrecioOro.value.length - 1)
+  }
+  if (colocarPrecioOro.value === "" || colocarPrecioOro.value.length === 0) {
+    colocarPrecioOro.value = "0"
+  }
+})
 
 cuantoTirar.addEventListener("keydown", (e) => {
   e.preventDefault()
@@ -1419,7 +1538,7 @@ canvasEl.addEventListener("click", (e) => {
     tirar.style.visibility = "hidden"
     menuAbierto = false
   }
-  const point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
+   point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
   point.cast = {
     cast,
     accion,
@@ -1451,30 +1570,9 @@ canvasEl.addEventListener("click", (e) => {
     descansar = false
   }
   if (accion === "crear" && cast) {
-    const slot = Number(itemSelect.split("slot")[1])
-    // socket.emit("gastarEnergia", 15)
-    const coord = {
-      x: point.x,
-      y: point.y,
-    }
-    const costo = [1, 0, 1]
-    socket.emit("soltar", slot, coord, 1, costo, false, (mensaje) => {
-      const msg = {
-        msg: mensaje,
-        tipo: "consola"
-      }
-      mensajesConsola.push(msg)
-      actualizarMensajes()
-      setTimeout(() => {
-
-        actualizarInventario()
-      }, 200);
-
-      console.log("esta pasando")
-
-    })
-    accion = ""
-    descansar = false
+    colocarPrecio.style.visibility = "visible"
+    //sacar esto cuando acepte en el menu
+    //soltarCreable()
   }
   cast = false
 });

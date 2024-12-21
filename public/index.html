@@ -110,8 +110,21 @@ input[type=number] { -moz-appearance:textfield; }
       border: 3px, 
       solid;border-color: black;
     }
-
-
+    #colocarPrecio {
+      position: absolute;
+      top: 200px;
+      left: 300px;
+      background-color: rgb(168, 168, 168);
+      border-color: black;
+      border-radius: 5%;
+      visibility: hidden;
+      width: 350px;
+      height: 150px;
+      border: 3px, 
+      solid;border-color: black;
+    }
+    
+    
     /*#boxHechizos::-webkit-scrollbar {
       
        display: none; 
@@ -301,6 +314,38 @@ input[type=number] { -moz-appearance:textfield; }
           <button id="tirarTodo" type="button" style="margin-left: 10px;margin-top: 10px; width: 40%; height: 40px;">Maximo</button>
 
           <button type="button" id="aceptarTirar" style="margin-left: 30px;margin-top: 10px; width: 40%; height: 40px;"
+       >Aceptar</button>
+  
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- MENU COLOCAR PRECIO -->
+  <div class="tirar" tabindex="-1" id="colocarPrecio">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div style="display: flex; text-align: center;">
+
+            <h2 style="width: 300px;  color: rgb(116, 120, 0);margin-left: 30px; margin-bottom: 10px;margin-top: 5px; font-size: 25px;">Precio por uso</h2>
+            <button style="color: rgb(107, 7, 7);margin: 0;padding: 0; width: 30px; height: 30px; margin-left: 10px;" onclick="document.querySelector('#colocarPrecio').style.visibility = 'hidden', menuAbierto = false ">X</button>
+          </div>
+          <div style="display: flex;">
+            <p style="margin: 0;margin-left: 15px; color: rgb(12, 12, 12);margin-top: 3px; font-size: 18px; width: 25px;">Oro: </p>
+            <input id="colocarPrecioOro" value="0" type="number" min="0" max="9999" id="cuantoTirar"
+              style="text-align: center; margin-left: 10px; width: 50px; height: 25px;font-size: 18px;"  >
+            <p style="margin: 0;margin-left: 5px; color: rgb(12, 12, 12);margin-top: 3px; font-size: 18px; width: 35px;">Plata: </p>
+            <input id="colocarPrecioPlata" value="0" type="number" min="0" max="9999" id="cuantoTirar"
+              style="text-align: center; margin-left: 10px; width: 50px; height: 25px;font-size: 18px;"  >
+            <p style="margin: 0;margin-left: 5px; color: rgb(12, 12, 12);margin-top: 3px; font-size: 18px; width: 40px;">Cobre: </p>
+            <input id="colocarPrecioCobre" value="0" type="number" min="0" max="9999" id="cuantoTirar"
+              style="text-align: center; margin-left: 10px; width: 50px; height: 25px;font-size: 18px;"  >
+          </div>
+        </div >
+
+        <div style= "display:flex;">
+          <button id="aceptarColocarPrecio" type="button" id="aceptarTirar" style="margin-left: 10%;margin-top: 10px; width: 80%; height: 50px;"
        >Aceptar</button>
   
         </div>
