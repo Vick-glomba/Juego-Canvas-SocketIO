@@ -708,14 +708,11 @@ const SNOWBALL_RADIUS = 4;
 
 const checkUrl = async(url) => {
   return new Promise((resolve, reject) => {
-    if (url.trim() == "") {
-      resolve(false)
-    }
     fetch(url).then(res => {
         const img = new Image();
         img.src = url;
         img.onload = () => {
-          if (res.status == 200 && !(img.width == 0)) {
+          if (res.status == 200 && img.width > 0) {
             resolve(true)
           } else {
             resolve(false)
@@ -752,7 +749,7 @@ const checkUrlAudio = async(url) => {
 
 
 
-const actualizarInventario = () => {
+const actualizarInventario = async() => {
   if (myPlayer) {
     let contador = 0
     let html = ""
@@ -772,7 +769,7 @@ const actualizarInventario = () => {
           const item = myPlayer.inventario[contador][0]
           const url = "./items/" + dbItems[item].imagen + ".BMP"
           const url2 = "./items/" + dbItems[item].imagen + ".bmp"
-          const existe= checkUrl(url);
+          const existe= await checkUrl(url)
           imagen = existe === true?`background-image: url(${url});`:`background-image: url(${url2});`
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
