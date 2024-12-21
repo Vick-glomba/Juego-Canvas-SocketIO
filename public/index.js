@@ -777,9 +777,9 @@ const actualizarInventario = async() => {
               img.src = url
       
           if(img && img.width == 0){
-            imagen = `background-image: url(${url});`
-          }else{
             imagen = `background-image: url(${url2});`
+          }else{
+            imagen = `background-image: url(${url});`
           }
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
