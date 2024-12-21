@@ -45,6 +45,10 @@ const minar = new Audio("./audio/minar.WAV");
 minar.volume = 0.1
 const pescar = new Audio("./audio/pescar.WAV");
 pescar.volume = 0.1
+const tomar = new Audio("./audio/tomar.WAV");
+tomar.volume = 0.1
+const comer = new Audio("./audio/comer.WAV");
+comer.volume = 0.1
 
 
 const misPasos = new Audio("./audio/caminar.WAV");
@@ -70,6 +74,34 @@ const principal = document.getElementById("principal");
 const tirar = document.getElementById("tirar")
 const cuantoTirar = document.getElementById("cuantoTirar")
 const aceptarTirar = document.getElementById("aceptarTirar")
+const tirarTodo = document.getElementById("tirarTodo")
+
+const listaCraftNecesita = document.getElementById("listaCraftNecesita")
+const listaCraftItem = document.getElementById("listaCraftItem")
+const craft = document.getElementById("craft")
+const cantidadCraft = document.getElementById("cantidadCraft")
+
+
+const actualizarCraftItem = () => {
+  let html = ""
+  for (let i = 0; i < 10; i++) {
+    html += `
+    <div style="font-size: 20px; text-align: center; border: 1px, solid;border-color: black ; height: 100%; height: 25px;">Objeto de prueba</div>`
+  }
+
+  listaCraftItem.innerHTML = html
+}
+
+const actualizarCraftNecesita = () => {
+  let html = ""
+  for (let i = 0; i < 10; i++) {
+    html += `
+    <div style="font-size: 20px; text-align: center; border: 1px, solid;border-color: black ; height: 100%; height: 25px;">${i+1} Objeto de prueba</div>`
+  }
+
+  listaCraftNecesita.innerHTML = html
+}
+
 
 function numeroRandom(min, max) {
   return parseInt(Math.random() * (max - 1 - min) + min);
@@ -196,9 +228,9 @@ cuantoTirar.addEventListener("keydown", (e) => {
   e.preventDefault()
   if (Number(e.key) || e.key === "Backspace") {
     if (e.key !== "e" && e.key !== "Backspace") {
-      if( cuantoTirar.value === "0"){
+      if (cuantoTirar.value === "0") {
         cuantoTirar.value = e.key
-      }else{
+      } else {
 
         cuantoTirar.value += e.key
       }
@@ -206,8 +238,27 @@ cuantoTirar.addEventListener("keydown", (e) => {
     if (e.key === "Backspace" || cuantoTirar.value.length > 4) {
       cuantoTirar.value = cuantoTirar.value.substring(0, cuantoTirar.value.length - 1)
     }
-    if( cuantoTirar.value === "" || cuantoTirar.value.length === 0){
+    if (cuantoTirar.value === "" || cuantoTirar.value.length === 0) {
       cuantoTirar.value = "0"
+    }
+  }
+})
+cantidadCraft.addEventListener("keydown", (e) => {
+  e.preventDefault()
+  if (Number(e.key) || e.key === "Backspace") {
+    if (e.key !== "e" && e.key !== "Backspace") {
+      if (cantidadCraft.value === "0") {
+        cantidadCraft.value = e.key
+      } else {
+
+        cantidadCraft.value += e.key
+      }
+    }
+    if (e.key === "Backspace" || cantidadCraft.value.length > 4) {
+      cantidadCraft.value = cantidadCraft.value.substring(0, cantidadCraft.value.length - 1)
+    }
+    if (cantidadCraft.value === "" || cantidadCraft.value.length === 0) {
+      cantidadCraft.value = "0"
     }
   }
 })
@@ -256,7 +307,20 @@ cajaInventario.addEventListener("click", (e) => {
 
 
 
-        socket.emit("usar", slot, (objeto, hechizo) => {
+        socket.emit("usar", slot, (objeto, hechizo, clase) => {
+          switch (clase) {
+            case "bebida":
+              tomar.play()
+              break;
+            case "comida":
+              comer.play()
+              break;
+            case "pocion":
+              tomar.play()
+              break;
+            default:
+              break;
+          }
           if (!hechizo) {
             const msg = {
               msg: ` ${objeto}`,
@@ -726,8 +790,12 @@ socket.on("recibirMensaje", (obj) => {
               tipo: "consola",
               msg: `Aca tengo que abrir el menu.`
             }
+            socket.emit("descontarMonedas", obj.objetivo.costo)
             mensajesConsola.push(msg)
             actualizarMensajes()
+            craft.style.visibility = "visible"
+            actualizarCraftItem()
+            actualizarCraftNecesita()
           }
 
           console.log("tiene saldo: ", tieneSaldo)
@@ -744,7 +812,7 @@ socket.on("recibirMensaje", (obj) => {
                   //reproducir sonido exito segun profesion
                   switch (obj.objetivo.requerido) {
                     case "talar":
-                     talar.play()
+                      talar.play()
                       break;
                     case "minar":
                       minar.play()
@@ -752,7 +820,7 @@ socket.on("recibirMensaje", (obj) => {
                     case "pescar":
                       pescar.play()
                       break;
-                  
+
                     default:
                       break;
                   }
@@ -1090,7 +1158,10 @@ window.addEventListener("keydown", (e) => {
 
         })
         break
-      case "esc":
+      case "c":
+        craft.style.visibility = "visible"
+        actualizarCraftItem()
+        actualizarCraftNecesita()
 
         break
       case "t":
@@ -1142,12 +1213,6 @@ window.addEventListener("keydown", (e) => {
       case "i":
         actualizarInventario()
         break
-      case "c":
-        socket.emit("comer", 10)
-        break
-      case "b":
-        socket.emit("beber", 10)
-        break
       case "e":
         const slot = Number(itemSelect.split("slot")[1])
         socket.emit("equipar", slot, (equipoItem, sonido) => {
@@ -1169,7 +1234,6 @@ window.addEventListener("keydown", (e) => {
         })
         break
 
-
       case "u":
         if (itemSelect) {
 
@@ -1183,7 +1247,22 @@ window.addEventListener("keydown", (e) => {
             if (item && dbItems[item].nombre) {
 
 
-              socket.emit("usar", slot, (objeto, hechizo) => {
+              socket.emit("usar", slot, (objeto, hechizo, clase) => {
+                switch (clase) {
+                  case "bebida":
+                    tomar.play()
+                    break;
+                  case "comida":
+                    comer.play()
+                    break;
+                  case "pocion":
+                    tomar.play()
+                    break;
+
+                  default:
+                    break;
+                }
+
                 if (!hechizo) {
                   const msg = {
                     msg: ` ${objeto}`,
@@ -1285,6 +1364,7 @@ window.addEventListener("keydown", (e) => {
 
     }
   }
+
   if (menuAbierto && e.key === "Enter") {
     tirarObjeto()
   }

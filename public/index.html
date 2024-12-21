@@ -97,6 +97,19 @@ input[type=number] { -moz-appearance:textfield; }
       border: 3px, 
       solid;border-color: black;
     }
+    #craft {
+      position: absolute;
+      top: 150px;
+      left: 200px;
+      background-color: rgb(168, 168, 168);
+      border-color: black;
+      border-radius: 5%;
+      visibility: hidden;
+      width: 450px;
+      height: 350px;
+      border: 3px, 
+      solid;border-color: black;
+    }
 
 
     /*#boxHechizos::-webkit-scrollbar {
@@ -292,6 +305,43 @@ input[type=number] { -moz-appearance:textfield; }
   
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU CRAFT -->
+  <div class="tirar" tabindex="-1" id="craft">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div style="display: flex; ">
+            <div style=" width: 90%;text-align: center;">
+
+              <h2 style=" color: rgb(42, 106, 12);  margin-bottom: 5px;margin-top: 0px; font-size: 35px;">Fragua</h2>
+            </div>
+            <button style="border-radius: 20px; color: rgb(107, 7, 7);margin: 0;padding: 0;margin-top: 2px; margin-right: 2px; width: 10%; height: 30px; font-size: 25px;" onclick="document.querySelector('#craft').style.visibility = 'hidden', menuAbierto = false ">X</button>
+          </div>
+          <div style="display: flex; width: 100%;text-align: center; ">
+            <p style="margin: 0;margin-left: 20px; color: rgb(12, 12, 12); font-size: 25px; width: 100px;">Cantidad: </p>
+            <input id="cantidadCraft" value="1" type="number" min="0" max="9999" id="cuantoTirar"
+              style="text-align: center; margin-left: 10px; width: 20%; height: 30px;font-size: 18px;"  >
+              <p style="background-color: rgb(196, 198, 197); height: 50px; margin: 0; color: rgb(12, 12, 12);margin-left: 15px; margin-right: 15px; font-size: 20px; width: 210px;" >Item Seleccionado </p>
+          </div>
+        </div >
+
+        <div style= "display:flex;">
+          <button id="tirarTodo" type="button" style="font-size: 20px; margin-left: 35px;margin-top: 10px; width: 40%; height: 40px;">Crear todos</button>
+          <button type="button" id="crear" style="font-size: 20px;margin-left: 30px;margin-top: 10px; width: 40%; height: 40px;"
+       >Crear</button>
+        </div>
+        <div style="display: flex; width: 100%; margin-top: 5px;">
+          <div style="width: 50%;text-align: center;font-size: 25px;">Item</div>
+          <div style=" width: 45%; text-align: center;font-size: 25px;">Necesita</div>
+        </div>
+        <div style="display: flex; width: 90%; height: 150px; margin: 5%; margin-top: 0;">
+          <div id="listaCraftItem" style="overflow-y: scroll; width: 50%; height: 100%; background-color: rgb(215, 213, 213);"></div>
+          <div id="listaCraftNecesita" style="overflow-y: scroll; width: 50%; height: 100%; background-color: rgba(209, 213, 210, 0.824);"></div>
+        </div>
       </div>
     </div>
   </div>

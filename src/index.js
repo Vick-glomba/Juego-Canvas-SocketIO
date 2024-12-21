@@ -631,7 +631,7 @@ async function main() {
       billetera: [0, 0, 0],
       inventario: [
         [35, 1],
-        [0, 0],
+        [1, 100],
         [37, 3],
         [32, 1],
         [38, 5],
@@ -738,6 +738,15 @@ async function main() {
 
     })
 
+    socket.on("descontarMonedas", (monedas = [0,0,0]) => {
+      const player = players.find((player) => player.id === socket.id);
+      player.billetera[0] -= monedas[0]
+      player.billetera[1] -= monedas[1]
+      player.billetera[2] -= monedas[2]
+ 
+   
+    })
+
 
     socket.on("usar", (slot, callback) => {
       const player = players.find((player) => player.id === socket.id);
@@ -746,6 +755,13 @@ async function main() {
         if (player.inventario[slot][1] > 0 && dbItems[player.inventario[slot][0]].usable) {
 
           player[dbItems[player.inventario[slot][0]].stat] += dbItems[player.inventario[slot][0]].modifica
+          const total = dbItems[player.inventario[slot][0]].stat + "Total"
+          console.log(total)
+          if(player[dbItems[player.inventario[slot][0]].stat] > player[total]){
+            player[dbItems[player.inventario[slot][0]].stat] = player[total]
+          }
+
+
           if (dbItems[player.inventario[slot][0]].clase === "moneda") {
             switch (dbItems[player.inventario[slot][0]].imagen) {
               case 46:
@@ -770,6 +786,7 @@ async function main() {
             player.inventario[slot][0] = 0
             player.inventario[slot][1] = 0
           }
+          callback("","",dbItems[player.inventario[slot][0]].clase)
         } else {
 
           callback("No puedes usar  " + dbItems[player.inventario[slot][0]].nombre)
