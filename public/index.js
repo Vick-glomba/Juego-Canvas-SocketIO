@@ -776,12 +776,15 @@ const actualizarInventario = async() => {
         //  const existe= await checkUrl(url);
         
            img1.src = url
+           img1.onload(()=>{
+             
+             if(img1.width == 0){
+               imagen = `background-image: url(${url2});`
+             }else{
+               imagen = `background-image: url(${url});`
+             }
+           })
       
-          if(img1.width == 0){
-            imagen = `background-image: url(${url2});`
-          }else{
-            imagen = `background-image: url(${url});`
-          }
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
           } else {
