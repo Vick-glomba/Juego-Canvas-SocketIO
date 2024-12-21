@@ -671,7 +671,7 @@ let cameraY = 0;
 
 let hechizoSelect
 let hechizoTemp
-const img1 = new Image()
+
 
 let escribiendo = false
 
@@ -706,42 +706,42 @@ const TILE_SIZE = 32;
 
 const SNOWBALL_RADIUS = 4;
 
-const checkUrl = async(url) => {
+const checkUrl = async (url) => {
   return new Promise((resolve, reject) => {
     if (url.trim() == "") {
       resolve(false)
     }
     fetch(url).then(res => {
-        const img = new Image();
-        img.src = url;
-        img.onload = () => {
-          if (res.status == 200) {
-            resolve(true)
-          } else {
-            resolve(false)
-          }
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        if (res.status == 200) {
+          resolve(true)
+        } else {
+          resolve(false)
         }
-      })
+      }
+    })
       .catch(e => {
         resolve(false)
       })
   })
 }
-const checkUrlAudio = async(url) => {
+const checkUrlAudio = async (url) => {
   return new Promise((resolve, reject) => {
     if (url.trim() == "") {
       resolve(false)
     }
     fetch(url).then(res => {
-        const audio = new Audio(url);
-        audio.onload = () => {
-          if (res.status == 200 && !(img.width == 0)) {
-            resolve(true)
-          } else {
-            resolve(false)
-          }
+      const audio = new Audio(url);
+      audio.onload = () => {
+        if (res.status == 200 && !(img.width == 0)) {
+          resolve(true)
+        } else {
+          resolve(false)
         }
-      })
+      }
+    })
       .catch(e => {
         resolve(false)
       })
@@ -753,7 +753,7 @@ const checkUrlAudio = async(url) => {
 
 
 
-const actualizarInventario = async() => {
+const actualizarInventario = async () => {
   if (myPlayer) {
     let contador = 0
     let html = ""
@@ -773,18 +773,16 @@ const actualizarInventario = async() => {
           const item = myPlayer.inventario[contador][0]
           const url = "./items/" + dbItems[item].imagen + ".BMP"
           const url2 = "./items/" + dbItems[item].imagen + ".bmp"
-        //  const existe= await checkUrl(url);
-        
-           img1.src = url
-           img1.onload(()=>{
-             
-             if(img1.width == 0){
-               imagen = `background-image: url(${url2});`
-             }else{
-               imagen = `background-image: url(${url});`
-             }
-           })
-      
+          //  const existe= await checkUrl(url);
+          const img1 = new Image()
+          img1.src = url
+          if (img1.width == 0) {
+            imagen = `background-image: url(${url2});`
+          } else {
+            imagen = `background-image: url(${url});`
+          }
+
+
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
           } else {
