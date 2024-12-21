@@ -752,7 +752,7 @@ const checkUrlAudio = async(url) => {
 
 
 
-const actualizarInventario = () => {
+const actualizarInventario = async() => {
   if (myPlayer) {
     let contador = 0
     let html = ""
@@ -772,9 +772,8 @@ const actualizarInventario = () => {
           const item = myPlayer.inventario[contador][0]
           const url = "./items/" + dbItems[item].imagen + ".bmp"
           const url2 = "./items/" + dbItems[item].imagen + ".BMP"
-        //  const existe= checkUrl(url);
-          const image = require(url)
-          imagen = image?`background-image: url(${url});`:`background-image: url(${url2});`
+          const existe= await checkUrl(url);
+          imagen = existe?`background-image: url(${url});`:`background-image: url(${url2});`
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
           } else {
