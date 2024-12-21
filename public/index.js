@@ -671,7 +671,7 @@ let cameraY = 0;
 
 let hechizoSelect
 let hechizoTemp
-
+const img1 = new Image()
 
 let escribiendo = false
 
@@ -752,6 +752,7 @@ const checkUrlAudio = async(url) => {
 
 
 
+
 const actualizarInventario = async() => {
   if (myPlayer) {
     let contador = 0
@@ -773,10 +774,10 @@ const actualizarInventario = async() => {
           const url = "./items/" + dbItems[item].imagen + ".BMP"
           const url2 = "./items/" + dbItems[item].imagen + ".bmp"
         //  const existe= await checkUrl(url);
-        const img = new Image()
-              img.src = url
+        
+           img1.src = url
       
-          if(img.width == 0){
+          if(img1.width == 0){
             imagen = `background-image: url(${url2});`
           }else{
             imagen = `background-image: url(${url});`
