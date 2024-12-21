@@ -712,7 +712,7 @@ const checkUrl = async(url) => {
         const img = new Image();
         img.src = url;
         img.onload = () => {
-          if (res.status == 200 && img.width > 0) {
+          if (res.status == 200 && (!img.width == 0)) {
             resolve(true)
           } else {
             resolve(false)
