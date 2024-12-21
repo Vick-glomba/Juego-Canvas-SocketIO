@@ -45,7 +45,7 @@ const minar = new Audio("./audio/minar.WAV");
 minar.volume = 0.1
 const pescar = new Audio("./audio/pescar.WAV");
 pescar.volume = 0.1
-const tomar = new Audio("./audio/tomar.WAV");
+const tomar = new Audio("./audio/tomar.wav");
 tomar.volume = 0.1
 const comer = new Audio("./audio/comer.WAV");
 comer.volume = 0.1
@@ -80,7 +80,7 @@ const listaCraftNecesita = document.getElementById("listaCraftNecesita")
 const listaCraftItem = document.getElementById("listaCraftItem")
 const craft = document.getElementById("craft")
 const cantidadCraft = document.getElementById("cantidadCraft")
-let costoElegido = [0,0,0]
+let costoElegido = [0, 0, 0]
 let point
 
 const actualizarCraftItem = () => {
@@ -97,7 +97,7 @@ const actualizarCraftNecesita = () => {
   let html = ""
   for (let i = 0; i < 10; i++) {
     html += `
-    <div style="font-size: 20px; text-align: center; border: 1px, solid;border-color: black ; height: 100%; height: 25px;">${i+1} Objeto de prueba</div>`
+    <div style="font-size: 20px; text-align: center; border: 1px, solid;border-color: black ; height: 100%; height: 25px;">${i + 1} Objeto de prueba</div>`
   }
 
   listaCraftNecesita.innerHTML = html
@@ -109,7 +109,7 @@ function numeroRandom(min, max) {
 }
 
 
-const soltarCreable = ()=>{
+const soltarCreable = () => {
   const slot = Number(itemSelect.split("slot")[1])
   // socket.emit("gastarEnergia", 15)
   const coord = {
@@ -259,14 +259,14 @@ const colocarPrecioOro = document.getElementById("colocarPrecioOro")
 const colocarPrecioPlata = document.getElementById("colocarPrecioPlata")
 const colocarPrecioCobre = document.getElementById("colocarPrecioCobre")
 
-aceptarColocarPrecio.addEventListener("click", ()=>{
-  
-  costoElegido = [Number(colocarPrecioOro.value),Number(colocarPrecioPlata.value),Number(colocarPrecioCobre.value)]
+aceptarColocarPrecio.addEventListener("click", () => {
+
+  costoElegido = [Number(colocarPrecioOro.value), Number(colocarPrecioPlata.value), Number(colocarPrecioCobre.value)]
   colocarPrecio.style.visibility = "hidden"
   soltarCreable()
-  colocarPrecioOro.value ="0"
-  colocarPrecioPlata.value="0"
-  colocarPrecioCobre.value="0"
+  colocarPrecioOro.value = "0"
+  colocarPrecioPlata.value = "0"
+  colocarPrecioCobre.value = "0"
 })
 
 
@@ -284,10 +284,10 @@ colocarPrecioPlata.addEventListener("keydown", (e) => {
       }
     }
   }
-  if(colocarPrecioPlata.value.length >= 1 && colocarPrecioPlata.value !== "0" && (e.key === "0" || e.key === 0) ){
+  if (colocarPrecioPlata.value.length >= 1 && colocarPrecioPlata.value !== "0" && (e.key === "0" || e.key === 0)) {
     colocarPrecioPlata.value += e.key
   }
-  if (e.key === "Backspace"  || colocarPrecioPlata.value.length > 4) {
+  if (e.key === "Backspace" || colocarPrecioPlata.value.length > 4) {
     colocarPrecioPlata.value = colocarPrecioPlata.value.substring(0, colocarPrecioPlata.value.length - 1)
   }
   if (colocarPrecioPlata.value === "" || colocarPrecioPlata.value.length === 0) {
@@ -308,10 +308,10 @@ colocarPrecioCobre.addEventListener("keydown", (e) => {
       }
     }
   }
-  if(colocarPrecioCobre.value.length >= 1 && colocarPrecioCobre.value !== "0" && (e.key === "0" || e.key === 0) ){
+  if (colocarPrecioCobre.value.length >= 1 && colocarPrecioCobre.value !== "0" && (e.key === "0" || e.key === 0)) {
     colocarPrecioCobre.value += e.key
   }
-  if (e.key === "Backspace"  || colocarPrecioCobre.value.length > 4) {
+  if (e.key === "Backspace" || colocarPrecioCobre.value.length > 4) {
     colocarPrecioCobre.value = colocarPrecioCobre.value.substring(0, colocarPrecioCobre.value.length - 1)
   }
   if (colocarPrecioCobre.value === "" || colocarPrecioCobre.value.length === 0) {
@@ -332,10 +332,10 @@ colocarPrecioOro.addEventListener("keydown", (e) => {
       }
     }
   }
-  if(colocarPrecioOro.value.length >= 1 && colocarPrecioOro.value !== "0" && (e.key === "0" || e.key === 0) ){
+  if (colocarPrecioOro.value.length >= 1 && colocarPrecioOro.value !== "0" && (e.key === "0" || e.key === 0)) {
     colocarPrecioOro.value += e.key
   }
-  if (e.key === "Backspace"  || colocarPrecioOro.value.length > 4) {
+  if (e.key === "Backspace" || colocarPrecioOro.value.length > 4) {
     colocarPrecioOro.value = colocarPrecioOro.value.substring(0, colocarPrecioOro.value.length - 1)
   }
   if (colocarPrecioOro.value === "" || colocarPrecioOro.value.length === 0) {
@@ -706,23 +706,52 @@ const TILE_SIZE = 32;
 
 const SNOWBALL_RADIUS = 4;
 
-// setInterval(() => {
-//   groundMap = []
+const checkUrl = async(url) => {
+  return new Promise((resolve, reject) => {
+    if (url.trim() == "") {
+      resolve(false)
+    }
+    fetch(url).then(res => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+          if (res.status == 200 && !(img.width == 0)) {
+            resolve(true)
+          } else {
+            resolve(false)
+          }
+        }
+      })
+      .catch(e => {
+        resolve(false)
+      })
+  })
+}
+const checkUrlAudio = async(url) => {
+  return new Promise((resolve, reject) => {
+    if (url.trim() == "") {
+      resolve(false)
+    }
+    fetch(url).then(res => {
+        const audio = new Audio(url);
+        audio.onload = () => {
+          if (res.status == 200 && !(img.width == 0)) {
+            resolve(true)
+          } else {
+            resolve(false)
+          }
+        }
+      })
+      .catch(e => {
+        resolve(false)
+      })
+  })
+}
 
-//   const tileY = parseInt(myPlayer.y / TILE_SIZE)
-//   const tileX = parseInt(myPlayer.x / TILE_SIZE)
 
 
-//   for (let row = 0; row < MundoGround.length; row++) {
-//     //console.log(tileX, tileY, MundoGround[row])
-//     if (row === tileY){
-//       console.log("si")
-//       groundMap[row] = MundoGround[row]
-//     } else{
-//       groundMap[row] ={id: undefined}
-//     }
-//   }
-// }, 5000);
+
+
 const actualizarInventario = () => {
   if (myPlayer) {
     let contador = 0
@@ -742,7 +771,9 @@ const actualizarInventario = () => {
           cantidad = myPlayer.inventario[contador][1]
           const item = myPlayer.inventario[contador][0]
           const url = "./items/" + dbItems[item].imagen + ".BMP"
-          imagen = `background-image: url(${url});`
+          const url2 = "./items/" + dbItems[item].imagen + ".bmp"
+          const existe= checkUrl(url);
+          imagen = existe === true?`background-image: url(${url});`:`background-image: url(${url2});`
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
           } else {
@@ -1538,7 +1569,7 @@ canvasEl.addEventListener("click", (e) => {
     tirar.style.visibility = "hidden"
     menuAbierto = false
   }
-   point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
+  point = { x: myPlayer.x + e.clientX - canvasEl.width / 2 + window.scrollX, y: myPlayer.y + e.clientY - canvasEl.height + window.scrollY + myPlayer.h };
   point.cast = {
     cast,
     accion,
