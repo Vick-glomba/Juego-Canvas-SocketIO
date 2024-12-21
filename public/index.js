@@ -770,8 +770,8 @@ const actualizarInventario = () => {
           }
           cantidad = myPlayer.inventario[contador][1]
           const item = myPlayer.inventario[contador][0]
-          const url = "./items/" + dbItems[item].imagen + ".BMP"
-          const url2 = "./items/" + dbItems[item].imagen + ".bmp"
+          const url = "./items/" + dbItems[item].imagen + ".bmp"
+          const url2 = "./items/" + dbItems[item].imagen + ".BMP"
           const existe= checkUrl(url);
           imagen = existe === true?`background-image: url(${url});`:`background-image: url(${url2});`
           if (itemSelect === "slot" + contador) {
