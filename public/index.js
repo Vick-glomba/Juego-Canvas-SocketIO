@@ -776,7 +776,7 @@ const actualizarInventario = async() => {
         const img = new Image()
               img.src = url
       
-          if(img.width == 0 && img){
+          if(img && img.width == 0){
             imagen = `background-image: url(${url2});`
           }else{
             imagen = `background-image: url(${url});`
