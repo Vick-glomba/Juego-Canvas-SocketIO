@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 30
+const FPS = 50
 
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
@@ -1928,9 +1928,9 @@ function loop() {
   }
 
 
-
-
 }
+
+
 
 setInterval(() => {
   
@@ -1944,6 +1944,8 @@ setInterval(() => {
       
       players = playersEnMapa
       itemsEnMapa = players.filter(p => p.skin === "items")
+      players = players.filter(p => p.skin !== "items")
+      players = players.filter(p => p.id === myPlayer.id)
       myPlayer = players.find((player) => player.id === socket.id);
       players.sort(((a, b) => a.y - b.y))
       snowballs = snowballsEnMapa
@@ -1956,14 +1958,11 @@ setInterval(() => {
         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
       }
       
+      loop();
       
     })
     
   })
-}, 1000/ 40);
+}, 1000/ FPS);
 
 
-setInterval(() => {
-  //RENDER
-  loop();
-}, 1000 / FPS);
