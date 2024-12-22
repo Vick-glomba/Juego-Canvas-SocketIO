@@ -14,8 +14,8 @@ const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
 const dbItems = db.items
-const SPEED = 5;
-const FPS =26;
+const SPEED = 6;
+const FPS =22;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
