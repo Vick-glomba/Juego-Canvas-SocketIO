@@ -1931,8 +1931,9 @@ function loop() {
 
 
 }
-setInterval(() => {
 
+setInterval(() => {
+  
   socket.emit("myPlayer", player => {
     myPlayer = player
     
@@ -1950,15 +1951,19 @@ setInterval(() => {
       
       playersOnline = playersOnlines
       if(myPlayer){
-
+  
         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-        loop();
       }
       
       
     })
     
   })
+}, 1000/ 50);
 
+
+setInterval(() => {
+  //RENDER
+  loop();
 }, 1000 / FPS);
