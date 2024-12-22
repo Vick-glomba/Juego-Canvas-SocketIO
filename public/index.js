@@ -1643,7 +1643,24 @@ const actualizarHUD = () => {
 
 function loop() {
 
+  socket.emit("myPlayer", player => {
+    myPlayer = player
 
+    socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
+      
+      players = playersEnMapa
+      itemsEnMapa = players.filter(p => p.skin === "items")
+        myPlayer = players.find((player) => player.id === socket.id);
+      players.sort(((a, b) => a.y - b.y))
+      snowballs = snowballsEnMapa
+      
+      
+
+      playersOnline = playersOnlines
+
+
+    })
+  })
 
 
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
@@ -1927,24 +1944,7 @@ function loop() {
     }
   }
 
-  socket.emit("myPlayer", player => {
-    myPlayer = player
 
-    socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
-      
-      players = playersEnMapa
-      itemsEnMapa = players.filter(p => p.skin === "items")
-        myPlayer = players.find((player) => player.id === socket.id);
-      players.sort(((a, b) => a.y - b.y))
-      snowballs = snowballsEnMapa
-      
-      
-
-      playersOnline = playersOnlines
-
-
-    })
-  })
 
 
 }
