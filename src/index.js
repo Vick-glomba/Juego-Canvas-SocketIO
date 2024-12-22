@@ -15,7 +15,7 @@ const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
 const dbItems = db.items
 const SPEED = 10;
-const TICK_RATE =13;
+const TICK_RATE =14;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
