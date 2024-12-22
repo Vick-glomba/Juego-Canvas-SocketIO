@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 20
+const FPS = 24
 let terminoIntervalo = true
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
@@ -1642,7 +1642,7 @@ const actualizarHUD = ()=>{
 }
 
 function loop() {
-  if(terminoIntervalo){
+
     terminoIntervalo  =false
     
     canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
@@ -1924,7 +1924,7 @@ function loop() {
       );
       canvas.fill();
     }
-  }
+  
   terminoIntervalo =true
 }
   
@@ -1951,6 +1951,7 @@ setInterval(() => {
 
     })
   })
+  if(terminoIntervalo === true){
   loop();
-
+  }
 },1000/ FPS);
