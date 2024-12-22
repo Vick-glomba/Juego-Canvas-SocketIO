@@ -754,18 +754,18 @@ const checkUrlAudio = async (url) => {
 
 
 const actualizarInventario = async () => {
-  if (myPlayer) {
-    let contador = 0
-    let html = ""
-    for (let i = 0; i < 5; i++) {
-      html += `<div style="display: flex; width: 220px; height: 46px; color: aliceblue;">`
-      for (let a = 0; a < 5; a++) {
-        let imagen
-        let cantidad = ""
-        let borde
-        let equipado = ""
-        if (myPlayer.inventario[contador][1]) {
-          if (myPlayer.equipado.includes(contador)) {
+   if (myPlayer) {
+     let contador = 0
+     let html = ""
+     for (let i = 0; i < 5; i++) {
+       html += `<div style="display: flex; width: 220px; height: 46px; color: aliceblue;">`
+       for (let a = 0; a < 5; a++) {
+         let imagen
+         let cantidad = ""
+         let borde
+         let equipado = ""
+         if (myPlayer.inventario[contador][1]) {
+           if (myPlayer.equipado.includes(contador)) {
 
             equipado = `<p style="margin:0;margin-top:10px;margin-left:30px;color:yellow;font-weight: 900;">+</p>`
           }
@@ -788,19 +788,19 @@ const actualizarInventario = async () => {
           } else {
             borde = "border-color: black;"
 
-          }
-        }
-        html += `
-          <div id="${"slot" + contador}" style="width: 42px; height: 44px; color: aliceblue;border: 1px; ${borde}border-style: solid; ${imagen} background-size:100% 100%;')">${cantidad}${equipado}</div>`
-        contador += 1
-        if (a === 4) {
-          html += `
-            </div>`
-        }
-      }
-    }
-    cajaInventario.innerHTML = html
-  }
+           }
+         }
+         html += `
+           <div id="${"slot" + contador}" style="width: 42px; height: 44px; color: aliceblue;border: 1px; ${borde}border-style: solid; ${imagen} background-size:100% 100%;')">${cantidad}${equipado}</div>`
+         contador += 1
+         if (a === 4) {
+           html += `
+             </div>`
+         }
+       }
+     }
+     cajaInventario.innerHTML = html
+   }
 
 }
 
@@ -1917,7 +1917,6 @@ function loop() {
       );
       canvas.fill();
     }
-    console.log(myPlayer)
   }
 
 
@@ -1941,12 +1940,13 @@ setInterval(() => {
       if (myPlayer) {
         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+        playersOnline = playersOnlines
+        snowballs = snowballsEnMapa
+      
       }
-      playersOnline = playersOnlines
-      snowballs = snowballsEnMapa
 
     })
   })
   loop();
 
-}, 60);
+}, 50);

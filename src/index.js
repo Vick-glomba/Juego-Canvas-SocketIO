@@ -14,8 +14,8 @@ const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
 const dbItems = db.items
-const SPEED = 10;
-const TICK_RATE = 80;
+const SPEED = 8;
+const TICK_RATE = 60;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
@@ -269,7 +269,7 @@ function isCollidingWithPlayer(player) {
         break;
       case "items":
         valorX = otroPlayer.x - otroPlayer.w + 5
-        valorY = otroPlayer.y - otroPlayer.h +15
+        valorY = otroPlayer.y - otroPlayer.h + 15
         valorW = otroPlayer.w + 20
         valorH = otroPlayer.h - 5
         break;
@@ -475,11 +475,11 @@ function tick() {
           } else {
             let infoClick = `${player.nombre}`
             infoClick += player.timeLeft ? (player.timeLeft / 60) > 1 ? ` < ${Math.ceil(player.timeLeft / 60)} min >` : ` < ${player.timeLeft} seg >` : ""
-            if(player.dueño){
+            if (player.dueño) {
 
               infoClick += player.dueño && player.sinColision === false ? ` < Dueño: ${player.dueño} >` : ""
               if (player.costo) {
-            }
+              }
 
               infoClick += player.costo && (player.costo[0] || player.costo[1] || player.costo[2]) ? ` < Costo: ` : ""
               infoClick += player.costo[0] ? `  ${player.costo[0]} oro` : ""
@@ -553,9 +553,6 @@ function tick() {
 
         snowball.timeLeft = -1;
       }
-
-      //COLOCAR ACA
-
 
     }
 
@@ -731,13 +728,13 @@ async function main() {
 
     })
 
-    socket.on("descontarMonedas", (monedas = [0,0,0]) => {
+    socket.on("descontarMonedas", (monedas = [0, 0, 0]) => {
       const player = players.find((player) => player.id === socket.id);
       player.billetera[0] -= monedas[0]
       player.billetera[1] -= monedas[1]
       player.billetera[2] -= monedas[2]
- 
-   
+
+
     })
 
 
@@ -750,7 +747,7 @@ async function main() {
           player[dbItems[player.inventario[slot][0]].stat] += dbItems[player.inventario[slot][0]].modifica
           const total = dbItems[player.inventario[slot][0]].stat + "Total"
           console.log(total)
-          if(player[dbItems[player.inventario[slot][0]].stat] > player[total]){
+          if (player[dbItems[player.inventario[slot][0]].stat] > player[total]) {
             player[dbItems[player.inventario[slot][0]].stat] = player[total]
           }
 
@@ -779,7 +776,7 @@ async function main() {
             player.inventario[slot][0] = 0
             player.inventario[slot][1] = 0
           }
-          callback("","",dbItems[player.inventario[slot][0]].clase)
+          callback("", "", dbItems[player.inventario[slot][0]].clase)
         } else {
 
           callback("No puedes usar  " + dbItems[player.inventario[slot][0]].nombre)
