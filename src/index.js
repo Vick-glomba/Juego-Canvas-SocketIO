@@ -13,10 +13,9 @@ const PORT = process.env.PORT || 8080;
 const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
-const { write } = require("fs");
 const dbItems = db.items
-const SPEED = 8;
-const TICK_RATE = 30;
+const SPEED = 10;
+const TICK_RATE = 80;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
@@ -305,10 +304,10 @@ function isCollidingWithPlayer(player) {
   return false;
 }
 
-function tick(delta) {
+function tick() {
+
   for (const player of players) {
     if (player.clase === "player") {
-
 
       const inputs = inputsMap[player.id];
       const previousY = player.y;
@@ -446,16 +445,10 @@ function tick(delta) {
   }
 
   for (const snowball of snowballs) {
-    // snowball.x
-    // snowball.y 
-    //snowball.timeLeft -= delta;
 
-    let primero = false
     for (const player of players) {
       if (snowball.mapa === player.mapa) {
         const pj = players.find((player) => player.id === snowball.playerId);
-
-        //esto es de la bola original //if (player.id === snowball.playerId) continue;
 
         let tamaño = player.w / 2
         let posicionx = player.x
@@ -503,7 +496,6 @@ function tick(delta) {
 
             obj = {
               cast: snowball.cast,
-              //player: pj,
               tipo: "consola",
               msg: infoClick,
               objetivo: player
@@ -511,9 +503,7 @@ function tick(delta) {
             }
           }
           io.to(pj.id).emit("recibirMensaje", obj)
-          if (primero === false) {
-            primero = true
-          }
+
           if (snowball.cast) {
             //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
             if (snowball.cast.cast && snowball.cast.hechizoSelect.clase && snowball.cast.hechizoSelect.clase === "curacion" && player.clase === "player") {
@@ -564,12 +554,14 @@ function tick(delta) {
         snowball.timeLeft = -1;
       }
 
+      //COLOCAR ACA
+
+
     }
+
   }
   snowballs = snowballs.filter((snowball) => snowball.timeLeft > 0);
 
-  // io.emit("players", players);
-  // io.emit("snowballs", snowballs);
 }
 const mundo = []
 async function main() {
@@ -681,11 +673,12 @@ async function main() {
     // dataTiles: dataTiles
     socket.on("enMapa", (mapa, callback) => {
       const playersEnMapa = players.filter(p => p.mapa === mapa)
+      const playersOnlines = playersEnMapa.filter(p => p.clase === "player")
       const snowballsEnMapa = snowballs.filter(s => s.mapa === mapa)
       const data = {
         playersEnMapa,
         snowballsEnMapa,
-        playersOnlines: players.length
+        playersOnlines: playersOnlines.length
       }
       return callback(data)
     })
@@ -1059,13 +1052,10 @@ async function main() {
     console.log("Escuchando desde puerto:", PORT)
   });
 
-  let lastUpdate = Date.now();
+
   setInterval(() => {
-    const now = Date.now();
-    const delta = now - lastUpdate;
-    tick(delta);
-    lastUpdate = now;
-  }, 1000 / TICK_RATE);
+    tick();
+  }, TICK_RATE);
 
   //OBJETOS CON DURACION
 

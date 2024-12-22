@@ -1617,23 +1617,33 @@ canvasEl.addEventListener("click", (e) => {
   cast = false
 });
 
+setInterval(() => {
+  actualizarHUD()
+}, 500);
 
+
+
+
+const actualizarHUD = ()=>{
+  
+      energia.style.width = `${(myPlayer.energia / myPlayer.energiaTotal) * 100}%`
+      mana.style.width = `${(myPlayer.mana / myPlayer.manaTotal) * 100}%`
+      salud.style.width = `${(myPlayer.salud / myPlayer.saludTotal) * 100}%`
+      hambre.style.width = `${(myPlayer.hambre / myPlayer.hambreTotal) * 100}%`
+      sed.style.width = `${(myPlayer.sed / myPlayer.sedTotal) * 100}%`
+      cantidadOro.innerText = myPlayer.billetera[0]
+      cantidadPlata.innerText = myPlayer.billetera[1]
+      cantidadCobre.innerText = myPlayer.billetera[2]
+
+      const onlines = `Mapa: ${myPlayer.mapa} - x:  ${parseInt(myPlayer.x / 10)} -  y:  ${parseInt(myPlayer.y / 10)}  -  Online: ${playersOnline} `
+      online.innerText = onlines
+}
 
 function loop() {
 
 
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
-  if (myPlayer) {
-
-    energia.style.width = `${(myPlayer.energia / myPlayer.energiaTotal) * 100}%`
-    mana.style.width = `${(myPlayer.mana / myPlayer.manaTotal) * 100}%`
-    salud.style.width = `${(myPlayer.salud / myPlayer.saludTotal) * 100}%`
-    hambre.style.width = `${(myPlayer.hambre / myPlayer.hambreTotal) * 100}%`
-    sed.style.width = `${(myPlayer.sed / myPlayer.sedTotal) * 100}%`
-    cantidadOro.innerText = myPlayer.billetera[0]
-    cantidadPlata.innerText = myPlayer.billetera[1]
-    cantidadCobre.innerText = myPlayer.billetera[2]
-
+    if (myPlayer) {
 
     const TILES_IN_ROW = 100; //numero de tiles en imagen /public/mapas/dungeon-newbie.jpg
 
@@ -1651,8 +1661,6 @@ function loop() {
         const proximidad = Math.floor(ratio * 100)
 
         if (proximidad > distanciaRender) {
-
-
 
           canvas.drawImage(
             mapImage,
@@ -1713,6 +1721,8 @@ function loop() {
 
       if (proximidad > distanciaRender) {
 
+        
+
         TILES_IN_ROW_PJ = pjrender.info.rows
         TILES_IN_COL_PJ = pjrender.info.cols
         PJ_SIZE_W = pjrender.info.tileWidth
@@ -1726,10 +1736,11 @@ function loop() {
           let x
           let y
 
+
           switch (player.skin) {
             case "items":
-              x = player.x - cameraX - player.w / 2
-              y = player.y - cameraY - player.h / 2 + 10
+              x = player.x - cameraX - player.w / 2 -3
+              y = player.y - cameraY - player.h / 2 +10
               break;
             case "arboles":
               x = player.x - cameraX - player.w / 2 - player.w / 20
@@ -1741,8 +1752,6 @@ function loop() {
               y = player.y - cameraY - player.h / 2
               break;
           }
-
-
 
           canvas.drawImage(
             imagenes[player.skin],
@@ -1761,46 +1770,12 @@ function loop() {
       }
     }
 
-    //Personaje
+    //Personajes y arboles
     for (const player of players) {
       if (player.skin === "items") {
         continue;
       }
       const pjrender = personajes.find(pj => pj.skin === player.skin)
-
-      // id: socket.id,
-      // hechizos: [0, 6, 2, 0, 4, 5, 0, 3],
-      // x: 800,
-      // y: 800,
-      // mirando: "down",
-      // quieto: true,
-      // skin: "link",
-      // w: 0,
-      // h: 0,
-      // quieto: true,
-      // mirando: "down",
-      // row: 0,
-      // col: 0,
-      // ultimoMensaje: "",
-      // nombre: "El Vittor",
-      // nivel: 1,
-      // energiaTotal:400,
-      // saludTotal: 300,
-      // manaTotal:200,
-      // hambreTotal:100,
-      // sedTotal:100,
-      // energia:300,
-      // salud: 100,
-      // mana:100,
-      // hambre:20,
-      // sed:15,
-      // reputacion: 1000,
-      // estado: "ciudadano",
-      // ciudad: "Nix",
-      // descripcion: "Morgolock, me duras un click"
-
-
-
 
 
       const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
@@ -1876,17 +1851,9 @@ function loop() {
             canvas.fillStyle = color;
             canvas.font = "bold 12px";
             canvas.textAlign = "center"
-            canvas.fillText(player.nombre, player.skin === "arboles" ? player.x - cameraX : player.x - cameraX, player.skin === "arboles" ? player.y - cameraY + 50 : (player.y - cameraY - player.h / 2) + player.h + 15)
+            canvas.fillText(player.nombre, player.x - cameraX, (player.y - cameraY - player.h / 2) + player.h + 15)
           }
         }
-
-        //dibujar Click
-        //console.log(clickPoint)
-        // canvas.strokeStyle = "rgb(0,255,0)";
-        // canvas.beginPath();
-        // canvas.arc(clickPoint[0], clickPoint[1], 2, 0, 100, false);
-        // canvas.stroke();
-
 
       }
       //ULTIMO MENSAJE PERSONAJE
@@ -1900,8 +1867,7 @@ function loop() {
 
       // PLAYERS ONLINE  
       // mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
-      const onlines = `Mapa: ${myPlayer.mapa} - x:  ${parseInt(myPlayer.x / 10)} -  y:  ${parseInt(myPlayer.y / 10)}  -  Online: ${playersOnline} `
-      online.innerText = onlines
+
       const anchoMundo = 20
       if (myPlayer) {
 
@@ -1938,26 +1904,7 @@ function loop() {
 
       }
 
-
-
-      if (!player.isMuted) {
-        //   canvas.drawImage(
-        //     speakerImage,
-        //     player.x - cameraX + 5,
-        //     player.y - cameraY - 28
-        //   );
-      }
-
-
-      if (player !== myPlayer) {
-        if (remoteUsers[player.voiceId] && remoteUsers[player.voiceId].audioTrack) {
-          const distance = Math.sqrt((player.x - myPlayer.x) ** 2 + (player.y - myPlayer.y) ** 2);
-          const ratio = 1.0 - Math.min(distance / 700, 1);
-          remoteUsers[player.voiceId].audioTrack.setVolume(Math.floor(ratio * 100));
-        }
-      }
     }
-
     for (const snowball of snowballs) {
       canvas.fillStyle = "#d1d107";
       canvas.beginPath();
@@ -1970,6 +1917,7 @@ function loop() {
       );
       canvas.fill();
     }
+    console.log(myPlayer)
   }
 
 
@@ -2001,4 +1949,4 @@ setInterval(() => {
   })
   loop();
 
-}, 20);
+}, 60);
