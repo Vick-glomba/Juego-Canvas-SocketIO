@@ -1930,9 +1930,7 @@ function loop() {
 
 }
 setInterval(() => {
-  cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-  cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-
+  
   socket.emit("myPlayer", player => {
     myPlayer = player
     
@@ -1943,13 +1941,15 @@ setInterval(() => {
       myPlayer = players.find((player) => player.id === socket.id);
       players.sort(((a, b) => a.y - b.y))
       snowballs = snowballsEnMapa
-
+      
       playersOnline = playersOnlines
-
-
-
+      
+      
+      
     })
   })
+  cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+  cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
   loop();
 
 }, 1000 / FPS);
