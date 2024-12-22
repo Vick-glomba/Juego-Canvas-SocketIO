@@ -1109,7 +1109,7 @@ socket.on("privado", (mensaje) => {
 
 setInterval(() => {
   if (meditar) {
-    if (myPlayer&& myPlayer.mana < myPlayer.manaTotal) {
+    if (myPlayer.mana < myPlayer.manaTotal) {
 
       socket.emit("meditar", (texto) => {
         const msg = {
@@ -1136,7 +1136,7 @@ setInterval(() => {
 }, 2000);
 let descansar = false
 setInterval(() => {
-  if (myPlayer && myPlayer.sed > 0 && myPlayer.hambre > 0) {
+  if (myPlayer.sed > 0 && myPlayer.hambre > 0) {
     if (myPlayer.energia < myPlayer.energiaTotal && descansar) {
       socket.emit("descansar", parseInt(myPlayer.energiaTotal * 0.1), (texto, bool) => {
         if (!bool) {
@@ -1620,10 +1620,7 @@ canvasEl.addEventListener("click", (e) => {
 });
 
 setInterval(() => {
-  if(myPlayer){
-
-    actualizarHUD()
-  }
+  actualizarHUD()
 }, 100);
 
 
