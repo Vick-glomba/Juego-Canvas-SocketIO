@@ -1654,11 +1654,11 @@ function loop() {
       players.sort(((a, b) => a.y - b.y))
       snowballs = snowballsEnMapa
 
-     // if (myPlayer) {
+      if (myPlayer) {
         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
 
-     // }
+      }
 
 
       playersOnline = playersOnlines
