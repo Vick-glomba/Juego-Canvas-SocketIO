@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 30
+const FPS = 20
 let terminoIntervalo = true
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
@@ -1942,12 +1942,12 @@ setInterval(() => {
       players.sort(((a, b) => a.y - b.y))
       snowballs = snowballsEnMapa
       
-     // if (myPlayer) {
+      if (myPlayer) {
         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
         playersOnline = playersOnlines
         
-     // }
+      }
 
     })
   })
