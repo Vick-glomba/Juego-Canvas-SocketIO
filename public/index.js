@@ -1937,11 +1937,10 @@ function loop() {
 }
 setInterval(() => {
 
-  loop();
   socket.emit("myPlayer", player => {
     myPlayer = player
-   
-
+    
+    
     
     socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
       
@@ -1951,9 +1950,10 @@ setInterval(() => {
       myPlayer = players.find((player) => player.id === socket.id);
       players.sort(((a, b) => a.y - b.y))
       snowballs = snowballsEnMapa
-
+      
       
       playersOnline = playersOnlines
+      loop();
       
       
     })
