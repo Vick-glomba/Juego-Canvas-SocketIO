@@ -1931,8 +1931,8 @@ function loop() {
 }
 setInterval(() => {
   
-  socket.emit("myPlayer", player => {
-    myPlayer = player
+  // socket.emit("myPlayer", player => {
+  //   myPlayer = player
     
     socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
       
@@ -1950,7 +1950,7 @@ setInterval(() => {
   
 
     })
-  })
+  // })
   loop();
 
 },1000/ FPS);
