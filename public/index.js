@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 20
+let FPS = 20
 let terminoIntervalo = true
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
@@ -1488,12 +1488,14 @@ window.addEventListener("keydown", (e) => {
         break
 
       case "+":
-        zoom = zoom + 0.02
-        document.body.style.zoom = zoom
+        // zoom = zoom + 0.02
+        // document.body.style.zoom = zoom
+        FPS +=1
         break
       case "-":
-        zoom = zoom - 0.02
-        document.body.style.zoom = zoom
+        // zoom = zoom - 0.02
+        // document.body.style.zoom = zoom
+        FPS -=1
         break
       case "w":
         inputs["up"] = true;
