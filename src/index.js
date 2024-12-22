@@ -14,8 +14,8 @@ const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
 const dbItems = db.items
-const SPEED =3;
-const FPS =50;
+const SPEED =4;
+const FPS =35;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
@@ -558,6 +558,12 @@ function tick() {
 
   }
   snowballs = snowballs.filter((snowball) => snowball.timeLeft > 0);
+  
+  players.forEach(player => {
+    const playersEnMapa = players.filter(p=>p.mapa === player.mapa)
+    const clicksEnMapa = snowballs.filter(c=>c.mapa === player.mapa)
+    io.to(player.id).emit("update", playersEnMapa, clicksEnMapa)
+  })
 
 }
 const mundo = []

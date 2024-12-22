@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 50
+const FPS = 35
 
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
@@ -855,6 +855,7 @@ socket.on("map", ({ mundo, player, db }) => {
 
 
 
+
 socket.on("pjs", (pjs) => {
   personajes = pjs
 });
@@ -1106,6 +1107,52 @@ socket.on("privado", (mensaje) => {
   actualizarMensajes()
 })
 
+socket.on("update", (playersTotal, clicks) => {
+ // loop()
+  players = playersTotal
+  playersOnline= playersTotal.length
+
+  //console.log(myPlayer)
+  itemsEnMapa = players.filter(p => p.skin === "items")
+  //players = players.filter(p => p.skin !== "items")
+  myPlayer = players.find((player) => player.id === socket.id);
+  if (myPlayer){
+    players.sort(((a, b) => a.y - b.y))
+    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+    cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+  } 
+  snowballs = clicks
+  console.log(snowballs)
+  // socket.emit("myPlayer", player => {
+  //   myPlayer = player
+    
+    
+    
+  //   socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
+      
+      
+  //    // players = playersEnMapa
+  //   //  itemsEnMapa = players.filter(p => p.skin === "items")
+  //    // players = players.filter(p => p.skin !== "items")
+ 
+  //     // myPlayer = players.find((player) => player.id === socket.id);
+  //     // players.sort(((a, b) => a.y - b.y))
+  //     // snowballs = snowballsEnMapa
+      
+      
+  //     //playersOnline = playersOnlines
+  //     // if(myPlayer){
+  
+  //     //   cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+  //     //   cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+  //     // }
+      
+  //     loop();
+      
+  //   })
+    
+  // })
+});
 
 setInterval(() => {
   if (meditar) {
@@ -1136,7 +1183,7 @@ setInterval(() => {
 }, 2000);
 let descansar = false
 setInterval(() => {
-  if (myPlayer.sed > 0 && myPlayer.hambre > 0) {
+  if (myPlayer&& myPlayer.sed > 0 && myPlayer.hambre > 0) {
     if (myPlayer.energia < myPlayer.energiaTotal && descansar) {
       socket.emit("descansar", parseInt(myPlayer.energiaTotal * 0.1), (texto, bool) => {
         if (!bool) {
@@ -1160,7 +1207,7 @@ setInterval(() => {
   socket.emit("gastarSed", 5)
   setTimeout(() => {
     socket.emit("gastarHambre", 5)
-    if (myPlayer.sed <= 0 && myPlayer.energia === 0) {
+    if (myPlayer&& myPlayer.sed <= 0 && myPlayer.energia === 0) {
       const msg = {
         msg: "Estas Sediento.",
         tipo: "consola"
@@ -1620,7 +1667,10 @@ canvasEl.addEventListener("click", (e) => {
 });
 
 setInterval(() => {
-  actualizarHUD()
+  if(myPlayer){
+
+    actualizarHUD()
+  }
 }, 100);
 
 
@@ -1934,35 +1984,7 @@ function loop() {
 
 setInterval(() => {
   
-  socket.emit("myPlayer", player => {
-    myPlayer = player
-    
-    
-    
-    socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
-      
-      
-      players = playersEnMapa
-      itemsEnMapa = players.filter(p => p.skin === "items")
-      players = players.filter(p => p.skin !== "items")
-      players = players.filter(p => p.id === myPlayer.id)
-      myPlayer = players.find((player) => player.id === socket.id);
-      players.sort(((a, b) => a.y - b.y))
-      snowballs = snowballsEnMapa
-      
-      
-      playersOnline = playersOnlines
-      if(myPlayer){
-  
-        cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-        cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-      }
-      
-      loop();
-      
-    })
-    
-  })
+  loop();
 }, 1000/ FPS);
 
 
