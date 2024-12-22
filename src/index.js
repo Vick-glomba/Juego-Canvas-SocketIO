@@ -14,8 +14,8 @@ const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
 const dbItems = db.items
-const SPEED =6;
-const FPS =30;
+const SPEED =3;
+const FPS =50;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
@@ -305,8 +305,8 @@ function isCollidingWithPlayer(player) {
 }
 
 function tick() {
-
-  for (const player of players) {
+  const playersFilter = players.filter(p => p.clase === "player")
+  for (const player of playersFilter) {
     if (player.clase === "player") {
 
       const inputs = inputsMap[player.id];
