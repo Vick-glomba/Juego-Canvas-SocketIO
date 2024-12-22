@@ -1643,11 +1643,7 @@ const actualizarHUD = () => {
 
 function loop() {
 
-  if(myPlayer){
 
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-  }
 
 
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
@@ -1953,7 +1949,12 @@ setInterval(() => {
       
       
       playersOnline = playersOnlines
-      loop();
+      if(myPlayer){
+
+        cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+        cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+        loop();
+      }
       
       
     })
