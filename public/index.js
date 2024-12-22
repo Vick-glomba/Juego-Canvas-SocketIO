@@ -1619,7 +1619,7 @@ canvasEl.addEventListener("click", (e) => {
 
 setInterval(() => {
   actualizarHUD()
-}, 500);
+}, 200);
 
 
 
@@ -1949,4 +1949,4 @@ setInterval(() => {
   })
   loop();
 
-}, 20);
+}, 50);
