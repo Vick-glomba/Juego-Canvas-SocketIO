@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 20
+const FPS = 30
 
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
@@ -1643,25 +1643,7 @@ const actualizarHUD = () => {
 
 function loop() {
 
-  socket.emit("myPlayer", player => {
-    myPlayer = player
 
-    socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
-
-      players = playersEnMapa
-      itemsEnMapa = players.filter(p => p.skin === "items")
-      myPlayer = players.find((player) => player.id === socket.id);
-      players.sort(((a, b) => a.y - b.y))
-      snowballs = snowballsEnMapa
-      
-      cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-      cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-
-      playersOnline = playersOnlines
-      
-      
-    })
-  })
 
 
   canvas.clearRect(0, 0, canvasEl.width, canvasEl.height);
@@ -1952,5 +1934,28 @@ function loop() {
 setInterval(() => {
 
   loop();
+  socket.emit("myPlayer", player => {
+    myPlayer = player
+   
+
+      cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+      cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
+ 
+  })
+  socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
+    
+    
+    players = playersEnMapa
+    itemsEnMapa = players.filter(p => p.skin === "items")
+    myPlayer = players.find((player) => player.id === socket.id);
+    players.sort(((a, b) => a.y - b.y))
+    snowballs = snowballsEnMapa
+
+
+    playersOnline = playersOnlines
+    
+    
+  })
+
 
 }, 1000 / FPS);
