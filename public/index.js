@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 20
+const FPS = 40
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
 
@@ -1620,7 +1620,7 @@ canvasEl.addEventListener("click", (e) => {
 
 setInterval(() => {
   actualizarHUD()
-}, 200);
+}, 100);
 
 
 
@@ -1870,6 +1870,7 @@ function loop() {
       // mapaActual = ((parseInt(parseInt(myPlayer.y / TILE_SIZE) / 48) * 10) + ((parseInt(parseInt(myPlayer.x / TILE_SIZE) / 48)) + 1))
 
       const anchoMundo = 20
+      
       if (myPlayer) {
 
         let nuevoMapa
@@ -1901,8 +1902,11 @@ function loop() {
           console.log("cambio a mapa: ", nuevoMapa)
 
         }
+        if(nuevoMapa !== myPlayer.mapa){
 
-
+          groundMap = mundoMaps[myPlayer.mapa].ground2D;
+          decalMap = mundoMaps[myPlayer.mapa].decal2D;
+        }
       }
 
     }
@@ -1933,17 +1937,13 @@ setInterval(() => {
       itemsEnMapa = players.filter(p => p.skin === "items")
       myPlayer = players.find((player) => player.id === socket.id);
       players.sort(((a, b) => a.y - b.y))
-      if (mundoMaps[myPlayer.mapa]) {
-        groundMap = mundoMaps[myPlayer.mapa].ground2D;
-        decalMap = mundoMaps[myPlayer.mapa].decal2D;
-      }
+      snowballs = snowballsEnMapa
 
       if (myPlayer) {
         cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
         cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
         playersOnline = playersOnlines
-        snowballs = snowballsEnMapa
-      
+        
       }
 
     })

@@ -14,8 +14,8 @@ const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
 const dbItems = db.items
-const SPEED = 10;
-const TICK_RATE =14;
+const SPEED = 8;
+const FPS =20;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
@@ -1052,7 +1052,7 @@ async function main() {
 
   setInterval(() => {
     tick();
-  }, 1000/TICK_RATE);
+  }, 1000/FPS);
 
   //OBJETOS CON DURACION
 
