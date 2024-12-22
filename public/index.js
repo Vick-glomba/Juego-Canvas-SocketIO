@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 26
+const FPS = 25
 
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
