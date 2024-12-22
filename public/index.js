@@ -3,7 +3,7 @@ const resolucionX = 1025
 const resolucionY = 550
 let zoom = 1
 let distanciaRender = 22
-const FPS = 22
+const FPS = 30
 
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
@@ -1960,7 +1960,7 @@ setInterval(() => {
     })
     
   })
-}, 1000/ 50);
+}, 1000/ 40);
 
 
 setInterval(() => {
