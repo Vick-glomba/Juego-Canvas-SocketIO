@@ -1933,14 +1933,14 @@ setInterval(() => {
 
   socket.emit("myPlayer", player => {
     myPlayer = player
-    cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
-    cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-
+    
     socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
-
+      
       players = playersEnMapa
       itemsEnMapa = players.filter(p => p.skin === "items")
       myPlayer = players.find((player) => player.id === socket.id);
+      cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
+      cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
       players.sort(((a, b) => a.y - b.y))
       snowballs = snowballsEnMapa
 
