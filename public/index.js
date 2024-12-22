@@ -1620,7 +1620,10 @@ canvasEl.addEventListener("click", (e) => {
 });
 
 setInterval(() => {
-  actualizarHUD()
+  if(myPlayer){
+
+    actualizarHUD()
+  }
 }, 100);
 
 
