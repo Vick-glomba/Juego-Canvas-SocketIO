@@ -1116,12 +1116,13 @@ socket.on("privado", (mensaje) => {
 socket.on("update", (playersTotal, clicks) => {
  // loop()
   players = playersTotal
-  playersOnline= playersTotal.length
-
+  
   //console.log(myPlayer)
   itemsEnMapa = players.filter(p => p.skin === "items")
   players = players.filter(p => p.skin !== "items")
   myPlayer = players.find((player) => player.id === socket.id);
+  const onlines = players.filter((player) => player.clase === "player");
+  playersOnline= onlines.length
   if (myPlayer){
     players.sort(((a, b) => a.y - b.y))
     cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
