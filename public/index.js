@@ -849,9 +849,13 @@ socket.on("map", ({ mundo, player, db }) => {
 
   dbItems = db.items
   hechizosData = db.hechizos
+  actualizarInventario()
   setTimeout(() => {
-    
     actualizarInventario()
+    setTimeout(() => {
+      actualizarInventario()
+      
+    }, 1000);
   }, 500);
 });
 
