@@ -849,8 +849,10 @@ socket.on("map", ({ mundo, player, db }) => {
 
   dbItems = db.items
   hechizosData = db.hechizos
-
-  actualizarInventario()
+  setTimeout(() => {
+    
+    actualizarInventario()
+  }, 500);
 });
 
 
@@ -1122,7 +1124,7 @@ socket.on("update", (playersTotal, clicks) => {
     cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
   } 
   snowballs = clicks
-  actualizarInventario()
+
   // socket.emit("myPlayer", player => {
   //   myPlayer = player
     
