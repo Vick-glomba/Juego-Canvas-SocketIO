@@ -1114,7 +1114,7 @@ socket.on("update", (playersTotal, clicks) => {
 
   //console.log(myPlayer)
   itemsEnMapa = players.filter(p => p.skin === "items")
-  //players = players.filter(p => p.skin !== "items")
+  players = players.filter(p => p.skin !== "items")
   myPlayer = players.find((player) => player.id === socket.id);
   if (myPlayer){
     players.sort(((a, b) => a.y - b.y))
@@ -1122,7 +1122,7 @@ socket.on("update", (playersTotal, clicks) => {
     cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
   } 
   snowballs = clicks
-  console.log(snowballs)
+  actualizarInventario()
   // socket.emit("myPlayer", player => {
   //   myPlayer = player
     
