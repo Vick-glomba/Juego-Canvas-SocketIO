@@ -681,6 +681,78 @@ let cast = false
 let mensajesConsola = []
 let mapaActual
 let mundoMaps = [];
+let mundoDibujables = []
+mundoDibujables[1] = [
+  {
+    mapa: 1,
+    id: 1,
+    x: 845,
+    y: 1080,
+    skin: "arboles",
+    w: 256,
+    h: 320,
+    row: 0,
+    col: 0,
+    clase: "arbol",
+    nombre: "Yacimiento de Cobre",
+    quieto: true,
+    estado: "criminal",
+    recurso: 37,
+    requerido: "minar"
+  },
+  {
+    mapa: 1,
+    id: 1,
+    x: 1015,
+    y: 1080,
+    skin: "arboles",
+    w: 256,
+    h: 320,
+    row: 0,
+    col: 1,
+    clase: "arbol",
+    nombre: "cipress",
+    quieto: true,
+    estado: "criminal",
+    recurso: 29,
+    requerido: "talar"
+  },
+  {
+    mapa: 1,
+    id: 1,
+    x: 1215,
+    y: 1180,
+    skin: "arboles",
+    w: 256,
+    h: 320,
+    row: 0,
+    col: 2,
+    clase: "arbol",
+    nombre: "sauce",
+    quieto: true,
+    estado: "criminal",
+    recurso: 38,
+    requerido: "talar"
+  },
+  {
+    mapa: 1,
+    id: 1,
+    x: 615,
+    y: 1180,
+    skin: "arboles",
+    w: 256,
+    h: 320,
+    row: 1,
+    col: 3,
+    clase: "arbol",
+    nombre: "sauce naranja",
+    quieto: true,
+    estado: "criminal",
+    recurso: 39,
+    requerido: "talar"
+  },
+]
+
 
 let dbItems = []
 let groundMap = [[]];
@@ -708,53 +780,6 @@ const TILE_SIZE = 32;
 
 const SNOWBALL_RADIUS = 4;
 
-const checkUrl = async (url) => {
-  return new Promise((resolve, reject) => {
-    if (url.trim() == "") {
-      resolve(false)
-    }
-    fetch(url).then(res => {
-      const img = new Image();
-      img.src = url;
-      img.onload = () => {
-        if (res.status == 200) {
-          resolve(true)
-        } else {
-          resolve(false)
-        }
-      }
-    })
-      .catch(e => {
-        resolve(false)
-      })
-  })
-}
-const checkUrlAudio = async (url) => {
-  return new Promise((resolve, reject) => {
-    if (url.trim() == "") {
-      resolve(false)
-    }
-    fetch(url).then(res => {
-      const audio = new Audio(url);
-      audio.onload = () => {
-        if (res.status == 200 && !(img.width == 0)) {
-          resolve(true)
-        } else {
-          resolve(false)
-        }
-      }
-    })
-      .catch(e => {
-        resolve(false)
-      })
-  })
-}
-
-
-
-
-
-
 const actualizarInventario = async () => {
   if (myPlayer) {
     let contador = 0
@@ -773,23 +798,12 @@ const actualizarInventario = async () => {
           }
           cantidad = myPlayer.inventario[contador][1]
           const item = myPlayer.inventario[contador][0]
-          const url = "./items/" + dbItems[item].imagen + ".BMP"
-          const url2 = "./items/" + dbItems[item].imagen + ".bmp"
-          //  const existe= await checkUrl(url);
-          const img1 = new Image()
-          img1.src = url
-          if (img1.width == 0) {
-            imagen = `background-image: url(${url2});`
-          } else {
-            imagen = `background-image: url(${url});`
-          }
-
-
+          const url = "./items/" + dbItems[item].imagen + ".bmp"
+          imagen = `background-image: url(${url});`
           if (itemSelect === "slot" + contador) {
             borde = "border-color: rgb(253, 232, 0);"
           } else {
             borde = "border-color: black;"
-
           }
         }
         html += `
@@ -850,13 +864,7 @@ socket.on("map", ({ mundo, player, db }) => {
   dbItems = db.items
   hechizosData = db.hechizos
   actualizarInventario()
-  setTimeout(() => {
-    actualizarInventario()
-    setTimeout(() => {
-      actualizarInventario()
-      
-    }, 1000);
-  }, 500);
+
 });
 
 
@@ -1114,50 +1122,51 @@ socket.on("privado", (mensaje) => {
 })
 
 socket.on("update", (playersTotal, clicks) => {
- // loop()
+  // loop()
   players = playersTotal
-  
+  snowballs = clicks
+
   //console.log(myPlayer)
   itemsEnMapa = players.filter(p => p.skin === "items")
-  players = players.filter(p => p.skin !== "items")
-  myPlayer = players.find((player) => player.id === socket.id);
+ // players = players.filter(p => p.skin !== "items")
+  myPlayer = players.find((player) => player.id === socket.id)
+  players = players.concat(mundoDibujables[myPlayer.mapa])
   const onlines = players.filter((player) => player.clase === "player");
-  playersOnline= onlines.length
-  if (myPlayer){
+  playersOnline = onlines.length
+  if (myPlayer) {
     players.sort(((a, b) => a.y - b.y))
     cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
     cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
-  } 
-  snowballs = clicks
+  }
 
   // socket.emit("myPlayer", player => {
   //   myPlayer = player
-    
-    
-    
+
+
+
   //   socket.emit("enMapa", myPlayer.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
-      
-      
+
+
   //    // players = playersEnMapa
   //   //  itemsEnMapa = players.filter(p => p.skin === "items")
   //    // players = players.filter(p => p.skin !== "items")
- 
+
   //     // myPlayer = players.find((player) => player.id === socket.id);
   //     // players.sort(((a, b) => a.y - b.y))
   //     // snowballs = snowballsEnMapa
-      
-      
+
+
   //     //playersOnline = playersOnlines
   //     // if(myPlayer){
-  
+
   //     //   cameraX = parseInt(myPlayer.x - canvasEl.width / 2);
   //     //   cameraY = parseInt(myPlayer.y - canvasEl.height / 2)
   //     // }
-      
+
   //     loop();
-      
+
   //   })
-    
+
   // })
 });
 
@@ -1190,7 +1199,7 @@ setInterval(() => {
 }, 2000);
 let descansar = false
 setInterval(() => {
-  if (myPlayer&& myPlayer.sed > 0 && myPlayer.hambre > 0) {
+  if (myPlayer && myPlayer.sed > 0 && myPlayer.hambre > 0) {
     if (myPlayer.energia < myPlayer.energiaTotal && descansar) {
       socket.emit("descansar", parseInt(myPlayer.energiaTotal * 0.1), (texto, bool) => {
         if (!bool) {
@@ -1214,7 +1223,7 @@ setInterval(() => {
   socket.emit("gastarSed", 5)
   setTimeout(() => {
     socket.emit("gastarHambre", 5)
-    if (myPlayer&& myPlayer.sed <= 0 && myPlayer.energia === 0) {
+    if (myPlayer && myPlayer.sed <= 0 && myPlayer.energia === 0) {
       const msg = {
         msg: "Estas Sediento.",
         tipo: "consola"
@@ -1644,7 +1653,147 @@ canvasEl.addEventListener("click", (e) => {
   HUD.style.cursor = "default"
   hechizoSelect = hechizoTemp
   actualizarHechizos()
-  socket.emit("point", point);
+  //socket.emit("point", point);
+
+  //traigo lo que hacia el server para hacerlo local
+
+  const player = myPlayer
+  const objeto = point
+  const snowball = {
+    cast: objeto.cast,
+    mapa: player.mapa,
+    x: objeto.x,
+    y: objeto.y,
+    timeLeft: 10000,
+    playerId: socket.id,
+  }
+  
+  for (const player of players) {
+
+    const pj = player
+
+    let tamaño = player.w / 2
+    let posicionx = player.x
+    let posiciony = player.y
+
+    if (player.clase === "arbol") {
+      tamaño = 15
+      posiciony = posiciony + 10
+      posicionx = posicionx - 5
+    }
+    let distance = Math.sqrt(
+      (posicionx - snowball.x) ** 2 +
+      (posiciony - snowball.y) ** 2
+    );
+    if (distance <= tamaño) {
+   
+      let obj
+      if (player.clase === "player") {
+        obj = {
+          cast: snowball.cast,
+          player: pj,
+          tipo: "click",
+          msg: player
+        }
+      } else {
+        let infoClick = `${player.nombre}`
+        infoClick += player.timeLeft ? (player.timeLeft / 60) > 1 ? ` < ${Math.ceil(player.timeLeft / 60)} min >` : ` < ${player.timeLeft} seg >` : ""
+        if (player.dueño) {
+
+          infoClick += player.dueño && player.sinColision === false ? ` < Dueño: ${player.dueño} >` : ""
+          if (player.costo) {
+          }
+
+          infoClick += player.costo && (player.costo[0] || player.costo[1] || player.costo[2]) ? ` < Costo: ` : ""
+          infoClick += player.costo[0] ? `  ${player.costo[0]} oro` : ""
+          infoClick += player.costo[0] && player.costo[1] ? `, ` : ""
+          infoClick += player.costo[1] ? `  ${player.costo[1]} plata` : ""
+          infoClick += player.costo[0] && player.costo[2] || player.costo[1] && player.costo[2] ? `, ` : ""
+          infoClick += player.costo[2] ? `  ${player.costo[2]} cobre` : ""
+          infoClick += player.costo && (player.costo[0] || player.costo[1] || player.costo[2]) ? ` >` : ""
+        }
+        if (player.objeto) {
+
+          infoClick += player.objeto[1] && player.sinColision === true ? ` < Cantidad: ${player.objeto[1]} >` : ""
+        }
+
+        obj = {
+          cast: snowball.cast,
+          tipo: "consola",
+          msg: infoClick,
+          objetivo: player
+
+        }
+      }
+      socket.emit("point", pj.id, obj);
+      mensajesConsola.push(obj)
+      actualizarMensajes()
+      
+
+      if (snowball.cast) {
+        //ACA CONFIGRAR TODOS LOS QUE PASA AL CASTEAR HECHIZOS SOBRE ALGO O ALGUIEN
+        if (snowball.cast.cast && snowball.cast.hechizoSelect.clase && snowball.cast.hechizoSelect.clase === "curacion" && player.clase === "player") {
+          console.log("toco la bola y es : ", snowball.cast)
+          if (pj.mana >= snowball.cast.hechizoSelect["mana necesario"]) {
+            pj.mana = pj.mana - snowball.cast.hechizoSelect["mana necesario"]
+            player.salud = player.salud + snowball.cast.hechizoSelect["max"]
+            player.salud > player.saludTotal ? player.salud = player.saludTotal : player.salud
+            const destino = {
+              tipo: "daño",
+              msg: `Has lanzado ${snowball.cast.hechizoSelect["nombre"]} `,
+              playerDestino: player,
+              playerOrigen: pj
+            }
+           // io.to(pj.id).emit('privado', destino);
+            mensajesConsola.push(destino)
+            actualizarMensajes()
+            const origen = {
+              tipo: "daño",
+              msg: pj.id === player.id ? "Te has curado " + snowball.cast.hechizoSelect["max"] + " puntos de vida." : "te ha curado " + snowball.cast.hechizoSelect["max"] + " puntos de vida.",
+              playerDestino: player,
+              playerOrigen: pj
+            }
+            // io.to(player.id).emit('privado', origen);
+            mensajesConsola.push(origen)
+            actualizarMensajes()
+            if (player.id !== pj.id) {
+              const destino = {
+                tipo: "daño",
+                msg: "Has curado a " + player.nombre + " por " + snowball.cast.hechizoSelect["max"] + " puntos.",
+                playerDestino: player,
+                playerOrigen: pj
+              }
+              // io.to(pj.id).emit('privado', destino);
+              mensajesConsola.push(destino)
+              actualizarMensajes()
+              //socket.emit("point", pj.id, destino);
+            }
+          } else {
+            const destino = {
+              tipo: "daño",
+              msg: "No tienes suficiente mana. NO DEBERIA PODER LANZARLO",
+              playerDestino: player,
+              playerOrigen: pj
+            }
+            mensajesConsola.push(destino)
+            actualizarMensajes()
+            //io.to(pj.id).emit('privado', destino);
+          }
+        }
+
+      }
+
+
+    }
+
+    snowball.timeLeft = -1;
+
+
+  }
+
+  //cierro lo que hacia el server
+
+
   if (accion === "trabajo" && cast) {
     if (descansar) {
       const msg = {
@@ -1674,7 +1823,7 @@ canvasEl.addEventListener("click", (e) => {
 });
 
 setInterval(() => {
-  if(myPlayer){
+  if (myPlayer) {
 
     actualizarHUD()
   }
@@ -1990,8 +2139,8 @@ function loop() {
 
 
 setInterval(() => {
-  
+
   loop();
-}, 1000/ FPS);
+}, 1000 / FPS);
 
 
