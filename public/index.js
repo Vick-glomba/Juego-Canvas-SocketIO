@@ -1417,6 +1417,8 @@ setInterval(() => {
     }
 
     //console.log(p.x, myPlayer.x)
+    myPlayer.x = p.x
+    myPlayer.y = p.y
     socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
   }
 
