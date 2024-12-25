@@ -676,10 +676,7 @@ async function main() {
       } else{
         console.log( player.nombre,  "se mueve mas rapido que la velocidad")
       }
- 
 
-     
-   
         io.to(player.mapa).emit("updatePlayer", player.id,player.x, player.y, player.quieto, player.mirando, player.col, player.row)
     
 
