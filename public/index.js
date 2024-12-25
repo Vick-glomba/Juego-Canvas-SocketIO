@@ -5,7 +5,7 @@ let zoom = 1
 let distanciaRender = 22
 const FPS = 25
 const MOV = 25
-const pixels = 5
+const pixels = 6
 // document.body.style.width = window.innerWidth
 // document.body.style.height= window.innerHeight
 

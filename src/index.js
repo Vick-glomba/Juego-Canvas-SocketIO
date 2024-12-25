@@ -673,6 +673,7 @@ async function main() {
         player.y=y
         player.mirando= mirando
         player.quieto= quieto
+      
       } else{
         console.log( player.nombre,  "se mueve mas rapido que la velocidad")
       }
