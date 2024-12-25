@@ -1390,22 +1390,22 @@ setInterval(() => {
   let colision = false
 
   if ((isCollidingWithMap(p) || isCollidingWithPlayer(p))) {
-    // if (inputs.up) {
-    //   p.y += pixels
+    if (inputs.up) {
+      p.y += pixels
 
-    // }
-    // if (inputs.down) {
-    //   p.y -= pixels
+    }
+    if (inputs.down) {
+      p.y -= pixels
 
-    // }
-    // if (inputs.left) {
-    //   p.x += pixels
+    }
+    if (inputs.left) {
+      p.x += pixels
 
-    // }
-    // if (inputs.right) {
-    //   p.x -= pixels
+    }
+    if (inputs.right) {
+      p.x -= pixels
 
-    // }
+    }
     colision = true
 
   } else {

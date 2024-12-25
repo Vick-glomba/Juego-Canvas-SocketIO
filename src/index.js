@@ -677,11 +677,11 @@ async function main() {
         console.log( player.nombre,  "se mueve mas rapido que la velocidad")
       }
  
-      let playersEnMapa = players.filter(p => p.mapa === player.mapa)
+
      
-      playersEnMapa.forEach(p => {
-        io.to(p.id).emit("updatePlayer", player.id,player.x, player.y, player.quieto, player.mirando, player.col, player.row)
-      })
+   
+        io.to(player.mapa).emit("updatePlayer", player.id,player.x, player.y, player.quieto, player.mirando, player.col, player.row)
+    
 
       
 
