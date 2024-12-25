@@ -874,16 +874,8 @@ socket.on("updatePlayer", (id, x, y, quieto, mirando, col, row) => {
     player.col = col
     player.row = row
   }
-  //const myPlayer = players.find(p => p.id === socket.id)
-  if (myPlayer.id === id) {
+  const myPlayer = players.find(p => p.id === socket.id)
 
-    myPlayer.x = x
-    myPlayer.y = y
-    myPlayer.quieto = quieto
-    myPlayer.mirando = mirando
-    myPlayer.col = col
-    myPlayer.row = row
-  }
 })
 
 socket.on("map", ({ mundo, player, db }) => {
