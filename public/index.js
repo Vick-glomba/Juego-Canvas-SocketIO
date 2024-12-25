@@ -874,7 +874,7 @@ socket.on("updatePlayer", (id, x, y, quieto, mirando, col, row) => {
     player.col = col
     player.row = row
   }
-  const myPlayer = players.find(p => p.id === socket.id)
+   myPlayer = players.find(p => p.id === socket.id)
 
 })
 
