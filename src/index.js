@@ -14,8 +14,8 @@ const loadMap = require("./mapLoader");
 const loadPj = require("./pjLoader");
 const db = require("./hechizosDB");
 const dbItems = db.items
-const SPEED = 4;
-const FPS = 35;
+const SPEED = 6
+const FPS = 10;
 
 const PLAYER_SIZE = 120;
 const TILE_SIZE = 32;
@@ -150,100 +150,14 @@ const loadPersonajes = async () => {
   }
 }
 
-function isColliding(rect1, rect2) {
-  return (
-    rect1.x < rect2.x + rect2.w &&
-    rect1.x + rect1.w > rect2.x &&
-    rect1.y < rect2.y + rect2.h &&
-    rect1.h + rect1.y > rect2.y
-  );
-}
 
-function isCollidingWithMap(player) {
-  for (let row = 0; row < mundo[player.mapa].decal2D.length; row++) {
-    for (let col = 0; col < mundo[player.mapa].decal2D[0].length; col++) {
-      const tile = mundo[player.mapa].decal2D[row][col];
-
-      if (
-        tile &&
-        isColliding(
-          {
-            x: player.x,
-            y: player.y,
-            w: 0,
-            h: 0,
-          },
-          {
-            x: col * TILE_SIZE - TILE_SIZE / 2,
-            y: row * TILE_SIZE - TILE_SIZE,
-            w: TILE_SIZE * 2,
-            h: TILE_SIZE * 2,
-          }
-        )
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-function isCollidingWithPlayer(player) {
-  let playerEnMapa = players.filter(p => p.mapa === player.mapa && p.id !== player.id)
-  playerEnMapa = playerEnMapa.filter(p => !p.sinColision || p.sinColision === false)
-  for (let i = 0; i < playerEnMapa.length; i++) {
-    const otroPlayer = playerEnMapa[i]
-    switch (otroPlayer.skin) {
-      case "arboles":
-        valorX = otroPlayer.x - 30
-        valorY = otroPlayer.y - 10
-        valorW = 50
-        valorH = 50
-        break;
-      case "items":
-        valorX = otroPlayer.x - otroPlayer.w + 5
-        valorY = otroPlayer.y - otroPlayer.h + 15
-        valorW = otroPlayer.w + 20
-        valorH = otroPlayer.h - 5
-        break;
-
-      default:
-        valorX = otroPlayer.x - 35
-        valorY = otroPlayer.y - 30
-        valorW = otroPlayer.w + 30
-        valorH = otroPlayer.h + 10
-
-        break;
-    }
-
-    if (isColliding(
-      {
-        x: valorX,
-        y: valorY,
-        w: valorW,
-        h: valorH,
-      },
-      {
-        x: player.x,
-        y: player.y,
-        w: 0,
-        h: 0,
-      },
-    )
-    ) {
-      return otroPlayer.id;
-    }
-  }
-  return false;
-}
 
 function tick() {
   const playersFilter = players.filter(p => p.clase === "player")
   for (const player of playersFilter) {
     if (player.clase === "player") {
 
-      const inputs = inputsMap[player.id];
-      const previousY = player.y;
-      const previousX = player.x;
+
       let row = 0
       let col = 0
 
@@ -261,35 +175,7 @@ function tick() {
 
 
 
-      if (inputs && inputs.up) {
-        player.y -= SPEED;
-        player.mirando = "up"
-      } else if (inputs && inputs.down) {
-        player.y += SPEED;
-        player.mirando = "down"
-      }
 
-      if ((isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
-        player.y = previousY;
-      }
-
-
-      if (inputs && inputs.left) {
-        player.x -= SPEED;
-        player.mirando = "left"
-      } else if (inputs && inputs.right) {
-        player.x += SPEED;
-        player.mirando = "right"
-      }
-
-
-
-      if (inputs && (inputs.up || inputs.down || inputs.left || inputs.right)) {
-        player.quieto = false
-
-      } else {
-        player.quieto = true
-      }
 
 
       if (player.quieto) {
@@ -368,11 +254,6 @@ function tick() {
 
 
 
-      if ((isCollidingWithMap(player) || isCollidingWithPlayer(player))) {
-
-        player.x = previousX;
-
-      }
     }
   }
 
@@ -380,11 +261,12 @@ function tick() {
 
   // snowballs = snowballs.filter((snowball) => snowball.timeLeft > 0);
 
-  players.forEach(player => {
-    const playersEnMapa = players.filter(p => p.mapa === player.mapa)
-    const clicksEnMapa = []//aca tengo que mandar mi click solamente o nada //snowballs.filter(c=>c.mapa === player.mapa)
-    io.to(player.id).emit("update", playersEnMapa, clicksEnMapa)
-  })
+  // players.forEach(player => {
+  //   let playersEnMapa = players.filter(p => p.mapa === player.mapa)
+  //   const clicksEnMapa = []//aca tengo que mandar mi click solamente o nada //snowballs.filter(c=>c.mapa === player.mapa)
+  //  playersEnMapa= playersEnMapa.filter(p => p.id === player.id)
+  //   io.to(player.id).emit("update", playersEnMapa, clicksEnMapa)
+  // })
 
 }
 const mundo = []
@@ -421,8 +303,8 @@ async function main() {
       quieto: true,
       skin: "link",
       clase: "player",
-      w: 0,
-      h: 0,
+      w: adjust["link"].w,
+      h: adjust["link"].h,
       quieto: true,
       mirando: "down",
       row: 0,
@@ -476,16 +358,19 @@ async function main() {
     });
 
     const player = players.find((player) => player.id === socket.id);
-    const otroPlayer = isCollidingWithPlayer(player)
-    if (otroPlayer) {
-      //PISAR PERSONAJE Y DESCONECTARLO
-      io.sockets.sockets.forEach((socket) => {
-        if (socket.id === otroPlayer)
-          socket.disconnect(true);
-      });
+    // const otroPlayer = isCollidingWithPlayer(player)
+    // if (otroPlayer) {
+    //   //PISAR PERSONAJE Y DESCONECTARLO
+    //   io.sockets.sockets.forEach((socket) => {
+    //     if (socket.id === otroPlayer)
+    //       socket.disconnect(true);
+    //   });
 
+    // }
 
-    }
+    socket.join(player.mapa)
+    socket.broadcast.to(player.mapa).emit("agregarPlayer", player)
+
     socket.emit("map", {
       mundo,
       player,
@@ -673,25 +558,16 @@ async function main() {
       }
     })
 
-    socket.on("agarrar", (item, callback) => {
+    socket.on("agarrar", (index,slot,id, callback) => {
       const player = players.find((player) => player.id === socket.id);
-      //busco si hay algun slot con ese item ya en el inventario
-      let slotMismoItem = player.inventario.find(slot => slot[0] === item[0])
-      if (slotMismoItem && dbItems[item[0]].apilable) {
-        slotMismoItem[1] += item[1]
-        callback("agarro", true)
-      } else {
-        //busca espacio vacio en inventario
-        let slotDisponible = player.inventario.find(slot => slot[0] === 0 && slot[1] === 0)
-        if (slotDisponible) {
-          slotDisponible[0] = item[0]
-          slotDisponible[1] = item[1]
-          callback("agarro", true)
-        } else {
-          callback("No tienes espacio suficiente.", false)
-        }
-      }
+      io.to(player.mapa).emit("borrarItem", id)
+      console.error({slotinv: player.inventario[index], slot })
+      player.inventario[index]= slot 
+      players= players.filter(p=>p.id !== id)
+      callback(player.inventario[index])
+    
     })
+
     socket.on("soltar", (slot, { x, y }, cantidad = 1, costo, colision, callback) => {
       const player = players.find((player) => player.id === socket.id);
       if (dbItems[player.inventario[slot][0]]) {
@@ -707,7 +583,7 @@ async function main() {
 
         let nuevoId = x.toString() + y.toString()
 
-        console.log(dbItems[item[0]])
+     
         const fisico = {
           objeto: [item[0], cantidad],
           mapa: 1,
@@ -725,15 +601,19 @@ async function main() {
           estado: "neutral",
           recurso: 0,
           requerido: dbItems[item[0]].requerido,
-          dueño: player.nombre,
+          "dueño": player.nombre,
           timeLeft: dbItems[item[0]].duracion ? dbItems[item[0]].duracion : 120, // 1 = 1 segundo
           costo: costo ? costo : "",
           sinColision: colision
           //  drop: item,
         }
-        console.log("solto: ", fisico)
+      
         players.push(fisico)
-        callback("tiro el objeto")
+
+        
+        io.to(player.mapa).emit("agregarItem", fisico)
+        const index = player.inventario.indexOf(player.inventario[slot])
+        callback("tiro el objeto",player.inventario[slot],index)
       } else {
         callback("no hay nada que tirar")
       }
@@ -786,10 +666,29 @@ async function main() {
       player.descripcion = desc
     })
 
-    socket.on("inputs", (inputs) => {
-      inputsMap[socket.id] = inputs;
+    socket.on("movimiento", (x, y, mirando, quieto) => {
+      const player = players.find((player) => player.id === socket.id);
+      if (Math.abs(player.x - x) <= SPEED && Math.abs(player.y - y) <= SPEED ) {
+        player.x=x
+        player.y=y
+        player.mirando= mirando
+        player.quieto= quieto
+      } else{
+        console.log( player.nombre,  "se mueve mas rapido que la velocidad")
+      }
+ 
+      let playersEnMapa = players.filter(p => p.mapa === player.mapa)
+     
+      playersEnMapa.forEach(p => {
+        io.to(p.id).emit("updatePlayer", player.id,player.x, player.y, player.quieto, player.mirando, player.col, player.row)
+      })
+
+      
+
     });
-    socket.on("cambiarMapa", (mapa) => {
+
+
+    socket.on("cambiarMapa", (mapa, callback) => {
       const player = players.find((player) => player.id === socket.id);
       if (mundo[mapa]) {
         player.mapa = mapa
@@ -829,6 +728,7 @@ async function main() {
             break;
         }
       }
+      callback(mapa, player.x, player.y)
     })
 
 
@@ -840,14 +740,6 @@ async function main() {
       const player = players.find((player) => player.id === socket.id);
       player.skin = nuevoSkin
     });
-    socket.on("voiceId", (voiceId) => {
-      const player = players.find((player) => player.id === socket.id);
-      player.voiceId = voiceId;
-    });
-    socket.on("myPlayer", (callback) => {
-      const player = players.find((player) => player.id === socket.id);
-      return callback(player)
-    })
 
     socket.on("point", (pjID, obj) => {
       socket.to(pjID).emit("recibirMensaje", obj)
@@ -855,6 +747,9 @@ async function main() {
     });
 
     socket.on("disconnect", () => {
+     const player = players.find((player) => player.id === socket.id);
+      socket.broadcast.to(player.mapa).emit("quitarPlayer", player.id)
+      socket.leave(player.mapa)
       players = players.filter((player) => player.id !== socket.id);
     });
   });
