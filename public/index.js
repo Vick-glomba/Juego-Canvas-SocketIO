@@ -1365,7 +1365,7 @@ function isCollidingWithPlayer(player) {
 
 setInterval(() => {
 
-  let p = myPlayer
+  let p = {...myPlayer}
 
 
   if (inputs.up) {
@@ -1416,7 +1416,7 @@ setInterval(() => {
       p.quieto = true
     }
 
-
+    console.log(p.x, myPlayer.x)
     socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
   }
 
