@@ -1412,6 +1412,7 @@ setInterval(() => {
 
     if (inputs && (inputs.right || inputs.left || inputs.up || inputs.down) && !colision) {
       p.quieto = false
+      socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
     } else {
       p.quieto = true
     }
@@ -1419,7 +1420,6 @@ setInterval(() => {
     //console.log(p.x, myPlayer.x)
     myPlayer.x = p.x
     myPlayer.y = p.y
-    socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
   }
 
 
