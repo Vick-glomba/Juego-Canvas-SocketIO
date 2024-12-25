@@ -874,8 +874,16 @@ socket.on("updatePlayer", (id, x, y, quieto, mirando, col, row) => {
     player.col = col
     player.row = row
   }
-   myPlayer = players.find(p => p.id === socket.id)
+  if (myPlayer.id === id) {
 
+    myPlayer.x = x
+    myPlayer.y = y
+    myPlayer.quieto = quieto
+    myPlayer.mirando = mirando
+    myPlayer.col = col
+    myPlayer.row = row
+  }
+  //const myPlayer = players.find(p => p.id === socket.id)
 })
 
 socket.on("map", ({ mundo, player, db }) => {
@@ -1382,22 +1390,22 @@ setInterval(() => {
   let colision = false
 
   if ((isCollidingWithMap(p) || isCollidingWithPlayer(p))) {
-    if (inputs.up) {
-      p.y += pixels
+    // if (inputs.up) {
+    //   p.y += pixels
 
-    }
-    if (inputs.down) {
-      p.y -= pixels
+    // }
+    // if (inputs.down) {
+    //   p.y -= pixels
 
-    }
-    if (inputs.left) {
-      p.x += pixels
+    // }
+    // if (inputs.left) {
+    //   p.x += pixels
 
-    }
-    if (inputs.right) {
-      p.x -= pixels
+    // }
+    // if (inputs.right) {
+    //   p.x -= pixels
 
-    }
+    // }
     colision = true
 
   } else {
