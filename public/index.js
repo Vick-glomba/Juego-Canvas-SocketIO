@@ -878,8 +878,6 @@ socket.on("updatePlayer", (id, x, y, quieto, mirando, col, row) => {
     } else {
       myPlayer.col = col
       myPlayer.row = row
-      myPlayer.quieto = quieto
-      myPlayer.mirando = mirando
     }
   }
 
