@@ -866,24 +866,23 @@ socket.on("quitarPlayer", (id) => {
 
 socket.on("updatePlayer", (id, x, y, quieto, mirando, col, row) => {
   const player = players.find(p => p.id === id)
-  if (player) {
-    player.x = x
-    player.y = y
-    player.quieto = quieto
-    player.mirando = mirando
-    player.col = col
-    player.row = row
-  }
-  // if (myPlayer.id === id) {
+  if(player){
 
-  //   myPlayer.x = x
-  //   myPlayer.y = y
-  //   myPlayer.quieto = quieto
-  //   myPlayer.mirando = mirando
-  //   myPlayer.col = col
-  //   myPlayer.row = row
-  // }
-  //const myPlayer = players.find(p => p.id === socket.id)
+    if ( myPlayer.id !== id) {
+      player.x = x
+      player.y = y
+      player.quieto = quieto
+      player.mirando = mirando
+      player.col = col
+      player.row = row
+    }else{
+      myPlayer.col = col
+      myPlayer.row = row
+      myPlayer.quieto = quieto
+      myPlayer.mirando= mirando
+    }
+  } 
+  
 })
 
 socket.on("map", ({ mundo, player, db }) => {
@@ -892,6 +891,8 @@ socket.on("map", ({ mundo, player, db }) => {
   socket.emit("enMapa", player.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
 
     players = playersEnMapa
+    players = players.filter(p=> p.id!== socket.id)
+    players.push(myPlayer)
     itemsEnMapa= players.filter(p=>p.skin === "items")
     players = players.concat(mundoDibujables[myPlayer.mapa])
     playersOnline = playersOnlines
@@ -1973,10 +1974,9 @@ canvasEl.addEventListener("click", (e) => {
     mapa: player.mapa,
     x: objeto.x,
     y: objeto.y,
-    timeLeft: 10000,
+  //  timeLeft: 10000, en deshuso por el momento
     playerId: socket.id,
   }
-
   for (const player of players) {
 
     const pj = player
@@ -2111,7 +2111,7 @@ canvasEl.addEventListener("click", (e) => {
 
     }
 
-    snowball.timeLeft = -1;
+   // snowball.timeLeft = -1;
 
 
   }
@@ -2410,18 +2410,20 @@ function loop() {
 
 
   }
-  for (const snowball of snowballs) {
-    canvas.fillStyle = "#d1d107";
-    canvas.beginPath();
-    canvas.arc(
-      snowball.x - cameraX,
-      snowball.y - cameraY + 10,
-      SNOWBALL_RADIUS,
-      0,
-      2 * Math.PI
-    );
-    canvas.fill();
-  }
+
+  //dibujar CLicks en desuhuso
+  // for (const snowball of snowballs) {
+  //   canvas.fillStyle = "#d1d107";
+  //   canvas.beginPath();
+  //   canvas.arc(
+  //     snowball.x - cameraX,
+  //     snowball.y - cameraY + 10,
+  //     SNOWBALL_RADIUS,
+  //     0,
+  //     2 * Math.PI
+  //   );
+  //   canvas.fill();
+  // }
 
 
 
