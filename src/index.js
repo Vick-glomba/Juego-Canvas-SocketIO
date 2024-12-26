@@ -674,7 +674,7 @@ async function main() {
         player.mirando = mirando
         player.quieto = quieto
         setTimeout(() => {
-          if (player.x === x &&  player.y === y) {
+          if ((player.x === x &&  player.y === y )|| player.mirando !== mirando) {
 
             player.quieto = true
             player.col = 0

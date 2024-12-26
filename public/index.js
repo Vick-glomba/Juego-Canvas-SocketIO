@@ -1395,51 +1395,38 @@ setInterval(() => {
     }
     if (inputs.down) {
       p.y -= pixels
-
+  
     }
     if (inputs.left) {
       p.x += pixels
-
+  
     }
     if (inputs.right) {
       p.x -= pixels
-
+ 
     }
     colision = true
 
+    
+    if (myPlayer.mirando !== p.mirando) {
+
+      console.log("emite cambio", myPlayer.mirando, p.mirando)
+      socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
+    }
   } else {
 
-    if (inputs && (inputs.right || inputs.left || inputs.up || inputs.down) && !colision) {
-      p.quieto = false
-      socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
-    } else {
-      p.quieto = true
-      myPlayer.col = 0
-      switch (p.mirando) {
-        case "up":
-          myPlayer.row = 2
-          break;
-        case "down":
-          myPlayer.row = 0
-          break;
-        case "left":
-          myPlayer.row = 1
-          break;
-        case "right":
-          myPlayer.row = 3
-          break;
-
-        default:
-          break;
+    if (inputs && (inputs.right || inputs.left || inputs.up || inputs.down)) {
+      if (!colision) {
+        p.quieto = false
+        socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
       }
-      myPlayer.col = 0
-    }
-
-    myPlayer.quieto = p.quieto
-    myPlayer.mirando = p.mirando
-    myPlayer.x = p.x
-    myPlayer.y = p.y
+    } 
+    
   }
+  myPlayer.mirando = p.mirando
+  myPlayer.quieto = p.quieto
+  myPlayer.x = p.x
+  myPlayer.y = p.y
 
 
 
