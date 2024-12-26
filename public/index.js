@@ -876,10 +876,10 @@ socket.on("updatePlayer", (id, x, y, quieto, mirando, col, row) => {
       player.col = col
       player.row = row
     } else {
-      if(myPlayer.mirando === mirando){
+      
         myPlayer.col = col
         myPlayer.row = row
-      }
+     
     }
   }
 
