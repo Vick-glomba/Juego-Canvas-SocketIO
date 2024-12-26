@@ -558,14 +558,14 @@ async function main() {
       }
     })
 
-    socket.on("agarrar", (index,slot,id, callback) => {
+    socket.on("agarrar", (index, slot, id, callback) => {
       const player = players.find((player) => player.id === socket.id);
       io.to(player.mapa).emit("borrarItem", id)
-      console.error({slotinv: player.inventario[index], slot })
-      player.inventario[index]= slot 
-      players= players.filter(p=>p.id !== id)
+      console.error({ slotinv: player.inventario[index], slot })
+      player.inventario[index] = slot
+      players = players.filter(p => p.id !== id)
       callback(player.inventario[index])
-    
+
     })
 
     socket.on("soltar", (slot, { x, y }, cantidad = 1, costo, colision, callback) => {
@@ -583,7 +583,7 @@ async function main() {
 
         let nuevoId = x.toString() + y.toString()
 
-     
+
         const fisico = {
           objeto: [item[0], cantidad],
           mapa: 1,
@@ -607,13 +607,13 @@ async function main() {
           sinColision: colision
           //  drop: item,
         }
-      
+
         players.push(fisico)
 
-        
+
         io.to(player.mapa).emit("agregarItem", fisico)
         const index = player.inventario.indexOf(player.inventario[slot])
-        callback("tiro el objeto",player.inventario[slot],index)
+        callback("tiro el objeto", player.inventario[slot], index)
       } else {
         callback("no hay nada que tirar")
       }
@@ -668,20 +668,46 @@ async function main() {
 
     socket.on("movimiento", (x, y, mirando, quieto) => {
       const player = players.find((player) => player.id === socket.id);
-      if (Math.abs(player.x - x) <= SPEED && Math.abs(player.y - y) <= SPEED ) {
-        player.x=x
-        player.y=y
-        player.mirando= mirando
-        player.quieto= quieto
-      
-      } else{
-        console.log( player.nombre,  "se mueve mas rapido que la velocidad")
+      if (Math.abs(player.x - x) <= SPEED && Math.abs(player.y - y) <= SPEED) {
+        player.x = x
+        player.y = y
+        player.mirando = mirando
+        player.quieto = quieto
+        setTimeout(() => {
+          if (player.x === x &&  player.y === y) {
+
+            player.quieto = true
+            player.col = 0
+            switch (player.mirando) {
+              case "up":
+                player.row = 2
+                break;
+              case "down":
+                player.row = 0
+                break;
+              case "left":
+                player.row = 1
+                break;
+              case "right":
+                player.row = 3
+                break;
+
+              default:
+                break;
+            }
+            player.col = 0
+            
+                  io.to(player.mapa).emit("updatePlayer", player.id, player.x, player.y, player.quieto, player.mirando, player.col, player.row)
+          }
+        }, 150);
+      } else {
+        console.log(player.nombre, "se mueve mas rapido que la velocidad")
       }
 
-        io.to(player.mapa).emit("updatePlayer", player.id,player.x, player.y, player.quieto, player.mirando, player.col, player.row)
-    
+      io.to(player.mapa).emit("updatePlayer", player.id, player.x, player.y, player.quieto, player.mirando, player.col, player.row)
 
-      
+
+
 
     });
 
@@ -745,7 +771,7 @@ async function main() {
     });
 
     socket.on("disconnect", () => {
-     const player = players.find((player) => player.id === socket.id);
+      const player = players.find((player) => player.id === socket.id);
       socket.broadcast.to(player.mapa).emit("quitarPlayer", player.id)
       socket.leave(player.mapa)
       players = players.filter((player) => player.id !== socket.id);

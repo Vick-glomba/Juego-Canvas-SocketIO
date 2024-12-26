@@ -165,7 +165,7 @@ function tirarObjeto() {
       mensajesConsola.push(msg)
       actualizarMensajes()
       console.log(myPlayer.inventario[slot], slotReturn, cantidadTirar)
-  
+
       myPlayer.inventario[index] = slotReturn
       console.log(myPlayer.inventario[slot])
       actualizarInventario()
@@ -866,23 +866,23 @@ socket.on("quitarPlayer", (id) => {
 
 socket.on("updatePlayer", (id, x, y, quieto, mirando, col, row) => {
   const player = players.find(p => p.id === id)
-  if(player){
+  if (player) {
 
-    if ( myPlayer.id !== id) {
+    if (myPlayer.id !== id) {
       player.x = x
       player.y = y
       player.quieto = quieto
       player.mirando = mirando
       player.col = col
       player.row = row
-    }else{
+    } else {
       myPlayer.col = col
       myPlayer.row = row
       myPlayer.quieto = quieto
-      myPlayer.mirando= mirando
+      myPlayer.mirando = mirando
     }
-  } 
-  
+  }
+
 })
 
 socket.on("map", ({ mundo, player, db }) => {
@@ -891,9 +891,9 @@ socket.on("map", ({ mundo, player, db }) => {
   socket.emit("enMapa", player.mapa, ({ playersEnMapa, snowballsEnMapa, playersOnlines }) => {
 
     players = playersEnMapa
-    players = players.filter(p=> p.id!== socket.id)
+    players = players.filter(p => p.id !== socket.id)
     players.push(myPlayer)
-    itemsEnMapa= players.filter(p=>p.skin === "items")
+    itemsEnMapa = players.filter(p => p.skin === "items")
     players = players.concat(mundoDibujables[myPlayer.mapa])
     playersOnline = playersOnlines
     while (isCollidingWithPlayer(myPlayer) || isCollidingWithMap(myPlayer)) {
@@ -1169,9 +1169,9 @@ socket.on("privado", (mensaje) => {
 })
 
 
-socket.on("borrarItem",( id )=>{
-  players= players.filter(p=>p.id !== id)
-  itemsEnMapa= itemsEnMapa.filter( p=> p.id !== id)
+socket.on("borrarItem", (id) => {
+  players = players.filter(p => p.id !== id)
+  itemsEnMapa = itemsEnMapa.filter(p => p.id !== id)
 })
 
 
@@ -1366,7 +1366,7 @@ function isCollidingWithPlayer(player) {
 
 setInterval(() => {
 
-  let p = {...myPlayer}
+  let p = { ...myPlayer }
 
 
   if (inputs.up) {
@@ -1416,9 +1416,29 @@ setInterval(() => {
       socket.emit("movimiento", p.x, p.y, p.mirando, p.quieto);
     } else {
       p.quieto = true
+      myPlayer.col = 0
+      switch (p.mirando) {
+        case "up":
+          myPlayer.row = 2
+          break;
+        case "down":
+          myPlayer.row = 0
+          break;
+        case "left":
+          myPlayer.row = 1
+          break;
+        case "right":
+          myPlayer.row = 3
+          break;
+
+        default:
+          break;
+      }
+      myPlayer.col = 0
     }
 
-    //console.log(p.x, myPlayer.x)
+    myPlayer.quieto = p.quieto
+    myPlayer.mirando = p.mirando
     myPlayer.x = p.x
     myPlayer.y = p.y
   }
@@ -1652,38 +1672,38 @@ window.addEventListener("keydown", (e) => {
           //console.log(proximidad)
           if (proximidad > 97 && player.skin === "items" && player.clase !== "creable") {
             //busco si hay algun slot con ese item ya en el inventario
-            let item= player.objeto
+            let item = player.objeto
             let slotMismoItem = myPlayer.inventario.find(slot => slot[0] === item[0])
             const index = myPlayer.inventario.indexOf(slotMismoItem)
             if (slotMismoItem && dbItems[item[0]].apilable) {
-              
-              player.objeto[1]= myPlayer.inventario[index][1] += item[1]
-              socket.emit("agarrar",index, player.objeto,player.id, ( slotReturn) => {
 
-                myPlayer.inventario[index][1] =slotReturn[1]
-            
+              player.objeto[1] = myPlayer.inventario[index][1] += item[1]
+              socket.emit("agarrar", index, player.objeto, player.id, (slotReturn) => {
+
+                myPlayer.inventario[index][1] = slotReturn[1]
+
+                actualizarInventario()
+
+
+              })
+            } else {
+              //busca espacio vacio en inventario
+              let slotDisponible = myPlayer.inventario.find(slot => slot[0] === 0 && slot[1] === 0)
+              const index = myPlayer.inventario.indexOf(slotDisponible)
+              if (slotDisponible) {
+                slotDisponible[0] = item[0]
+                slotDisponible[1] = item[1]
+
+                socket.emit("agarrar", index, player.objeto, player.id, (slotReturn) => {
+
+                  console.log("slot disponible ", slotReturn)
+
+                  myPlayer.inventario[slotDisponible] = slotReturn
                   actualizarInventario()
-                  
-                  
+
                 })
               } else {
-                //busca espacio vacio en inventario
-                let slotDisponible = myPlayer.inventario.find(slot => slot[0] === 0 && slot[1] === 0)
-                const index = myPlayer.inventario.indexOf(slotDisponible)
-                if (slotDisponible) {
-                  slotDisponible[0] = item[0]
-                  slotDisponible[1] = item[1]
-                  
-                  socket.emit("agarrar",index, player.objeto, player.id,( slotReturn) => {
-                    
-                    console.log("slot disponible ", slotReturn)
 
-                  myPlayer.inventario[slotDisponible] =  slotReturn
-                  actualizarInventario()
-
-                })
-              } else {
-               
                 const msg = {
                   msg: "No tienes suficiente espacio.",
                   tipo: "consola"
@@ -1693,7 +1713,7 @@ window.addEventListener("keydown", (e) => {
               }
               actualizarInventario()
             }
-  
+
           }
 
         })
@@ -1974,7 +1994,7 @@ canvasEl.addEventListener("click", (e) => {
     mapa: player.mapa,
     x: objeto.x,
     y: objeto.y,
-  //  timeLeft: 10000, en deshuso por el momento
+    //  timeLeft: 10000, en deshuso por el momento
     playerId: socket.id,
   }
   for (const player of players) {
@@ -2111,7 +2131,7 @@ canvasEl.addEventListener("click", (e) => {
 
     }
 
-   // snowball.timeLeft = -1;
+    // snowball.timeLeft = -1;
 
 
   }
